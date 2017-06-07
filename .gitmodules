@@ -1,0 +1,3 @@
+[submodule "AbstractTypeInference"]
+    path = AbstractTypeInference
+    url = git://github.com/jglrxavpok/AbstractTypeInference.git

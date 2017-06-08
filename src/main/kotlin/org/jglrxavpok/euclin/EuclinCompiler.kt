@@ -35,15 +35,7 @@ object EuclinCompiler {
         val functions = functionGatherer.gather(code).toMutableMap()
 
         // on y ajoute les fonctions de la bibliothèque standard
-        val circleFunction = FunctionSignature("circle", listOf(
-                Argument("center", FunctionType(RealType, RealPointType)),
-                Argument("radius", FunctionType(RealType, RealType))
-                ), ObjectType("Circle", ShapeType), "euclin.std.Geometry")
-        val sinFunction = FunctionSignature("sin", listOf(
-                Argument("angle", RealType)
-        ), RealType, "euclin.std.MathFunctions")
-        functions["circle"] = circleFunction
-        functions["sin"] = sinFunction
+        addStandardFunctions(functions)
 
         // on génére le code des lambda-fonctions
         val lambdaExpressions = compileLambdas(classWriter, code, className, functions)
@@ -56,6 +48,26 @@ object EuclinCompiler {
 
         classWriter.visitEnd()
         return classWriter.toByteArray()
+    }
+
+    private fun addStandardFunctions(functions: MutableMap<String, FunctionSignature>) {
+        val circleFunction = FunctionSignature("circle", listOf(
+                Argument("center", FunctionType(RealType, RealPointType)),
+                Argument("radius", FunctionType(RealType, RealType))
+        ), ObjectType("Circle", ShapeType), "euclin.std.Geometry")
+        val sinFunction = FunctionSignature("sin", listOf(
+                Argument("angle", RealType)
+        ), RealType, "euclin.std.MathFunctions")
+        val cosFunction = FunctionSignature("cos", listOf(
+                Argument("angle", RealType)
+        ), RealType, "euclin.std.MathFunctions")
+        val tanFunction = FunctionSignature("tan", listOf(
+                Argument("angle", RealType)
+        ), RealType, "euclin.std.MathFunctions")
+        functions["sin"] = sinFunction
+        functions["cos"] = cosFunction
+        functions["tan"] = tanFunction
+        functions["circle"] = circleFunction
     }
 
     private fun compileLambdas(classWriter: ClassWriter, code: EuclinParser.CodeBlockContext, ownerClass: String, functions: Map<String, FunctionSignature>): Map<String, FunctionSignature> {

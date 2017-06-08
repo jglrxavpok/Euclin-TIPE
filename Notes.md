@@ -19,4 +19,5 @@ javap -p -c -v -constants TestEuclin.class
 
 Compilation des fonctions lambda: http://blog.takipi.com/compiling-lambda-expressions-scala-vs-java-8/
 + http://cr.openjdk.java.net/~briangoetz/lambda/lambda-translation.html
-+ https://stackoverflow.com/questions/18971830/generating-working-invokedynamic-instruction-with-asm
++ https://stackoverflow.com/questions/18971830/generating-working-invokedynamic-instruction-with-
++ https://stackoverflow.com/questions/16827262/how-will-java-lambda-functions-be-compiled

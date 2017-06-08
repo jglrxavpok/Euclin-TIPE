@@ -89,18 +89,25 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         error("Il est interdit d'avoir des déclarations de fonctions dans des fonctions!")
     }
 
-    override fun visitFunctionCall(ctx: EuclinParser.FunctionCallContext) {
+    override fun visitFunctionCall(call: EuclinParser.FunctionCallContext) {
         with(writer) {
-            val call = ctx//ctx.functionCall()
             call.expression().forEach { visit(it) } // on compile les arguments
             val function = availableFunctions[call.Identifier().text] ?: error("Aucune fonction correspondante!")
 
-            println("hi ${function.name}")
-            for (arg in function.arguments.reversed()) { // inversé pour correspondre à l'ordre dans lequel sortent les valeurs de la pile
-                val expected = arg.second
+            for ((argName, expected) in function.arguments.reversed()) { // inversé pour correspondre à l'ordre dans lequel sortent les valeurs de la pile
                 val actual = typeStack.pop()
-                if (expected != actual)
-                    error("Appel d'une fonction avec le mauvais type d'arguments! $expected != $actual dans ${ctx.text} pour l'argument ${arg.first}")
+                if (expected != actual) {
+                    var actuallyValid = false
+                    if(expected is FunctionType) {
+                        if(expected.returnType == actual) {
+                            // TODO
+                            println("dkqzdjkqzd")
+                            actuallyValid = true
+                        }
+                    }
+                    if(!actuallyValid)
+                        error("Appel d'une fonction avec le mauvais type d'arguments! $expected != $actual dans ${call.text} pour l'argument $argName")
+                }
             }
 
             val descriptor = methodType(function.arguments, function.returnType).descriptor

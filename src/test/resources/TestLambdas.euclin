@@ -1,12 +1,10 @@
-var myCircle = circle([(sin(_), 0.)], sin)
-myCircle.visible = true // par défaut, déjà vrai
-
 transform {
     translate(10, 10)
     square((0, 0), 50)
 }
 
 func f(x: Int): Int {
+    circle([(sin(_), 0.)], sin)
     circle([(sin(45.), _)], [_])
     return x
 }

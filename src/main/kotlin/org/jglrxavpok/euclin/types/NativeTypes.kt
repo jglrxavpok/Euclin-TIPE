@@ -20,7 +20,7 @@ class ObjectType(val name: String, val parent: TypeDefinition): TypeDefinition()
     }
 
 }
-private class BasicType(private val toString: String): TypeDefinition() {
+class BasicType(private val toString: String): TypeDefinition() {
     override fun toString(): String {
         return toString
     }
@@ -35,5 +35,9 @@ private class BasicType(private val toString: String): TypeDefinition() {
         if(firstCall)
             return other.compare(this, false)
         throw IllegalArgumentException("Cannot compare basic types $this and $other")
+    }
+
+    override fun hashCode(): Int {
+        return toString.hashCode()
     }
 }

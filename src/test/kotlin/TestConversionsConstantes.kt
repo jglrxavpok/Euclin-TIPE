@@ -10,13 +10,13 @@ import java.io.PrintWriter
 import java.io.StringWriter
 
 
-object TestCompile {
+object TestConversionsConstantes {
 
     @JvmStatic fun main(args: Array<String>) {
-        val sourceCode = javaClass.getResourceAsStream("/Test.euclin").bufferedReader().use { it.readText() } // ferme le flux après
-        val data = EuclinCompiler.compile(sourceCode, "Test.euclin")
+        val sourceCode = javaClass.getResourceAsStream("/TestConversionConstantesVersFonctions.euclin").bufferedReader().use { it.readText() } // ferme le flux après
+        val data = EuclinCompiler.compile(sourceCode, "TestConversionConstantesVersFonctions.euclin")
 
-        FileOutputStream(File("runtime/tests", "TestEuclin.class")).use {
+        FileOutputStream(File("runtime/tests", "TestConversionConstantesVersFonctions.class")).use {
             it.write(data)
             it.flush()
             it.close()

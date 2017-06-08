@@ -5,6 +5,7 @@ import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
 import org.jglrxavpok.euclin.grammar.EuclinBaseVisitor
 import org.jglrxavpok.euclin.grammar.EuclinParser
+import org.jglrxavpok.euclin.types.BasicType
 import org.jglrxavpok.euclin.types.IntType
 import org.jglrxavpok.euclin.types.RealPointType
 
@@ -30,9 +31,7 @@ class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignat
         return when(text) {
             "Int" -> IntType
             "Float" -> RealPointType
-            else -> object: TypeDefinition() {
-                override fun toString(): String  = text
-            }
+            else -> BasicType(text)
         }
     }
 }

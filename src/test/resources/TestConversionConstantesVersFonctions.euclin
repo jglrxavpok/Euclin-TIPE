@@ -1,0 +1,3 @@
+func f(): Circle {
+    return circle((0., 1.), 1.)
+}

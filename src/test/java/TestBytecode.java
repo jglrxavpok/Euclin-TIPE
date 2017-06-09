@@ -12,4 +12,11 @@ public class TestBytecode {
     private static void someother() {
         Stream.of("dzd", "dzd").forEach(s -> Math.sin(Float.parseFloat(s)));
     }
+
+    /**
+     * Petit test pour voir comment javac gère les lambdas avec utilisation d'une variable
+     */
+    private static void lambdaAvecVariable(double s0) {
+        Stream.of("dzq").forEach(s -> System.out.println(s+s0));
+    }
 }

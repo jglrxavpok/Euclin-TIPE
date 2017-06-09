@@ -41,6 +41,8 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
         val funcName = call.Identifier().text
         val signature = availableFunctions[funcName]!!
         val f = function(signature)
+        if(arguments.size == 1)
+            return f(arguments[0])
         return f(Tuple(*arguments.toTypedArray()))
     }
 
@@ -95,6 +97,11 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
     }
 
     private fun function(signature: FunctionSignature): Function {
+        // on ne convertit pas à un tuple si on a qu'un seul argument!
+        if(signature.arguments.size == 1) {
+            val arg = signature.arguments[0]
+            return Function(signature.name, Variable(arg.first) of arg.second, OpaqueExpression("${signature.name}(*)") of signature.returnType)
+        }
         val arguments = signature.arguments.map { Variable(it.first) of it.second }
         return Function(signature.name, Tuple(*arguments.toTypedArray()), OpaqueExpression("${signature.name}(*)") of signature.returnType)
     }

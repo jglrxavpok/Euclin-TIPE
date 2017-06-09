@@ -12,7 +12,6 @@ import org.objectweb.asm.ClassWriter
 class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val availableFunctions: Map<String, FunctionSignature>):
     EuclinBaseVisitor<FunctionSignature?>() {
 
-    private var lambdaID = 0
     private var resultMap = hashMapOf<String, FunctionSignature>()
     private val translator = ExpressionTranslator(availableFunctions)
     private val alreadyCompiled = hashMapOf<String, FunctionSignature>()
@@ -26,20 +25,16 @@ class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val a
     override fun visitLambdaFunctionExpr(ctx: EuclinParser.LambdaFunctionExprContext): FunctionSignature? {
         val functionExpression = ctx.expression()
 
-        println("COMPILING ${functionExpression.text}")
         // on ne compile pas deux fois la même fonction!
         if(alreadyCompiled.containsKey(functionExpression.text)) {
             resultMap[functionExpression.text] = alreadyCompiled[functionExpression.text]!!
-            println(">> ${functionExpression.text}")
-            return null
+            return alreadyCompiled[functionExpression.text]
         }
         val function = translator.translateLambdaExpression(functionExpression)
         val returnType = function.expression.type
 
-        // si l'expression n'est que '_', on change le nom
-        val name = if (functionExpression.text.trim() == "_") "_lambda_identity" else "_lambda_$lambdaID"
-        val lambdaSignature = FunctionSignature(name, listOf(Argument("_", RealType)), returnType, ownerClass) // TODO: Meilleur nom?
-        lambdaID++
+        val name = generateLambdaName(functionExpression)
+        val lambdaSignature = FunctionSignature(name, listOf(Argument("_", RealType)), returnType, ownerClass)
         val functionBody = generateLambdaBody(functionExpression)
 
         alreadyCompiled[functionExpression.text] = lambdaSignature
@@ -47,12 +42,10 @@ class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val a
 
         val funcCompiler = FunctionCompiler(classWriter, lambdaSignature, availableFunctions, resultMap)
         funcCompiler.visitFunctionCodeBlock(functionBody)
-
-        println(">> ${functionExpression.text} - ${lambdaSignature.name}")
         return lambdaSignature
     }
 
-    private fun generateLambdaBody(instruction: EuclinParser.ExpressionContext): EuclinParser.FunctionCodeBlockContext {
+    fun generateLambdaBody(instruction: EuclinParser.ExpressionContext): EuclinParser.FunctionCodeBlockContext {
         val result = EuclinParser.FunctionCodeBlockContext(null, -1)
         val instructions = EuclinParser.FunctionInstructionsContext()
         result.addChild(instructions)
@@ -62,5 +55,17 @@ class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val a
 
         instructions.addChild(returnInstructionWrapper)
         return result
+    }
+
+    companion object {
+
+        private var lambdaID = 1
+
+        fun generateLambdaName(functionExpression: EuclinParser.ExpressionContext): String {
+            // si l'expression n'est que '_', on change le nom
+            val name = if (functionExpression.text.trim() == "_") "lambda\$identity" else "lambda\$$lambdaID"
+            lambdaID++
+            return name
+        }
     }
 }

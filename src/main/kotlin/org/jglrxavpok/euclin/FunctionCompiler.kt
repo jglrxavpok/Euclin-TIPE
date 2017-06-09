@@ -5,6 +5,7 @@ import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TypeDefinition
 import org.jglrxavpok.euclin.grammar.EuclinBaseVisitor
 import org.jglrxavpok.euclin.grammar.EuclinParser
+import org.jglrxavpok.euclin.lambda.LambdaCompiler
 import org.jglrxavpok.euclin.types.*
 import org.objectweb.asm.*
 import org.objectweb.asm.Opcodes.*
@@ -19,6 +20,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
     private val writer: MethodVisitor
     private val translator = ExpressionTranslator(availableFunctions)
+    private val constantChecker = ConstantChecker(availableFunctions)
     private val typeStack = Stack<TypeDefinition>()
     private val localVariableIDs = hashMapOf<String, Int>()
     private val localVariableTypes = hashMapOf<String, TypeDefinition>()
@@ -35,7 +37,6 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
     override fun visitTerminal(node: TerminalNode) {
         super.visitTerminal(node)
-        println("terminal ${node.text}")
     }
 
     /**
@@ -59,7 +60,6 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
     override fun visitCoupleExpr(ctx: EuclinParser.CoupleExprContext) {
         val couple = ctx.couple()
-        // ordre important!
 
         val left = couple.expression(0)
         val right = couple.expression(1)
@@ -69,8 +69,8 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
         assert(rightType == leftType) { "Les éléments d'un couple doivent avoir le même type!" }
 
-        // crée un nouvel objet couple:
         // TODO: autres types
+        // crée un nouvel objet couple:
         val baseType = leftType
         val type = if(baseType == IntType) IntPointType else RealPointType
         with(writer) {
@@ -91,22 +91,29 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
     override fun visitFunctionCall(call: EuclinParser.FunctionCallContext) {
         with(writer) {
-            call.expression().forEach { visit(it) } // on compile les arguments
             val function = availableFunctions[call.Identifier().text] ?: error("Aucune fonction correspondante!")
 
-            for ((argName, expected) in function.arguments.reversed()) { // inversé pour correspondre à l'ordre dans lequel sortent les valeurs de la pile
-                val actual = typeStack.pop()
+            // on compile les arguments de la fonction
+            for (index in 0 until function.arguments.size) {
+                val (argName, expected) = function.arguments[index]
+                val argumentContext = call.expression(index)
+                val translated = translator.translate(argumentContext)
+                val actual = translated.type
                 if (expected != actual) {
                     var actuallyValid = false
                     if(expected is FunctionType) {
-                        if(expected.returnType == actual) {
-                            // TODO
-                            println("dkqzdjkqzd")
+                        if(expected.returnType == actual) { // si la conversion constante=>fonction est possible
+                            val constantExpr = call.expression(index)
+                            compileMethodReference(createConstantFunction(constantExpr)) // alors on référence la fonction correspondant
                             actuallyValid = true
                         }
                     }
                     if(!actuallyValid)
                         error("Appel d'une fonction avec le mauvais type d'arguments! $expected != $actual dans ${call.text} pour l'argument $argName")
+                } else {
+                    visit(argumentContext) // compile the argument
+                    typeStack.pop() // on retire directement car on s'en fiche en fait ici
+                    // TODO vérifier si il y a une méthode plus propre
                 }
             }
 
@@ -115,6 +122,37 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
             typeStack.push(function.returnType)
         }
+    }
+
+    private fun createConstantFunction(constantExpr: EuclinParser.ExpressionContext): FunctionSignature {
+        constantChecker.assertConstant(constantExpr)
+        return compileLambda(constantExpr)
+    }
+
+    private fun compileLambda(functionExpression: EuclinParser.ExpressionContext): FunctionSignature {
+        val function = translator.translateLambdaExpression(functionExpression)
+        val returnType = function.expression.type
+
+        // si l'expression n'est que '_', on change le nom
+        val name = LambdaCompiler.generateLambdaName(functionExpression)+"\$constant"
+        val lambdaSignature = FunctionSignature(name, listOf(Argument("_", RealType)), returnType, functionSignature.ownerClass) // TODO: Meilleur nom?
+        val functionBody = generateLambdaBody(functionExpression)
+
+        val funcCompiler = FunctionCompiler(classWriter, lambdaSignature, availableFunctions, lambdaExpressions)
+        funcCompiler.visitFunctionCodeBlock(functionBody)
+        return lambdaSignature
+    }
+
+    fun generateLambdaBody(instruction: EuclinParser.ExpressionContext): EuclinParser.FunctionCodeBlockContext {
+        val result = EuclinParser.FunctionCodeBlockContext(null, -1)
+        val instructions = EuclinParser.FunctionInstructionsContext()
+        result.addChild(instructions)
+
+        val returnInstructionWrapper = EuclinParser.ReturnFuncInstructionContext(instructions)
+        returnInstructionWrapper.addChild(instruction)
+
+        instructions.addChild(returnInstructionWrapper)
+        return result
     }
 
     override fun visitLambdaVarExpr(ctx: EuclinParser.LambdaVarExprContext?) {
@@ -152,10 +190,6 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
     private fun compileMethodReference(signature: FunctionSignature) {
         // sorte de pointeur vers la méthode
         val methodHandle = toHandle(signature)
-        /*writer.visitLdcInsn(methodHandle) // on charge le pointeur
-
-        //writer.visitMethodInsn(INVOKEDYNAMIC, )
-        */
         val mt = MethodType.methodType(CallSite::class.java,
                 MethodHandles.Lookup::class.java, String::class.java, MethodType::class.java, MethodType::class.java, MethodHandle::class.java, MethodType::class.java)
         val bootstrapHandle = Handle(H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory", mt.toMethodDescriptorString())
@@ -168,14 +202,6 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
     }
 
     override fun visitLambdaFunctionExpr(ctx: EuclinParser.LambdaFunctionExprContext) {
-        /*println("!! ${ctx.expression().text}")
-        for ((key, value) in lambdaExpressions) {
-            println("map[$key] = ${value.name}")
-        }
-        val lambdaSignature = lambdaExpressions[ctx.expression().text]!!
-        val handle = toHandle(lambdaSignature)
-        writer.visitLdcInsn(handle)
-        typeStack.push(lambdaSignature.toType())*/
         compileMethodReference(lambdaExpressions[ctx.expression().text]!!)
     }
 
@@ -204,5 +230,15 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
             visitMaxs(0, 0) // nécessaire pour qu'ASM puisse calculer les stacks et les frames
             visitEnd()
         }
+    }
+
+    override fun visitBoolTrueExpr(ctx: EuclinParser.BoolTrueExprContext?) {
+        writer.visitLdcInsn(true)
+        typeStack.push(BooleanType)
+    }
+
+    override fun visitBoolFalseExpr(ctx: EuclinParser.BoolFalseExprContext?) {
+        writer.visitLdcInsn(false)
+        typeStack.push(BooleanType)
     }
 }

@@ -38,6 +38,8 @@ class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignat
 
 // Un argument est un nom (String) + un type (String)
 typealias Argument = Pair<String, TypeDefinition>
+
+// Définit la signature d'une fonction (nom, arguments, type de retour, la classe dans laquelle elle est et sa pureté)
 data class FunctionSignature(val name: String, val arguments: List<Argument>, val returnType: TypeDefinition, val ownerClass: String) {
 
     fun toType(): TypeDefinition {
@@ -45,4 +47,6 @@ data class FunctionSignature(val name: String, val arguments: List<Argument>, va
             return FunctionType(arguments[0].second, returnType)
         return FunctionType(TupleType(arguments.map { it.second }.toTypedArray()), returnType)
     }
+
+    val pure: Boolean = false // TODO
 }

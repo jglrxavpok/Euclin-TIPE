@@ -3,6 +3,8 @@ package org.jglrxavpok.euclin
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.jglr.inference.types.FunctionType
+import org.jglrxavpok.euclin.functions.MemoizedFunctionCompiler
+import org.jglrxavpok.euclin.functions.FunctionPurityInquisition
 import org.jglrxavpok.euclin.grammar.EuclinLexer
 import org.jglrxavpok.euclin.grammar.EuclinParser
 import org.jglrxavpok.euclin.lambda.LambdaCompiler
@@ -76,15 +78,39 @@ object EuclinCompiler {
     }
 
     private fun compileFunctions(classWriter: ClassWriter, code: EuclinParser.CodeBlockContext, availableFunctions: Map<String, FunctionSignature>, lambdaExpressions: Map<String, FunctionSignature>) {
+        val inquisition = FunctionPurityInquisition(availableFunctions)
         val declarations = code.instructions().filterIsInstance<EuclinParser.DeclareFuncInstructionContext>().map { it.functionDeclaration() } // on récupére les déclarations de fonctions
         for(func in declarations) {
             val funcName = func.Identifier().text
             val signature = availableFunctions[funcName] ?: error("Aucune signature correspondante") // renvoit une erreur si on ne trouve pas la signature correspondant au nom
             // (ne devrait jamais arriver)
 
-            val funcCompiler = FunctionCompiler(classWriter, signature, availableFunctions, lambdaExpressions)
-            func.functionCodeBlock().accept(funcCompiler)
+            if(modifiersHave(func, "pure") && modifiersHave(func, "impure")) {
+                error("A function cannot be both pure and impure")
+            }
+
+            val isPure = inquisition.visit(func)
+            signature.pure = isPure
+            if(modifiersHave(func, "pure")) {
+                if( ! isPure) {
+                    error("Function '$funcName' is declared pure but is not")
+                }
+            }
+            if(modifiersHave(func, "impure")) {
+                signature.pure = false
+            }
+            if(modifiersHave(func, "memoized")) {
+                signature.pure = true // Les fonctions avec un cache renvoient par définition toujours le même résultat pour les mêmes arguments
+                MemoizedFunctionCompiler.compile(func.functionCodeBlock(), classWriter, signature, availableFunctions, lambdaExpressions)
+            } else {
+                val funcCompiler = FunctionCompiler(classWriter, signature, availableFunctions, lambdaExpressions)
+                funcCompiler.visit(func.functionCodeBlock())
+            }
         }
+    }
+
+    private fun modifiersHave(func: EuclinParser.FunctionDeclarationContext, modifier: String): Boolean {
+        return func.modifiers().any { it.text == modifier }
     }
 
 }

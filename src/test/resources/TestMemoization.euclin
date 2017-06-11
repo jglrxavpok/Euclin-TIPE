@@ -1,0 +1,3 @@
+memoized func f(a: Int, b: Real): Real {
+    return 0.
+}

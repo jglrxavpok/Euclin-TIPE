@@ -56,12 +56,12 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
 
     override fun visitVarExpr(ctx: EuclinParser.VarExprContext): Expression {
         val name = ctx.Identifier().text
-        if(variableTypes.containsKey(name)) // variable locale ?
+        if(variableTypes.containsKey(name)) // est-ce une variable locale ?
             return Variable(name) of variableTypes[name]!!
-        else if(availableFunctions.containsKey(name)) // fonction ?
+        else if(availableFunctions.containsKey(name)) // est-ce une fonction ?
             return function(availableFunctions[name]!!)
         else
-            error("Unknown variable $name")
+            error("Unknown variable $name") // non c'est un symbole inconnu!
     }
 
     override fun visitIntExpr(ctx: EuclinParser.IntExprContext): Expression {

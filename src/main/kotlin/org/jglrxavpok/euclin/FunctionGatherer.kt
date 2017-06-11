@@ -8,6 +8,7 @@ import org.jglrxavpok.euclin.grammar.EuclinParser
 import org.jglrxavpok.euclin.types.BasicType
 import org.jglrxavpok.euclin.types.IntType
 import org.jglrxavpok.euclin.types.RealPointType
+import org.jglrxavpok.euclin.types.RealType
 
 class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignature>() {
 
@@ -30,7 +31,7 @@ class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignat
     private fun toType(text: String): TypeDefinition {
         return when(text) {
             "Int" -> IntType
-            "Float" -> RealPointType
+            "Real" -> RealType
             else -> BasicType(text)
         }
     }
@@ -48,5 +49,6 @@ data class FunctionSignature(val name: String, val arguments: List<Argument>, va
         return FunctionType(TupleType(arguments.map { it.second }.toTypedArray()), returnType)
     }
 
-    val pure: Boolean = false // TODO
+    var pure: Boolean = false
+    var cached: Boolean = false
 }

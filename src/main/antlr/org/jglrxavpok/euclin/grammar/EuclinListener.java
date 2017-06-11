@@ -154,6 +154,16 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitFunctionDeclaration(EuclinParser.FunctionDeclarationContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link EuclinParser#modifiers}.
+	 * @param ctx the parse tree
+	 */
+	void enterModifiers(EuclinParser.ModifiersContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EuclinParser#modifiers}.
+	 * @param ctx the parse tree
+	 */
+	void exitModifiers(EuclinParser.ModifiersContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link EuclinParser#functionCall}.
 	 * @param ctx the parse tree
 	 */

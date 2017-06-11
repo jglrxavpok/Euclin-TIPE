@@ -34,9 +34,14 @@ parameter
     ;
 
 functionDeclaration
-    : FunctionDefStart Identifier LeftBracket (parameter (Comma parameter)*)? RightBracket Colon type
+    : modifiers* FunctionDefStart Identifier LeftBracket (parameter (Comma parameter)*)? RightBracket Colon type
     LeftCurlyBracket functionCodeBlock RightCurlyBracket
     ;
+
+modifiers
+    : Pure
+    | Impure
+    | Memoized;
 
 functionCall
     : Identifier LeftBracket (expression (Comma expression)*)? RightBracket
@@ -88,6 +93,9 @@ FunctionDefStart: 'func';
 Var: 'var';
 True: 'true';
 False: 'false';
+Pure: 'pure';
+Impure: 'impure';
+Memoized: 'memoized';
 
 // Ponctuation
 LambdaVariable: '_';

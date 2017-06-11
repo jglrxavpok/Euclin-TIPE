@@ -97,6 +97,12 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFunctionDeclaration(EuclinParser.FunctionDeclarationContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link EuclinParser#modifiers}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitModifiers(EuclinParser.ModifiersContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link EuclinParser#functionCall}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

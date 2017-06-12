@@ -19,4 +19,12 @@ public class TestBytecode {
     private static void lambdaAvecVariable(double s0) {
         Stream.of("dzq").forEach(s -> System.out.println(s+s0));
     }
+
+    private static float convObj2Float(Object o) {
+        return (float)o;
+    }
+
+    private static Object convFloat2Obj(float x) {
+        return x;
+    }
 }

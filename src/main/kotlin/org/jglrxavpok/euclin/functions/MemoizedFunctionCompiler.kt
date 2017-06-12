@@ -3,8 +3,12 @@ package org.jglrxavpok.euclin.functions
 import org.jglr.inference.types.TypeDefinition
 import org.jglrxavpok.euclin.*
 import org.jglrxavpok.euclin.grammar.EuclinParser
+import org.jglrxavpok.euclin.types.BooleanType
+import org.jglrxavpok.euclin.types.IntType
+import org.jglrxavpok.euclin.types.RealType
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Label
+import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.signature.SignatureWriter
 
@@ -56,8 +60,10 @@ object MemoizedFunctionCompiler {
             // on charge les arguments
             for((index, arg) in arguments.withIndex()) {
                 visitVarInsn(ALOAD, arrayIndex)
+                visitLdcInsn(index)
                 visitVarInsn(correctOpcode(ILOAD, arg.second), index) // TODO Convertir les types natifs en types 'Boxed'
-                visitVarInsn(AASTORE, index)
+                convertToObjectTypeIfNeeded(writer, arg.second)
+                visitInsn(AASTORE)
             }
 
             // on vérifie si le cache a déjà la valeur
@@ -70,17 +76,52 @@ object MemoizedFunctionCompiler {
             visitFieldInsn(GETSTATIC, internalClassName, fieldName, "Leuclin/intrisincs/MemoizationCache;")
             visitVarInsn(ALOAD, arrayIndex)
             visitMethodInsn(INVOKEVIRTUAL, "euclin/intrisincs/MemoizationCache", "get", "([Ljava/lang/Object;)Ljava/lang/Object;", false)
-            visitJumpInsn(GOTO, end)
+            //visitJumpInsn(GOTO, end)
+            convertToNativeTypeIfNeeded(writer, signature.returnType)
+            visitInsn(correctOpcode(IRETURN, signature.returnType))
 
             // sinon on la calcule
             visitLabel(computeBranch)
+            for((index, arg) in arguments.withIndex())
+                visitVarInsn(correctOpcode(ILOAD, arg.second), index)
             visitMethodInsn(INVOKESTATIC, internalClassName, "${signature.name}\$compute", methodType(signature.arguments, signature.returnType).descriptor, false)
-
+            visitInsn(correctOpcode(IRETURN, signature.returnType))
 
             visitLabel(end)
-            visitInsn(correctOpcode(IRETURN, signature.returnType))
+            //visitInsn(correctOpcode(IRETURN, signature.returnType))
             visitMaxs(0, 0)
             visitEnd()
+        }
+    }
+
+    private fun convertToObjectTypeIfNeeded(writer: MethodVisitor, type: TypeDefinition) {
+        when(type) {
+            RealType -> {
+                writer.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false)
+            }
+            BooleanType -> {
+                writer.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false)
+            }
+            IntType -> {
+                writer.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false)
+            }
+        }
+    }
+
+    private fun convertToNativeTypeIfNeeded(writer: MethodVisitor, type: TypeDefinition) {
+        when(type) {
+            RealType -> {
+                writer.visitTypeInsn(CHECKCAST, "java/lang/Float") // conversion en Float
+                writer.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F", false)
+            }
+            IntType -> {
+                writer.visitTypeInsn(CHECKCAST, "java/lang/Integer") // conversion en Integer
+                writer.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I", false)
+            }
+            BooleanType -> {
+                writer.visitTypeInsn(CHECKCAST, "java/lang/Boolean") // conversion en Boolean
+                writer.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false)
+            }
         }
     }
 

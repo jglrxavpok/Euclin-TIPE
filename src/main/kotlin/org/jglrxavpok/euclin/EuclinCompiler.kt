@@ -14,6 +14,7 @@ import org.jglrxavpok.euclin.types.RealType
 import org.jglrxavpok.euclin.types.ShapeType
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes.*
+import java.io.File
 
 object EuclinCompiler {
 
@@ -21,13 +22,13 @@ object EuclinCompiler {
 
     fun compile(sourceCode: String, filename: String): ByteArray {
         val classWriter = ClassWriter(ClassWriter.COMPUTE_FRAMES) // laisse ASM générer les frames et maxs
-        val className = filename.replace("/", ".").substringBeforeLast(".")
+        val className = filename.substringAfterLast(File.separator).substringBefore(".") // dernier fichier du chemin et on retire l'extension
         val classType = ASMType.getObjectType(className)
         classWriter.visit(V1_8, ACC_PUBLIC, classType.internalName, null, OBJECT_TYPE.internalName, emptyArray())
 
         val functionGatherer = FunctionGatherer(className)
 
-        // création du lexer et du parseur
+        // création du lexer et du parser
         val lexer = EuclinLexer(CharStreams.fromString(sourceCode, filename))
         val parser = EuclinParser(CommonTokenStream(lexer))
 
@@ -57,15 +58,19 @@ object EuclinCompiler {
                 Argument("center", FunctionType(RealType, RealPointType)),
                 Argument("radius", FunctionType(RealType, RealType))
         ), ObjectType("Circle", ShapeType), "euclin.std.Geometry")
+
         val sinFunction = FunctionSignature("sin", listOf(
                 Argument("angle", RealType)
         ), RealType, "euclin.std.MathFunctions")
+
         val cosFunction = FunctionSignature("cos", listOf(
                 Argument("angle", RealType)
         ), RealType, "euclin.std.MathFunctions")
+
         val tanFunction = FunctionSignature("tan", listOf(
                 Argument("angle", RealType)
         ), RealType, "euclin.std.MathFunctions")
+
         functions["sin"] = sinFunction
         functions["cos"] = cosFunction
         functions["tan"] = tanFunction

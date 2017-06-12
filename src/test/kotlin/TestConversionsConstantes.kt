@@ -19,7 +19,6 @@ object TestConversionsConstantes {
         FileOutputStream(File("runtime/tests", "TestConversionConstantesVersFonctions.class")).use {
             it.write(data)
             it.flush()
-            it.close()
         }
 
         val reader = ClassReader(data)

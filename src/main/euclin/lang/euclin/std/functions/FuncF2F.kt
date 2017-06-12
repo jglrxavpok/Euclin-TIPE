@@ -3,6 +3,6 @@ package euclin.std.functions
 import euclin.std.RealPoint
 import euclin.std.IntPoint
 
-interface <Name> {
-    fun apply(input: <Args>): <Return>
+interface FuncF2F {
+    fun apply(input: Float): Float
 }

@@ -1,10 +1,7 @@
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TypeDefinition
 import org.jglrxavpok.euclin.basicType
-import org.jglrxavpok.euclin.types.IntPointType
-import org.jglrxavpok.euclin.types.IntType
-import org.jglrxavpok.euclin.types.RealPointType
-import org.jglrxavpok.euclin.types.RealType
+import org.jglrxavpok.euclin.types.*
 import java.io.File
 import java.io.FileWriter
 
@@ -20,7 +17,7 @@ object StdFunctionGenerator {
                 val funcType = FunctionType(argument, returnType)
                 val correspondingType = basicType(FunctionType(argument, returnType)).internalName
                 val name = correspondingType.substringAfterLast("/")
-                val output = File(rootFolder, name+".java")
+                val output = File(rootFolder, name+".kt")
                 println("> ${output.path}")
                 output.createNewFile()
 
@@ -44,8 +41,8 @@ object StdFunctionGenerator {
 
     private fun typeToJavaType(type: TypeDefinition): String {
         return when(type) {
-            RealType -> "float"
-            IntType -> "int"
+            RealType -> "Float"
+            IntType -> "Int"
             RealPointType -> "RealPoint"
             IntPointType -> "IntPoint"
             else -> type.toString().substringAfterLast(".")

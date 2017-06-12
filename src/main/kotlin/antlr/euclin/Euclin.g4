@@ -135,11 +135,11 @@ SubOperator
     ;
 // Fragments: visible que par le lexer
 fragment IdentifierStart
-    : [a-zA-Z]
+    : [a-z] | [A-Z]
     ;
 
 fragment IdentifierPart
-    : ([a-zA-Z] | [0-9])
+    : ([a-z] | [A-Z] | [0-9])
     ;
 
 fragment Digits

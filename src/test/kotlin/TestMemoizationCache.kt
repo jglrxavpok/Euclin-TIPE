@@ -23,4 +23,11 @@ class TestMemoizationCache {
         val cached = cache.get(args)
         assert(cached == "Mon texte") { "Le cache n'a pas la bonne valeur, la valeur est: $cached" }
     }
+
+    @Test(expected = AssertionError::class)
+    fun invalidArgumentCount() {
+        val cache = MemoizationCache(5)
+        val args = arrayOf("Dzd")
+        cache.set(args, "Mon texte")
+    }
 }

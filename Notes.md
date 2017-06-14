@@ -11,11 +11,11 @@ https://en.wikipedia.org/wiki/Java_bytecode_instruction_listings
 javap -p -c -v -constants TestEuclin.class
 
 
-4 Systèmes de types:
+3 Systèmes de types:
 - Kotlin
 - ASM (JVM)
 - AbstractInference
-- Types d'Euclin
+/ Types d'Euclin (plus maintenant)
 
 Compilation des fonctions lambda: http://blog.takipi.com/compiling-lambda-expressions-scala-vs-java-8/ (fr: http://blog.takipi.com/compilation-des-expressions-lambda-scala-et-java-8/ )
 + http://cr.openjdk.java.net/~briangoetz/lambda/lambda-translation.html

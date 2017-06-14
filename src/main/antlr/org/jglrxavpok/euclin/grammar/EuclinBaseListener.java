@@ -460,6 +460,18 @@ public class EuclinBaseListener implements EuclinListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterUnitExpr(EuclinParser.UnitExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitUnitExpr(EuclinParser.UnitExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterCouple(EuclinParser.CoupleContext ctx) { }
 	/**
 	 * {@inheritDoc}

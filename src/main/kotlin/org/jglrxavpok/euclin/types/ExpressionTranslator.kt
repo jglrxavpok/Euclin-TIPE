@@ -13,6 +13,7 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
     private var lambdaVar = Variable("_") of RealType
     private val True = Literal(true, BooleanType)
     private val False = Literal(false, BooleanType)
+    private val UnitValue = Literal(Unit, UnitType)
     private val inferer = TypeInferer()
     val variableTypes = hashMapOf<String, TypeDefinition>()
 
@@ -104,5 +105,9 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
         }
         val arguments = signature.arguments.map { Variable(it.first) of it.second }
         return Function(signature.name, Tuple(*arguments.toTypedArray()), OpaqueExpression("${signature.name}(*)") of signature.returnType)
+    }
+
+    override fun visitUnitExpr(ctx: EuclinParser.UnitExprContext?): Expression {
+        return UnitValue
     }
 }

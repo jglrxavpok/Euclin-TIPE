@@ -432,6 +432,18 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitIntExpr(EuclinParser.IntExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code UnitExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterUnitExpr(EuclinParser.UnitExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code UnitExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitUnitExpr(EuclinParser.UnitExprContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link EuclinParser#couple}.
 	 * @param ctx the parse tree
 	 */

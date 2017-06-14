@@ -9,7 +9,7 @@ typealias ASMType = org.objectweb.asm.Type
 
 private val RealPointASMType = ASMType.getObjectType("euclin/std/RealPoint")
 private val IntegerPointASMType = ASMType.getObjectType("euclin/std/IntPoint")
-private val JFunction = ASMType.getObjectType(java.util.function.Function::class.java.canonicalName.replace(".", "/"))
+private val UnitASMType = ASMType.getObjectType("euclin/std/UnitObject")
 
 fun methodType(arguments: List<Argument>, returnType: TypeDefinition): ASMType {
     return ASMType.getMethodType(basicType(returnType), *(arguments.map { basicType(it.second) }.toTypedArray()))
@@ -18,8 +18,8 @@ fun methodType(arguments: List<Argument>, returnType: TypeDefinition): ASMType {
 fun basicType(type: TypeDefinition): ASMType {
     return when(type) {
         IntType -> ASMType.INT_TYPE
-        UnitType -> ASMType.VOID_TYPE
         RealType -> ASMType.FLOAT_TYPE
+        UnitType -> UnitASMType
         RealPointType -> RealPointASMType
         IntPointType -> IntegerPointASMType
         is FunctionType -> generateFunctionObjectType(type)

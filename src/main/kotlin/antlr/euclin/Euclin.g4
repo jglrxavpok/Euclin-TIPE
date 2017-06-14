@@ -83,6 +83,7 @@ expression
     | expression AddOperator expression         #AddExpr
     | True                                      #BoolTrueExpr
     | False                                     #BoolFalseExpr
+    | LeftBracket RightBracket                  #UnitExpr
     ;
 
 couple

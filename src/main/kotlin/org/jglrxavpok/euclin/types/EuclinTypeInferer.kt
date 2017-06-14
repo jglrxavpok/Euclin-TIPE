@@ -50,4 +50,8 @@ class EuclinTypeInferer(val availableFunctions: Map<String, FunctionSignature>) 
     override fun visitFloatExpr(ctx: EuclinParser.FloatExprContext): TypeDefinition {
         return RealType
     }
+
+    override fun visitUnitExpr(ctx: EuclinParser.UnitExprContext?): TypeDefinition {
+        return UnitType
+    }
 }

@@ -10,8 +10,10 @@ object TypeConverter: EuclinBaseVisitor<TypeDefinition>() {
 
     override fun visitBasicType(type: EuclinParser.BasicTypeContext): TypeDefinition {
         return when(type.text) {
+            // Types de bases d'Euclin
             "Int" -> IntType
             "Real" -> RealType
+            "Unit" -> UnitType
             else -> BasicType(type.text)
         }
     }

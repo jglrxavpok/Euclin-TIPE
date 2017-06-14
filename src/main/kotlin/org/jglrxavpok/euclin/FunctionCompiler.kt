@@ -241,4 +241,10 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         writer.visitLdcInsn(false)
         typeStack.push(BooleanType)
     }
+
+    override fun visitUnitExpr(ctx: EuclinParser.UnitExprContext) {
+        // Kotlin compile les singletons en des champs statiques nommés 'INSTANCE'
+        writer.visitFieldInsn(GETSTATIC, "euclin/std/UnitObject", "INSTANCE", "Leuclin/std/UnitObject;")
+        typeStack.push(UnitType)
+    }
 }

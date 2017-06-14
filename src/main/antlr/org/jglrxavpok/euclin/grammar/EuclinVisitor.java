@@ -260,6 +260,13 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitIntExpr(EuclinParser.IntExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code UnitExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUnitExpr(EuclinParser.UnitExprContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link EuclinParser#couple}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

@@ -61,7 +61,7 @@ object MemoizedFunctionCompiler {
             for((index, arg) in arguments.withIndex()) {
                 visitVarInsn(ALOAD, arrayIndex)
                 visitLdcInsn(index)
-                visitVarInsn(correctOpcode(ILOAD, arg.second), index) // TODO Convertir les types natifs en types 'Boxed'
+                visitVarInsn(correctOpcode(ILOAD, arg.second), index)
                 convertToObjectTypeIfNeeded(writer, arg.second)
                 visitInsn(AASTORE)
             }

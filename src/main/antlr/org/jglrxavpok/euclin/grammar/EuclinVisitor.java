@@ -79,11 +79,33 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDeclareFuncInstruction(EuclinParser.DeclareFuncInstructionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link EuclinParser#type}.
+	 * Visit a parse tree produced by the {@code FunctionType}
+	 * labeled alternative in {@link EuclinParser#type}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitType(EuclinParser.TypeContext ctx);
+	T visitFunctionType(EuclinParser.FunctionTypeContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code CoupleType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCoupleType(EuclinParser.CoupleTypeContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code WrappedType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWrappedType(EuclinParser.WrappedTypeContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code BasicType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBasicType(EuclinParser.BasicTypeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link EuclinParser#parameter}.
 	 * @param ctx the parse tree

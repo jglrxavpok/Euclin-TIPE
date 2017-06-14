@@ -26,7 +26,10 @@ instructions
     ;
 
 type
-    : Identifier
+    : LeftBracket (type (Comma type)*)? RightBracket LightArrow type    #FunctionType
+    | LeftBracket type Comma type RightBracket                          #CoupleType
+    | LeftBracket type RightBracket                                     #WrappedType
+    | Identifier                                                        #BasicType
     ;
 
 parameter
@@ -110,6 +113,7 @@ Period: '.';
 Colon: ':';
 SemiColon: ';';
 Equals: '=';
+LightArrow: '->';
 
 Identifier: IdentifierStart IdentifierPart*;
 Integer: Digits;

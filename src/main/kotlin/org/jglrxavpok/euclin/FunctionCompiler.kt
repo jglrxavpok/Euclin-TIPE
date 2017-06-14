@@ -135,7 +135,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
         // si l'expression n'est que '_', on change le nom
         val name = LambdaCompiler.generateLambdaName(functionExpression)+"\$constant"
-        val lambdaSignature = FunctionSignature(name, listOf(Argument("_", RealType)), returnType, functionSignature.ownerClass) // TODO: Meilleur nom?
+        val lambdaSignature = FunctionSignature(name, listOf(Argument("_", RealType)), returnType, functionSignature.ownerClass)
         val functionBody = generateLambdaBody(functionExpression)
 
         val funcCompiler = FunctionCompiler(classWriter, lambdaSignature, availableFunctions, lambdaExpressions)

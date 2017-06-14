@@ -7,8 +7,8 @@ import org.jglrxavpok.euclin.grammar.EuclinBaseVisitor
 import org.jglrxavpok.euclin.grammar.EuclinParser
 import org.jglrxavpok.euclin.types.BasicType
 import org.jglrxavpok.euclin.types.IntType
-import org.jglrxavpok.euclin.types.RealPointType
 import org.jglrxavpok.euclin.types.RealType
+import org.jglrxavpok.euclin.types.TypeConverter
 
 class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignature>() {
 
@@ -22,18 +22,15 @@ class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignat
     override fun visitFunctionDeclaration(ctx: EuclinParser.FunctionDeclarationContext): FunctionSignature {
         val name = ctx.Identifier().text
         // on convertit les 'parameter' en arguments en décomposant selon le nom et le type
-        val arguments = ctx.parameter().map { Argument(it.Identifier().text, toType(it.type().text)) }
-        val returnType = toType(ctx.type().text)
+        val arguments = ctx.parameter().map { Argument(it.Identifier().text, toType(it.type())) }
+        val returnType = toType(ctx.type())
         return FunctionSignature(name, arguments, returnType, ownerClass)
     }
 
     // FIXME: Meilleure conversion vers les Type (autoriser les couples, par exemple)
-    private fun toType(text: String): TypeDefinition {
-        return when(text) {
-            "Int" -> IntType
-            "Real" -> RealType
-            else -> BasicType(text)
-        }
+    private fun toType(type: EuclinParser.TypeContext): TypeDefinition {
+        return TypeConverter.visit(type)
+/*        */
     }
 }
 

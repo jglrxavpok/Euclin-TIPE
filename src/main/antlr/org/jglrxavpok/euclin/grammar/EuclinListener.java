@@ -124,15 +124,53 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitDeclareFuncInstruction(EuclinParser.DeclareFuncInstructionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link EuclinParser#type}.
+	 * Enter a parse tree produced by the {@code FunctionType}
+	 * labeled alternative in {@link EuclinParser#type}.
 	 * @param ctx the parse tree
 	 */
-	void enterType(EuclinParser.TypeContext ctx);
+	void enterFunctionType(EuclinParser.FunctionTypeContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link EuclinParser#type}.
+	 * Exit a parse tree produced by the {@code FunctionType}
+	 * labeled alternative in {@link EuclinParser#type}.
 	 * @param ctx the parse tree
 	 */
-	void exitType(EuclinParser.TypeContext ctx);
+	void exitFunctionType(EuclinParser.FunctionTypeContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code CoupleType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void enterCoupleType(EuclinParser.CoupleTypeContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code CoupleType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void exitCoupleType(EuclinParser.CoupleTypeContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code WrappedType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void enterWrappedType(EuclinParser.WrappedTypeContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code WrappedType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void exitWrappedType(EuclinParser.WrappedTypeContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code BasicType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void enterBasicType(EuclinParser.BasicTypeContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code BasicType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void exitBasicType(EuclinParser.BasicTypeContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link EuclinParser#parameter}.
 	 * @param ctx the parse tree

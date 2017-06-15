@@ -22,7 +22,7 @@ public class EuclinParser extends Parser {
 		LeftCurlyBracket=13, RightCurlyBracket=14, LeftSquareBracket=15, RightSquareBracket=16, 
 		Comma=17, Period=18, Colon=19, SemiColon=20, Equals=21, LightArrow=22, 
 		Identifier=23, Integer=24, FloatNumber=25, MultOperator=26, DivOperator=27, 
-		AddOperator=28, SubOperator=29, LineComment=30, Whitespace=31;
+		AddOperator=28, SubOperator=29, LineComment=30, MultilineComment=31, Whitespace=32;
 	public static final int
 		RULE_codeBlock = 0, RULE_functionCodeBlock = 1, RULE_functionInstructions = 2, 
 		RULE_instructions = 3, RULE_type = 4, RULE_parameter = 5, RULE_functionDeclaration = 6, 
@@ -47,7 +47,8 @@ public class EuclinParser extends Parser {
 		"RightBracket", "LeftCurlyBracket", "RightCurlyBracket", "LeftSquareBracket", 
 		"RightSquareBracket", "Comma", "Period", "Colon", "SemiColon", "Equals", 
 		"LightArrow", "Identifier", "Integer", "FloatNumber", "MultOperator", 
-		"DivOperator", "AddOperator", "SubOperator", "LineComment", "Whitespace"
+		"DivOperator", "AddOperator", "SubOperator", "LineComment", "MultilineComment", 
+		"Whitespace"
 	};
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
@@ -1874,7 +1875,7 @@ public class EuclinParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3!\u00c5\4\2\t\2\4"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\"\u00c5\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\3\2\7\2\"\n\2\f\2\16"+
 		"\2%\13\2\3\3\6\3(\n\3\r\3\16\3)\3\4\3\4\3\4\5\4/\n\4\3\5\3\5\3\5\3\5\3"+

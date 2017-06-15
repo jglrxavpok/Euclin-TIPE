@@ -164,5 +164,9 @@ LineComment
   :  '//' ~( '\r' | '\n' )* -> skip
   ;
 
+MultilineComment
+  : '/*' .*? '*/' -> skip
+  ;
+
 Whitespace:
     [ \t\n\r]+ -> skip;

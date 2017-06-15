@@ -276,6 +276,18 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitAccessExpr(EuclinParser.AccessExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code StringExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterStringExpr(EuclinParser.StringExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code StringExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitStringExpr(EuclinParser.StringExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code FloatExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.
 	 * @param ctx the parse tree

@@ -8,10 +8,7 @@ import org.jglrxavpok.euclin.functions.FunctionPurityInquisition
 import org.jglrxavpok.euclin.grammar.EuclinLexer
 import org.jglrxavpok.euclin.grammar.EuclinParser
 import org.jglrxavpok.euclin.lambda.LambdaCompiler
-import org.jglrxavpok.euclin.types.ObjectType
-import org.jglrxavpok.euclin.types.RealPointType
-import org.jglrxavpok.euclin.types.RealType
-import org.jglrxavpok.euclin.types.ShapeType
+import org.jglrxavpok.euclin.types.*
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes.*
 import java.io.File
@@ -71,10 +68,20 @@ object EuclinCompiler {
                 Argument("angle", RealType)
         ), RealType, "euclin.std.MathFunctions")
 
+        val writeFunction = FunctionSignature("write", listOf(
+                Argument("text", StringType)
+        ), JVMVoid, "euclin.std.Console")
+
+        val writelnFunction = FunctionSignature("writeln", listOf(
+                Argument("text", StringType)
+        ), JVMVoid, "euclin.std.Console")
+
         functions["sin"] = sinFunction
         functions["cos"] = cosFunction
         functions["tan"] = tanFunction
         functions["circle"] = circleFunction
+        functions["write"] = writeFunction
+        functions["writeln"] = writelnFunction
     }
 
     private fun compileLambdas(classWriter: ClassWriter, code: EuclinParser.CodeBlockContext, ownerClass: String, functions: Map<String, FunctionSignature>): Map<String, FunctionSignature> {

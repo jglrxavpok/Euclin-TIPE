@@ -14,6 +14,7 @@ object TypeConverter: EuclinBaseVisitor<TypeDefinition>() {
             "Int" -> IntType
             "Real" -> RealType
             "Unit" -> UnitType
+            "String" -> StringType
             else -> BasicType(type.text)
         }
     }

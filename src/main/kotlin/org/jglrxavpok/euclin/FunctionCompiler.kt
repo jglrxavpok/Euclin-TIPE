@@ -292,6 +292,13 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         typeStack.push(UnitType)
     }
 
+    override fun visitStringExpr(ctx: EuclinParser.StringExprContext) {
+        val str = ctx.StringConstant().text
+        val content = str.substring(1, str.length-1) // on retire les guillemets qui entourent le texte
+        writer.visitLdcInsn(content)
+        typeStack.push(StringType)
+    }
+
     fun loadUnitOnStack() {
         // Kotlin compile les singletons en des champs statiques nommés 'INSTANCE'
         writer.visitFieldInsn(GETSTATIC, "euclin/std/UnitObject", "INSTANCE", "Leuclin/std/UnitObject;")

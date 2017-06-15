@@ -27,10 +27,8 @@ class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignat
         return FunctionSignature(name, arguments, returnType, ownerClass)
     }
 
-    // FIXME: Meilleure conversion vers les Type (autoriser les couples, par exemple)
     private fun toType(type: EuclinParser.TypeContext): TypeDefinition {
         return TypeConverter.visit(type)
-/*        */
     }
 }
 

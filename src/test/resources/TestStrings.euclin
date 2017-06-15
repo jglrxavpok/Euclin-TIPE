@@ -1,0 +1,7 @@
+func main(): Unit {
+    write(someText())
+}
+
+func someText(): String {
+    return "Hello world!"
+}

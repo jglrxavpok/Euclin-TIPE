@@ -81,6 +81,10 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
         return False
     }
 
+    override fun visitStringExpr(ctx: EuclinParser.StringExprContext): Expression {
+        return Literal(ctx.StringConstant().text, StringType)
+    }
+
     override fun visitDivExpr(ctx: EuclinParser.DivExprContext): Expression {
         return visit(ctx.expression(0)) / visit(ctx.expression(1)) // Gauche + droite
     }

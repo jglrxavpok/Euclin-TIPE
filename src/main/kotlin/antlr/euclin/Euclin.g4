@@ -83,6 +83,7 @@ expression
     | expression AddOperator expression         #AddExpr
     | True                                      #BoolTrueExpr
     | False                                     #BoolFalseExpr
+    | StringConstant                            #StringExpr
     | LeftBracket RightBracket                  #UnitExpr
     ;
 
@@ -138,6 +139,10 @@ AddOperator
 SubOperator
     : '-' BinaryOperatorSuffix
     ;
+
+StringConstant
+    : '"' ~('"')* '"'
+    ;
 // Fragments: visible que par le lexer
 fragment IdentifierStart
     : [a-z] | [A-Z]
@@ -165,6 +170,9 @@ LineComment
   ;
 
 MultilineComment
+// '/*': début du commentaire
+// '*/': fin
+// '.*?': n'importe ('.') quel**s** ('*') caractères, ou rien ('?')
   : '/*' .*? '*/' -> skip
   ;
 

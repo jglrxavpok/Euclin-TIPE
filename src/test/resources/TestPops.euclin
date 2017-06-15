@@ -1,0 +1,8 @@
+func functionNotUsingValues(a: Int, b: Real): Unit {
+    someIntFunc()
+    return ()
+}
+
+func someIntFunc(): Int {
+    return 4
+}

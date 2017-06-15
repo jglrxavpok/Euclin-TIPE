@@ -1,0 +1,7 @@
+func someUnitFunc(a: Int, b: Real): Unit {
+    someIntFunc()
+}
+
+func someIntFunc(): Int {
+    4
+}

@@ -17,7 +17,7 @@ functionInstructions
     ;
 
 instructions
-    : functionCall          #CallInstruction
+    : expression            #ExpressionInstruction
     | variableDeclaration   #DeclareVarInstruction
     | variableAssign        #AssignVarInstruction
     | memberAssign          #AssignMemberInstruction

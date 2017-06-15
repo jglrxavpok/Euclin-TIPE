@@ -10,9 +10,9 @@ import java.io.PrintWriter
 import java.io.StringWriter
 
 
-object TestTypes {
+object TestAutoReturns {
 
     @JvmStatic fun main(args: Array<String>) {
-        TestBase.compileAndCheck("TestTypes")
+        TestBase.compileAndCheck("TestAutoReturns")
     }
 }

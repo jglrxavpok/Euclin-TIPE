@@ -37,12 +37,12 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitReturnFuncInstruction(EuclinParser.ReturnFuncInstructionContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code CallInstruction}
+	 * Visit a parse tree produced by the {@code ExpressionInstruction}
 	 * labeled alternative in {@link EuclinParser#instructions}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCallInstruction(EuclinParser.CallInstructionContext ctx);
+	T visitExpressionInstruction(EuclinParser.ExpressionInstructionContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code DeclareVarInstruction}
 	 * labeled alternative in {@link EuclinParser#instructions}.

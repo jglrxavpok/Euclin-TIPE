@@ -8,6 +8,7 @@ val IntType: TypeDefinition = BasicType("euclin.std.Int")
 val RealType: TypeDefinition = BasicType("euclin.std.Real")
 val BooleanType: TypeDefinition = BasicType("euclin.std.Boolean")
 val UnitType: TypeDefinition = BasicType("euclin.std.UnitObject")
+val JVMVoid: TypeDefinition = BasicType("void")
 
 val IntPointType = TupleType(arrayOf(IntType, IntType)) // TODO: 'Generic' types ?
 val RealPointType = TupleType(arrayOf(RealType, RealType))

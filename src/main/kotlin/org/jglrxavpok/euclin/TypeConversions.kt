@@ -22,6 +22,7 @@ fun basicType(type: TypeDefinition): ASMType {
         UnitType -> UnitASMType
         RealPointType -> RealPointASMType
         IntPointType -> IntegerPointASMType
+        JVMVoid -> ASMType.VOID_TYPE
         is FunctionType -> generateFunctionObjectType(type)
         // TODO: Autres types?
         else -> ASMType.getObjectType(type.toString().replace(".", "/"))

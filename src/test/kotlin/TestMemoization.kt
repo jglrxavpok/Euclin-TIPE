@@ -9,29 +9,9 @@ import java.io.FileOutputStream
 import java.io.PrintWriter
 import java.io.StringWriter
 
-
 object TestMemoization {
 
     @JvmStatic fun main(args: Array<String>) {
-        val sourceCode = javaClass.getResourceAsStream("/TestMemoization.euclin").bufferedReader().use { it.readText() } // ferme le flux après
-        val data = EuclinCompiler.compile(sourceCode, "TestMemoization.euclin")
-
-        FileOutputStream(File("runtime/tests", "TestMemoization.class")).use {
-            it.write(data)
-            it.flush()
-            it.close()
-        }
-
-        val reader = ClassReader(data)
-        val cw = ClassWriter(reader, ClassWriter.COMPUTE_MAXS)
-        val cv = CheckClassAdapter(cw)
-        reader.accept(cv, 0)
-
-        // Permet de vérifier que le code généré est valide
-        val sw = StringWriter()
-        val pw = PrintWriter(sw)
-        CheckClassAdapter.verify(ClassReader(cw.toByteArray()), true, pw)
-        println(sw.toString())
-        reader.accept(TraceClassVisitor(PrintWriter(System.out)), 0)
+        TestBase.compileAndCheck("TestMemoization")
     }
 }

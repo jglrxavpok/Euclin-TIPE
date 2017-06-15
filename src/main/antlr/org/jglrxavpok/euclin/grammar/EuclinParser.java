@@ -371,25 +371,6 @@ public class EuclinParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class CallInstructionContext extends InstructionsContext {
-		public FunctionCallContext functionCall() {
-			return getRuleContext(FunctionCallContext.class,0);
-		}
-		public CallInstructionContext(InstructionsContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof EuclinListener ) ((EuclinListener)listener).enterCallInstruction(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof EuclinListener ) ((EuclinListener)listener).exitCallInstruction(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof EuclinVisitor ) return ((EuclinVisitor<? extends T>)visitor).visitCallInstruction(this);
-			else return visitor.visitChildren(this);
-		}
-	}
 	public static class DeclareVarInstructionContext extends InstructionsContext {
 		public VariableDeclarationContext variableDeclaration() {
 			return getRuleContext(VariableDeclarationContext.class,0);
@@ -406,6 +387,25 @@ public class EuclinParser extends Parser {
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof EuclinVisitor ) return ((EuclinVisitor<? extends T>)visitor).visitDeclareVarInstruction(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ExpressionInstructionContext extends InstructionsContext {
+		public ExpressionContext expression() {
+			return getRuleContext(ExpressionContext.class,0);
+		}
+		public ExpressionInstructionContext(InstructionsContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof EuclinListener ) ((EuclinListener)listener).enterExpressionInstruction(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof EuclinListener ) ((EuclinListener)listener).exitExpressionInstruction(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof EuclinVisitor ) return ((EuclinVisitor<? extends T>)visitor).visitExpressionInstruction(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -456,11 +456,11 @@ public class EuclinParser extends Parser {
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,3,_ctx) ) {
 			case 1:
-				_localctx = new CallInstructionContext(_localctx);
+				_localctx = new ExpressionInstructionContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(46);
-				functionCall();
+				expression(0);
 				}
 				break;
 			case 2:
@@ -1894,12 +1894,12 @@ public class EuclinParser extends Parser {
 		"\u0090\3\2\2\2\34\u00a8\3\2\2\2\36\u00be\3\2\2\2 \"\5\b\5\2! \3\2\2\2"+
 		"\"%\3\2\2\2#!\3\2\2\2#$\3\2\2\2$\3\3\2\2\2%#\3\2\2\2&(\5\6\4\2\'&\3\2"+
 		"\2\2()\3\2\2\2)\'\3\2\2\2)*\3\2\2\2*\5\3\2\2\2+/\5\b\5\2,-\7\3\2\2-/\5"+
-		"\34\17\2.+\3\2\2\2.,\3\2\2\2/\7\3\2\2\2\60\67\5\22\n\2\61\67\5\24\13\2"+
-		"\62\67\5\26\f\2\63\67\5\30\r\2\64\67\5\32\16\2\65\67\5\16\b\2\66\60\3"+
-		"\2\2\2\66\61\3\2\2\2\66\62\3\2\2\2\66\63\3\2\2\2\66\64\3\2\2\2\66\65\3"+
-		"\2\2\2\67\t\3\2\2\28A\7\r\2\29>\5\n\6\2:;\7\23\2\2;=\5\n\6\2<:\3\2\2\2"+
-		"=@\3\2\2\2><\3\2\2\2>?\3\2\2\2?B\3\2\2\2@>\3\2\2\2A9\3\2\2\2AB\3\2\2\2"+
-		"BC\3\2\2\2CD\7\16\2\2DE\7\30\2\2ER\5\n\6\2FG\7\r\2\2GH\5\n\6\2HI\7\23"+
+		"\34\17\2.+\3\2\2\2.,\3\2\2\2/\7\3\2\2\2\60\67\5\34\17\2\61\67\5\24\13"+
+		"\2\62\67\5\26\f\2\63\67\5\30\r\2\64\67\5\32\16\2\65\67\5\16\b\2\66\60"+
+		"\3\2\2\2\66\61\3\2\2\2\66\62\3\2\2\2\66\63\3\2\2\2\66\64\3\2\2\2\66\65"+
+		"\3\2\2\2\67\t\3\2\2\28A\7\r\2\29>\5\n\6\2:;\7\23\2\2;=\5\n\6\2<:\3\2\2"+
+		"\2=@\3\2\2\2><\3\2\2\2>?\3\2\2\2?B\3\2\2\2@>\3\2\2\2A9\3\2\2\2AB\3\2\2"+
+		"\2BC\3\2\2\2CD\7\16\2\2DE\7\30\2\2ER\5\n\6\2FG\7\r\2\2GH\5\n\6\2HI\7\23"+
 		"\2\2IJ\5\n\6\2JK\7\16\2\2KR\3\2\2\2LM\7\r\2\2MN\5\n\6\2NO\7\16\2\2OR\3"+
 		"\2\2\2PR\7\31\2\2Q8\3\2\2\2QF\3\2\2\2QL\3\2\2\2QP\3\2\2\2R\13\3\2\2\2"+
 		"ST\7\31\2\2TU\7\25\2\2UV\5\n\6\2V\r\3\2\2\2WY\5\20\t\2XW\3\2\2\2Y\\\3"+

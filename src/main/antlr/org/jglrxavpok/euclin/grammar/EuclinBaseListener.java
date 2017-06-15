@@ -64,13 +64,13 @@ public class EuclinBaseListener implements EuclinListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCallInstruction(EuclinParser.CallInstructionContext ctx) { }
+	@Override public void enterExpressionInstruction(EuclinParser.ExpressionInstructionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCallInstruction(EuclinParser.CallInstructionContext ctx) { }
+	@Override public void exitExpressionInstruction(EuclinParser.ExpressionInstructionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

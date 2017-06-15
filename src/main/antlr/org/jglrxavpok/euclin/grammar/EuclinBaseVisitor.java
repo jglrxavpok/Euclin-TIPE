@@ -45,7 +45,7 @@ public class EuclinBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitCallInstruction(EuclinParser.CallInstructionContext ctx) { return visitChildren(ctx); }
+	@Override public T visitExpressionInstruction(EuclinParser.ExpressionInstructionContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -75,13 +75,16 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         val type = if(baseType == IntType) IntPointType else RealPointType
         with(writer) {
             val asmType = basicType(type)
-            val descriptor = methodType(listOf(Argument("first", baseType), Argument("second", baseType)), UnitType).descriptor
+            val descriptor = methodType(listOf(Argument("first", baseType), Argument("second", baseType)), JVMVoid).descriptor
             visitTypeInsn(NEW, asmType.internalName) // on crée l'objet
             visitInsn(DUP) // on duplique l'objet créé (permet de le réutiliser après)
             visit(left)
             visit(right)
             visitMethodInsn(INVOKESPECIAL, asmType.internalName, "<init>", descriptor, false)// on l'initialise
         }
+        // on retire les types des éléments du couple
+        typeStack.pop()
+        typeStack.pop()
         typeStack.push(type)
     }
 
@@ -111,16 +114,17 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
                     if(!actuallyValid)
                         error("Appel d'une fonction avec le mauvais type d'arguments! $expected != $actual dans ${call.text} pour l'argument $argName")
                 } else {
-                    visit(argumentContext) // compile the argument
+                    visit(argumentContext) // compile l'argument
                     typeStack.pop() // on retire directement car on s'en fiche en fait ici
-                    // TODO vérifier si il y a une méthode plus propre
                 }
             }
 
             val descriptor = methodType(function.arguments, function.returnType).descriptor
             visitMethodInsn(INVOKESTATIC, toInternalName(function.ownerClass), function.name, descriptor, false)
 
-            typeStack.push(function.returnType)
+            // les méthodes ayant 'void' en type de retour n'ajoutent rien sur le stack
+            if(function.returnType != JVMVoid)
+                typeStack.push(function.returnType)
         }
     }
 
@@ -158,13 +162,6 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
     override fun visitLambdaVarExpr(ctx: EuclinParser.LambdaVarExprContext?) {
         writer.visitVarInsn(correctOpcode(ILOAD, RealType), 0) // on charge le 1er argument de la fonction
         typeStack.push(RealType)
-    }
-
-    override fun visitInstructionFuncInstruction(ctx: EuclinParser.InstructionFuncInstructionContext) {
-        val label = Label()
-        writer.visitLineNumber(ctx.start.line, label)
-        writer.visitLabel(label)
-        super.visitInstructionFuncInstruction(ctx) // visite les instructions
     }
 
     override fun visitVarExpr(ctx: EuclinParser.VarExprContext) {
@@ -220,13 +217,61 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
                 visitParameter(name, Opcodes.ACC_FINAL)
                 localVariableIDs[name] = localIndex
                 localVariableTypes[name] = type
-                visitLocalVariable(name, basicType(type).descriptor, null, startLabel, endLabel, localIndex++)
                 translator.variableTypes[name] = type
             }
             visitCode()
             visitLabel(startLabel)
-            visitChildren(ctx) // on visite les enfants
+
+            val lastIndex = ctx.functionInstructions().size-1
+            ctx.functionInstructions().forEachIndexed { index, it ->
+                if(it.start != null) { // si on a bien une info sur la ligne dans le code source
+                    val label = Label()
+                    writer.visitLabel(label)
+                    writer.visitLineNumber(it.start.line, label)
+                }
+                visit(it)
+
+                // insertion automatique de return si on est à la fin de la fonction
+                if(index == lastIndex) {
+                    if(it !is EuclinParser.ReturnFuncInstructionContext) {
+                        if(typeStack.isNotEmpty()) {
+                            assert(typeStack.size == 1) { "Il ne doit y avoir qu'une seule valeur sur le stack pour insérer automatiquement un 'return'!" }
+                            val expected = functionSignature.returnType
+                            val actual = typeStack.pop() // on retire l'élement de la pile
+
+                            // la première condition permet d'éviter les exceptions dûes à l'impossibilité de la comparaison dans certains cas
+                            if(expected != actual || expected < actual) { // le type actuel ne peut rentrer dans le type attendu
+                                if(expected == UnitType) { // on ne s'occupe pas de la dernière valeur
+                                    // on retire l'élément, on charge Unit et on le renvoit
+                                    writer.visitInsn(POP)
+                                    loadUnitOnStack()
+                                    writer.visitInsn(ARETURN)
+                                } else {
+                                    error("Incompatibilité de types lors de l'insertion automatique de 'return' $expected != $actual (${functionSignature.name})")
+                                }
+                            } else { // tout va bien
+                                writer.visitInsn(correctOpcode(IRETURN, functionSignature.returnType))
+                            }
+                        } else { // si on est pas une instruction 'return' et que le stack est vide
+                            assert(functionSignature.returnType == UnitType) { "Aucune valeur renvoyée pour une fonction qui n'est pas une 'Unit function'!" }
+                            loadUnitOnStack()
+                            writer.visitInsn(ARETURN) // on renvoit le Unit
+                        }
+                    }
+                } else {
+                    // s'il reste des valeurs sur le stack à la fin de l'instruction, on les retire
+                    while(typeStack.isNotEmpty()) {
+                        writer.visitInsn(POP)
+                        typeStack.pop()
+                    }
+                }
+            }
+
             visitLabel(endLabel)
+
+            for((name, type) in functionSignature.arguments) {
+                visitLocalVariable(name, basicType(type).descriptor, null, startLabel, endLabel, localIndex++)
+            }
             visitMaxs(0, 0) // nécessaire pour qu'ASM puisse calculer les stacks et les frames
             visitEnd()
         }
@@ -244,7 +289,11 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
     override fun visitUnitExpr(ctx: EuclinParser.UnitExprContext) {
         // Kotlin compile les singletons en des champs statiques nommés 'INSTANCE'
-        writer.visitFieldInsn(GETSTATIC, "euclin/std/UnitObject", "INSTANCE", "Leuclin/std/UnitObject;")
+        loadUnitOnStack()
         typeStack.push(UnitType)
+    }
+
+    fun loadUnitOnStack() {
+        writer.visitFieldInsn(GETSTATIC, "euclin/std/UnitObject", "INSTANCE", "Leuclin/std/UnitObject;")
     }
 }

@@ -13,24 +13,6 @@ import java.io.StringWriter
 object TestConversionsConstantes {
 
     @JvmStatic fun main(args: Array<String>) {
-        val sourceCode = javaClass.getResourceAsStream("/TestConversionConstantesVersFonctions.euclin").bufferedReader().use { it.readText() } // ferme le flux après
-        val data = EuclinCompiler.compile(sourceCode, "TestConversionConstantesVersFonctions.euclin")
-
-        FileOutputStream(File("runtime/tests", "TestConversionConstantesVersFonctions.class")).use {
-            it.write(data)
-            it.flush()
-        }
-
-        val reader = ClassReader(data)
-        val cw = ClassWriter(reader, ClassWriter.COMPUTE_MAXS)
-        val cv = CheckClassAdapter(cw)
-        reader.accept(cv, 0)
-
-        // Permet de vérifier que le code généré est valide
-        val sw = StringWriter()
-        val pw = PrintWriter(sw)
-        CheckClassAdapter.verify(ClassReader(cw.toByteArray()), true, pw)
-        println(sw.toString())
-        reader.accept(TraceClassVisitor(PrintWriter(System.out)), 0)
+        TestBase.compileAndCheck("TestConversionConstantesVersFonctions")
     }
 }

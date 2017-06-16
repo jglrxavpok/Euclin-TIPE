@@ -1,9 +1,9 @@
-package org.jglrxavpok.euclin
+package org.jglrxavpok.euclin.types
 
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
-import org.jglrxavpok.euclin.types.*
+import org.jglrxavpok.euclin.Argument
 
 typealias ASMType = org.objectweb.asm.Type
 

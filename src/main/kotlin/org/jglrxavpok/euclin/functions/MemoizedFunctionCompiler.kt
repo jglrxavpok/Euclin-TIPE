@@ -3,14 +3,11 @@ package org.jglrxavpok.euclin.functions
 import org.jglr.inference.types.TypeDefinition
 import org.jglrxavpok.euclin.*
 import org.jglrxavpok.euclin.grammar.EuclinParser
-import org.jglrxavpok.euclin.types.BooleanType
-import org.jglrxavpok.euclin.types.IntType
-import org.jglrxavpok.euclin.types.RealType
+import org.jglrxavpok.euclin.types.*
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
-import org.objectweb.asm.signature.SignatureWriter
 
 object MemoizedFunctionCompiler {
     fun compile(functionCodeBlock: EuclinParser.FunctionCodeBlockContext, classWriter: ClassWriter, signature: FunctionSignature,

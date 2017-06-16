@@ -23,6 +23,9 @@ instructions
     | memberAssign          #AssignMemberInstruction
     | transformBlock        #TransformBlockInstruction
     | functionDeclaration   #DeclareFuncInstruction
+    | If LeftBracket expression RightBracket LeftCurlyBracket instructions* RightCurlyBracket                                                       #IfBranchingInstruction
+    | If LeftBracket expression RightBracket LeftCurlyBracket instructions* RightCurlyBracket Else LeftCurlyBracket instructions* RightCurlyBracket #IfElseBranchingInstruction
+    | While LeftBracket expression RightBracket LeftCurlyBracket instructions* RightCurlyBracket                                                    #WhileLoopInstruction
     ;
 
 type
@@ -101,6 +104,9 @@ False: 'false';
 Pure: 'pure';
 Impure: 'impure';
 Memoized: 'memoized';
+Else: 'else';
+If: 'if';
+While: 'while';
 
 // Ponctuation
 LambdaVariable: '_';

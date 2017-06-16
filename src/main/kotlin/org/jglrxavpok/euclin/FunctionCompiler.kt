@@ -213,9 +213,10 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
     override fun visitFunctionCodeBlock(ctx: EuclinParser.FunctionCodeBlockContext) {
         with(writer) {
-            for((name, type) in functionSignature.arguments) {
+            for((index, arg) in functionSignature.arguments.withIndex()) {
+                val (name, type) = arg
                 visitParameter(name, Opcodes.ACC_FINAL)
-                localVariableIDs[name] = localIndex
+                localVariableIDs[name] = index
                 localVariableTypes[name] = type
                 translator.variableTypes[name] = type
             }
@@ -269,8 +270,11 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
             visitLabel(endLabel)
 
-            for((name, type) in functionSignature.arguments) {
-                visitLocalVariable(name, basicType(type).descriptor, null, startLabel, endLabel, localIndex++)
+            val names = localVariableTypes.keys
+            for(name in names) {
+                val id = localVariableIDs[name]!!
+                val type = localVariableTypes[name]!!
+                visitLocalVariable(name, basicType(type).descriptor, null, startLabel, endLabel, id)
             }
             visitMaxs(0, 0) // nécessaire pour qu'ASM puisse calculer les stacks et les frames
             visitEnd()
@@ -380,5 +384,39 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         typeStack.pop()
         // on ajoute le type du résultat (on pourrait juste retirer un élément, mais cela ne serait pas clair et on laisse ainsi la possibilité de casts implicites)
         typeStack.push(leftExpr.type)
+    }
+
+    override fun visitVariableDeclaration(ctx: EuclinParser.VariableDeclarationContext) {
+        // FIXME: Créer des fields pour la méthode principale à la place de variables locales
+        val name = ctx.Identifier().text
+        if(localVariableIDs.containsKey(name))
+            error("Il y a déjà une variable appelée $name!")
+
+        val expression = ctx.expression()
+        val value = translator.translate(expression)
+
+        val varID = localIndex++
+        localVariableIDs[name] = varID
+        localVariableTypes[name] = value.type
+        translator.variableTypes[name] = value.type
+
+        storeValue(expression, value.type, varID)
+    }
+
+    override fun visitVariableAssign(ctx: EuclinParser.VariableAssignContext) {
+        val name = ctx.Identifier().text
+        val expression = ctx.expression()
+        val value = translator.translate(expression)
+        val localType = localVariableTypes[name]!!
+        assert(localType >= value.type) { "Impossible de stocker une valeur de type ${value.type} dans une variable de type $localType" }
+
+        val varID = localVariableIDs[name]!!
+        storeValue(expression, localType, varID)
+    }
+
+    private fun storeValue(expression: EuclinParser.ExpressionContext, type: TypeDefinition, varID: Int) {
+        visit(expression) // on compile la valeur
+        typeStack.pop()
+        writer.visitVarInsn(correctOpcode(ISTORE, type), varID) // et on la stocke dans la variable
     }
 }

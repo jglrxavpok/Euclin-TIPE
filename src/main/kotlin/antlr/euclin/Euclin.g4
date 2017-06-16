@@ -62,7 +62,7 @@ variableAssign
     ;
 
 memberAssign
-    : expression Period Identifier Equals expression
+    : expression (Period Identifier)+ Equals expression
     ;
 
 transformBlock
@@ -73,7 +73,7 @@ transformBlock
 expression
     : LambdaVariable                            #LambdaVarExpr
     | LeftSquareBracket expression RightSquareBracket   #LambdaFunctionExpr
-    | expression Period Identifier              #AccessExpr
+    | expression (Period Identifier)+              #AccessExpr
     | functionCall                              #CallExpr
     | Identifier                                #VarExpr
     | couple                                    #CoupleExpr

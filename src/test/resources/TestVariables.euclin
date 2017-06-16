@@ -1,0 +1,11 @@
+func main(): Unit {
+    var myText = someText() // déclaration de variable
+    writeln(myText)
+}
+
+func someText(): String {
+    // ré-assignation de variable
+    var result = "Hello world"
+    result = result + "!"
+    return result
+}

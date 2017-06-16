@@ -9,4 +9,20 @@ public class RealPoint {
         this.x = x;
         this.y = y;
     }
+
+    public RealPoint add(RealPoint other) {
+        return new RealPoint(x+other.x, y+other.y);
+    }
+
+    public RealPoint sub(RealPoint other) {
+        return new RealPoint(x-other.x, y-other.y);
+    }
+
+    public RealPoint times(RealPoint other) {
+        return new RealPoint(x*other.x, y*other.y);
+    }
+
+    public RealPoint div(RealPoint other) {
+        return new RealPoint(x/other.x, y/other.y);
+    }
 }

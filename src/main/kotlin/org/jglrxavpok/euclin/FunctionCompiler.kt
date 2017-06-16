@@ -303,4 +303,82 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         // Kotlin compile les singletons en des champs statiques nommés 'INSTANCE'
         writer.visitFieldInsn(GETSTATIC, "euclin/std/UnitObject", "INSTANCE", "Leuclin/std/UnitObject;")
     }
+
+    override fun visitAddExpr(ctx: EuclinParser.AddExprContext) {
+        val left = ctx.expression(0)
+        val right = ctx.expression(1)
+        if(translator.translate(left).type == StringType) { // on veut concaténer deux String
+            // exemple de code décompilé:
+            /* val builder: StringBuilder =
+            StringBuilder(<left>)
+                .append(<right>)
+                .toString()
+
+             */
+
+            with(writer) {
+                val stringBuilderInternalName = "java/lang/StringBuilder"
+                visitTypeInsn(NEW, stringBuilderInternalName)
+
+                visitInsn(DUP) // on duplique deux fois le builder: pour <init>, pour 'append' et pour 'toString()'
+                visitInsn(DUP)
+
+                // compilation du membre gauche et appel de constructeur
+                visit(left)
+                visitMethodInsn(INVOKESPECIAL, stringBuilderInternalName, "<init>", "(Ljava/lang/String;)V", false)
+
+                // compilation membre droite + appel à 'append'
+                visit(right)
+                visitMethodInsn(INVOKEVIRTUAL, stringBuilderInternalName, "append", "(Ljava/lang/String;)L$stringBuilderInternalName;", false) // le builder se renvoit lui-même
+
+                // renvoi du résultat
+                visitMethodInsn(INVOKESPECIAL, stringBuilderInternalName, "toString", "()Ljava/lang/String;", false)
+            }
+        } else {
+            compileOperation(left, right, IADD, "plus")
+        }
+    }
+
+    override fun visitSubExpr(ctx: EuclinParser.SubExprContext) {
+        val left = ctx.expression(0)
+        val right = ctx.expression(1)
+        compileOperation(left, right, ISUB, "minus")
+    }
+
+    override fun visitMultExpr(ctx: EuclinParser.MultExprContext) {
+        val left = ctx.expression(0)
+        val right = ctx.expression(1)
+        compileOperation(left, right, IMUL, "times")
+    }
+
+    override fun visitDivExpr(ctx: EuclinParser.DivExprContext) {
+        val left = ctx.expression(0)
+        val right = ctx.expression(1)
+        compileOperation(left, right, IDIV, "div")
+    }
+
+    /**
+     * Compiles les deux termes et crées les instructions pour construire le résultat
+     */
+    private fun compileOperation(left: EuclinParser.ExpressionContext, right: EuclinParser.ExpressionContext, opcode: Int, functionName: String) {
+        val leftExpr = translator.translate(left)
+        val rightExpr = translator.translate(right)
+        assert(leftExpr.type == rightExpr.type) { "Les valeurs doivent être du même type! ${leftExpr.type} != ${rightExpr.type}" }
+        visit(left)
+        visit(right)
+        when(leftExpr.type) {
+            RealType, IntType -> writer.visitInsn(correctOpcode(opcode, leftExpr.type))
+
+            // cet appel de fonction fonctionne car l'instance de l'objet sur laquelle on agit est considérée comme 'left'
+            RealPointType -> writer.visitMethodInsn(INVOKEVIRTUAL, "euclin/std/RealPoint", functionName, "(Leuclin/std/RealPoint;)Leuclin/std/RealPoint;", false)
+            IntPointType -> writer.visitMethodInsn(INVOKEVIRTUAL, "euclin/std/IntPoint", functionName, "(Leuclin/std/IntPoint;)Leuclin/std/IntPoint;", false)
+            else -> error("Impossible d'ajouter deux valeurs du type ${leftExpr.type}")
+        }
+
+        // on retire les termes
+        typeStack.pop()
+        typeStack.pop()
+        // on ajoute le type du résultat (on pourrait juste retirer un élément, mais cela ne serait pas clair et on laisse ainsi la possibilité de casts implicites)
+        typeStack.push(leftExpr.type)
+    }
 }

@@ -111,6 +111,10 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
         return Function(signature.name, Tuple(*arguments.toTypedArray()), OpaqueExpression("${signature.name}(*)") of signature.returnType)
     }
 
+    override fun visitWrappedExpr(ctx: EuclinParser.WrappedExprContext): Expression {
+        return visit(ctx.expression())
+    }
+
     override fun visitUnitExpr(ctx: EuclinParser.UnitExprContext?): Expression {
         return UnitValue
     }

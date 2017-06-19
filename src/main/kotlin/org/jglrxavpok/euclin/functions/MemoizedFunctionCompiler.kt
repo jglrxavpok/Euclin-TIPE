@@ -34,11 +34,7 @@ object MemoizedFunctionCompiler {
 
             val computeBranch = Label()
             val arrayIndex = arguments.size
-            for ((index, arg) in arguments.withIndex()) {
-                visitParameter(arg.first, ACC_FINAL)
-                visitLocalVariable(arg.first, basicType(arg.second).descriptor, null, start, end, index)
-            }
-            visitLocalVariable("\$argArray", "[Ljava/lang/Object;", null, start, end, arrayIndex)
+            val resultIndex = arrayIndex+1
             visitCode()
             visitLabel(start)
             /*
@@ -82,10 +78,26 @@ object MemoizedFunctionCompiler {
             for((index, arg) in arguments.withIndex())
                 visitVarInsn(correctOpcode(ILOAD, arg.second), index)
             visitMethodInsn(INVOKESTATIC, internalClassName, "${signature.name}\$compute", methodType(signature.arguments, signature.returnType).descriptor, false)
+
+            // On sauvegarde la valeur:
+            visitVarInsn(correctOpcode(ISTORE, signature.returnType), resultIndex)
+            visitFieldInsn(GETSTATIC, internalClassName, fieldName, "Leuclin/intrisincs/MemoizationCache;")
+            visitVarInsn(ALOAD, arrayIndex)
+            visitVarInsn(correctOpcode(ILOAD, signature.returnType), resultIndex)
+            convertToObjectTypeIfNeeded(writer, signature.returnType)
+            visitMethodInsn(INVOKEVIRTUAL, "euclin/intrisincs/MemoizationCache", "set", "([Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false)
+
+            visitVarInsn(correctOpcode(ILOAD, signature.returnType), resultIndex)
             visitInsn(correctOpcode(IRETURN, signature.returnType))
 
             visitLabel(end)
-            //visitInsn(correctOpcode(IRETURN, signature.returnType))
+
+            for ((index, arg) in arguments.withIndex()) {
+                visitParameter(arg.first, ACC_FINAL)
+                visitLocalVariable(arg.first, basicType(arg.second).descriptor, null, start, end, index)
+            }
+            visitLocalVariable("\$argArray", "[Ljava/lang/Object;", null, start, end, arrayIndex)
+            visitLocalVariable("\$result", basicType(signature.returnType).descriptor, null, start, end, resultIndex)
             visitMaxs(0, 0)
             visitEnd()
         }

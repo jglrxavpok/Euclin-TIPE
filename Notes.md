@@ -21,3 +21,8 @@ Compilation des fonctions lambda: http://blog.takipi.com/compiling-lambda-expres
 + http://cr.openjdk.java.net/~briangoetz/lambda/lambda-translation.html
 + https://stackoverflow.com/questions/18971830/generating-working-invokedynamic-instruction-with-
 + https://stackoverflow.com/questions/16827262/how-will-java-lambda-functions-be-compiled
+
+
+A faire:
+========
+(Compileur) Remplacer les 'assert' et 'error' de Kotlin par un système d'exceptions permettant d'indiquer la position de l'erreur

@@ -7,6 +7,7 @@ import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
 import euclin.compiler.lambda.LambdaCompiler
+import org.antlr.v4.runtime.ParserRuleContext
 import org.objectweb.asm.*
 import org.objectweb.asm.Opcodes.*
 import java.util.*
@@ -225,11 +226,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
             val lastIndex = ctx.functionInstructions().size-1
             ctx.functionInstructions().forEachIndexed { index, it ->
-                if(it.start != null) { // si on a bien une info sur la ligne dans le code source
-                    val label = Label()
-                    writer.visitLabel(label)
-                    writer.visitLineNumber(it.start.line, label)
-                }
+                addLineInfos(it)
                 visit(it)
 
                 // insertion automatique de return si on est à la fin de la fonction
@@ -281,13 +278,21 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         }
     }
 
+    private fun addLineInfos(ctx: ParserRuleContext) {
+        if(ctx.start != null) { // si on a bien une info sur la ligne dans le code source
+            val label = Label()
+            writer.visitLabel(label)
+            writer.visitLineNumber(ctx.start.line, label)
+        }
+    }
+
     override fun visitBoolTrueExpr(ctx: EuclinParser.BoolTrueExprContext?) {
-        writer.visitLdcInsn(true)
+        writer.visitIntInsn(BIPUSH, 1) // la JVM préfère ça au 'LDC' pour les booléens
         typeStack.push(BooleanType)
     }
 
     override fun visitBoolFalseExpr(ctx: EuclinParser.BoolFalseExprContext?) {
-        writer.visitLdcInsn(false)
+        writer.visitIntInsn(BIPUSH, 0) // la JVM préfère ça au 'LDC' pour les booléens
         typeStack.push(BooleanType)
     }
 
@@ -424,5 +429,38 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         writer.visitMethodInsn(INVOKESTATIC, "euclin/std/Geometry", "pushTransform", "()V", false)
         visit(ctx.codeBlock())
         writer.visitMethodInsn(INVOKESTATIC, "euclin/std/Geometry", "popTransform", "()V", false)
+    }
+
+    override fun visitWhileLoopInstruction(ctx: EuclinParser.WhileLoopInstructionContext) {
+        val conditionExpr = ctx.expression()
+        val condition = translator.translate(conditionExpr)
+        assert(condition.type != BooleanType) { "La condition doit être un booléen!" }
+        val code = ctx.instructions()
+        val conditionLabel = Label()
+        val endLabel = Label()
+
+        with(writer) {
+            visitLabel(conditionLabel)
+            visit(conditionExpr) // la condition
+            visitJumpInsn(IFEQ, endLabel) // si la condition = false alors on va à 'endLabel'
+            typeStack.pop()
+
+            for(instruction in code) {
+                addLineInfos(instruction)
+                visit(instruction) // on compile l'instruction
+
+                // on vide le stack si nécessaire
+                if (typeStack.isNotEmpty()) {
+                    assert(typeStack.size == 1) { "Il ne doit y avoir qu'une seule valeur sur le stack à la fin d'une instruction!" }
+                    typeStack.pop()
+                    visitInsn(POP)
+                }
+            }
+
+            visitJumpInsn(GOTO, conditionLabel) // on retourne au début de la boucle
+
+            visitLabel(endLabel)
+            // fin
+        }
     }
 }

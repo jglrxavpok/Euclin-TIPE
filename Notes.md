@@ -23,6 +23,9 @@ Compilation des fonctions lambda: http://blog.takipi.com/compiling-lambda-expres
 + https://stackoverflow.com/questions/16827262/how-will-java-lambda-functions-be-compiled
 
 
+Différence fcmpl/fcmpg
++ http://www.javaworld.com/article/2077625/core-java/control-flow.html (traitement de NaN et comparaisons)
+
 A faire:
 ========
 (Compileur) Remplacer les 'assert' et 'error' de Kotlin par un système d'exceptions permettant d'indiquer la position de l'erreur

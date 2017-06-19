@@ -2,4 +2,56 @@ func main(): Unit {
     while(true) {
         writeln("Hello!")
     }
+
+    var i = 0
+    while(i < 10) {
+        writeln("Hello!")
+        i = i + 1
+    }
+    while(i <= 10) {
+        writeln("Hello!")
+        i = i + 1
+    }
+    while(i >= 10) {
+        writeln("Hello!")
+        i = i + 1
+    }
+    while(i > 10) {
+        writeln("Hello!")
+        i = i + 1
+    }
+    while(i != 10) {
+        writeln("Hello!")
+        i = i + 1
+    }
+    while(i == 10) {
+        writeln("Hello!")
+        i = i + 1
+    }
+
+    var f = 45.
+    while(f < 10.) {
+        writeln("Hello!")
+        f = f + 10.
+    }
+    while(f <= 10.) {
+        writeln("Hello!")
+        f = f + 1.
+    }
+    while(f >= 10.) {
+        writeln("Hello!")
+        f = f + 1.
+    }
+    while(f > 10.) {
+        writeln("Hello!")
+        f = f + 1.
+    }
+    while(f != 10.) {
+        writeln("Hello!")
+        f = f + 1.
+    }
+    while(f == 10.) {
+        writeln("Hello!")
+        f = f + 1.
+    }
 }

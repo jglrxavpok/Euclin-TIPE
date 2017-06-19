@@ -5,7 +5,7 @@ import euclin.compiler.FunctionCompiler
 import euclin.compiler.FunctionSignature
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
-import euclin.compiler.types.ExpressionTranslator
+import euclin.compiler.expressions.ExpressionTranslator
 import euclin.compiler.types.RealType
 import org.objectweb.asm.ClassWriter
 

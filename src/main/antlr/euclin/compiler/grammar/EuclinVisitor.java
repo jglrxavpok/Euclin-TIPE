@@ -232,6 +232,20 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLambdaFunctionExpr(EuclinParser.LambdaFunctionExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code GreaterExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGreaterExpr(EuclinParser.GreaterExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code GreaterEqualExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGreaterEqualExpr(EuclinParser.GreaterEqualExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code AddExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.
 	 * @param ctx the parse tree
@@ -245,6 +259,20 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitWrappedExpr(EuclinParser.WrappedExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LessExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLessExpr(EuclinParser.LessExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LessEqualExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLessEqualExpr(EuclinParser.LessEqualExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code LambdaVarExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.
@@ -294,6 +322,20 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitUnitExpr(EuclinParser.UnitExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Equality}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEquality(EuclinParser.EqualityContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Inequality}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInequality(EuclinParser.InequalityContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link EuclinParser#couple}.
 	 * @param ctx the parse tree

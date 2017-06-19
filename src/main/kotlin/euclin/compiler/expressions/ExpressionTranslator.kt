@@ -1,4 +1,4 @@
-package euclin.compiler.types
+package euclin.compiler.expressions
 
 import org.jglr.inference.TypeInferer
 import org.jglr.inference.expressions.*
@@ -7,6 +7,8 @@ import org.jglr.inference.types.TypeDefinition
 import euclin.compiler.FunctionSignature
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
+import euclin.compiler.types.*
+import org.jglr.inference.ImpossibleUnificationExpression
 
 class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature>) : EuclinBaseVisitor<Expression>() {
 
@@ -16,6 +18,17 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
     private val UnitValue = Literal(Unit, UnitType)
     private val inferer = TypeInferer()
     val variableTypes = hashMapOf<String, TypeDefinition>()
+
+    init {
+        // Ceci rajoute un nouveau type d'expression à l'inféreur de types: les comparaisons entre deux valeurs (<, <=, >, >=, ==, !=)
+        inferer.defineProcessingOf<ComparisonExpression> {
+            inferer.infer(it.left)
+            inferer.infer(it.right)
+            if(it.left.type != it.right.type) { // on vérifie que les deux membres sont bien du même type
+                throw ImpossibleUnificationExpression("Les comparaisons doivent être faites avec des termes de même type! (${it.left.type} != ${it.right.type})")
+            }
+        }
+    }
 
     fun translateLambdaExpression(functionExpression: EuclinParser.ExpressionContext): Function {
         val previousVar = lambdaVar
@@ -118,4 +131,42 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
     override fun visitUnitExpr(ctx: EuclinParser.UnitExprContext?): Expression {
         return UnitValue
     }
+
+    // Opérateurs de comparaison
+    override fun visitLessEqualExpr(ctx: EuclinParser.LessEqualExprContext): Expression {
+        val left = visit(ctx.expression(0))
+        val right = visit(ctx.expression(1))
+        return LessEqualThan(left, right)
+    }
+
+    override fun visitLessExpr(ctx: EuclinParser.LessExprContext): Expression {
+        val left = visit(ctx.expression(0))
+        val right = visit(ctx.expression(1))
+        return LessThan(left, right)
+    }
+
+    override fun visitEquality(ctx: EuclinParser.EqualityContext): Expression {
+        val left = visit(ctx.expression(0))
+        val right = visit(ctx.expression(1))
+        return EqualTo(left, right)
+    }
+
+    override fun visitInequality(ctx: EuclinParser.InequalityContext): Expression {
+        val left = visit(ctx.expression(0))
+        val right = visit(ctx.expression(1))
+        return DifferentFrom(left, right)
+    }
+
+    override fun visitGreaterExpr(ctx: EuclinParser.GreaterExprContext): Expression {
+        val left = visit(ctx.expression(0))
+        val right = visit(ctx.expression(1))
+        return GreaterThan(left, right)
+    }
+
+    override fun visitGreaterEqualExpr(ctx: EuclinParser.GreaterEqualExprContext): Expression {
+        val left = visit(ctx.expression(0))
+        val right = visit(ctx.expression(1))
+        return GreaterEqualThan(left, right)
+    }
+    // Fin des opérateurs de comparaison
 }

@@ -84,6 +84,12 @@ expression
     | expression MultOperator expression        #MultExpr
     | expression SubOperator expression         #SubExpr
     | expression AddOperator expression         #AddExpr
+    | expression Less expression                #LessExpr
+    | expression LessEqual expression           #LessEqualExpr
+    | expression Greater expression             #GreaterExpr
+    | expression GreaterEqual expression        #GreaterEqualExpr
+    | expression Equals Equals expression       #Equality
+    | expression Bang Equals expression         #Inequality
     | True                                      #BoolTrueExpr
     | False                                     #BoolFalseExpr
     | StringConstant                            #StringExpr
@@ -122,6 +128,11 @@ Colon: ':';
 SemiColon: ';';
 Equals: '=';
 LightArrow: '->';
+Bang: '!';
+Less: '<';
+LessEqual: '<=';
+Greater: '>';
+GreaterEqual: '>=';
 
 Identifier: IdentifierStart IdentifierPart*;
 Integer: Digits;

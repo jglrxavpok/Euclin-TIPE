@@ -412,6 +412,30 @@ public class EuclinBaseListener implements EuclinListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterGreaterExpr(EuclinParser.GreaterExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGreaterExpr(EuclinParser.GreaterExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGreaterEqualExpr(EuclinParser.GreaterEqualExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGreaterEqualExpr(EuclinParser.GreaterEqualExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterAddExpr(EuclinParser.AddExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -431,6 +455,30 @@ public class EuclinBaseListener implements EuclinListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitWrappedExpr(EuclinParser.WrappedExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLessExpr(EuclinParser.LessExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLessExpr(EuclinParser.LessExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLessEqualExpr(EuclinParser.LessEqualExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLessEqualExpr(EuclinParser.LessEqualExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -515,6 +563,30 @@ public class EuclinBaseListener implements EuclinListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitUnitExpr(EuclinParser.UnitExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEquality(EuclinParser.EqualityContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEquality(EuclinParser.EqualityContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInequality(EuclinParser.InequalityContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInequality(EuclinParser.InequalityContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

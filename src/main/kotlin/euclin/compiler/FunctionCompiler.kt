@@ -1,5 +1,6 @@
 package euclin.compiler
 
+import euclin.compiler.expressions.ExpressionTranslator
 import org.antlr.v4.runtime.tree.TerminalNode
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TypeDefinition
@@ -287,12 +288,12 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
     }
 
     override fun visitBoolTrueExpr(ctx: EuclinParser.BoolTrueExprContext?) {
-        writer.visitIntInsn(BIPUSH, 1) // la JVM préfère ça au 'LDC' pour les booléens
+        loadBooleanRaw(true)
         typeStack.push(BooleanType)
     }
 
     override fun visitBoolFalseExpr(ctx: EuclinParser.BoolFalseExprContext?) {
-        writer.visitIntInsn(BIPUSH, 0) // la JVM préfère ça au 'LDC' pour les booléens
+        loadBooleanRaw(false)
         typeStack.push(BooleanType)
     }
 
@@ -462,5 +463,89 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
             visitLabel(endLabel)
             // fin
         }
+    }
+
+    // Opérateurs de comparaison
+    private fun compare(left: EuclinParser.ExpressionContext, right: EuclinParser.ExpressionContext, jumpOpcode: Int) {
+        val valueType = translator.translate(left).type
+
+        assert(valueType == RealType || valueType == IntType) { "On ne peut comparer que les types Int et Real!" }
+
+        val trueLabel = Label()
+        val endLabel = Label()
+        with(writer) {
+            visit(left)
+            visit(right)
+            typeStack.pop()
+            typeStack.pop()
+
+            // /!\ Astuce: la comparaison va nous donner un nombre que l'on va ensuite comparer à 0
+            if(valueType == RealType) { // c'est un float
+                visitInsn(FCMPL) // on compare
+                visitIntInsn(BIPUSH, 0)
+                visitInsn(SWAP)
+            }
+
+            visitJumpInsn(jumpOpcode, trueLabel) // c'est une valeur > donc on charge 'true'
+            loadBooleanRaw(false)
+            visitJumpInsn(GOTO, endLabel)
+
+            visitLabel(trueLabel)
+            loadBooleanRaw(true)
+
+            visitLabel(endLabel)
+        }
+
+        typeStack.push(BooleanType)
+    }
+
+    override fun visitGreaterExpr(ctx: EuclinParser.GreaterExprContext) {
+        val left = ctx.expression(0)
+        val right = ctx.expression(1)
+
+        compare(left, right, IF_ICMPGT)
+    }
+
+    override fun visitGreaterEqualExpr(ctx: EuclinParser.GreaterEqualExprContext) {
+        val left = ctx.expression(0)
+        val right = ctx.expression(1)
+
+        compare(left, right, IF_ICMPGE)
+    }
+
+    override fun visitLessExpr(ctx: EuclinParser.LessExprContext) {
+        val left = ctx.expression(0)
+        val right = ctx.expression(1)
+
+        compare(left, right, IF_ICMPLT)
+    }
+
+    override fun visitLessEqualExpr(ctx: EuclinParser.LessEqualExprContext) {
+        val left = ctx.expression(0)
+        val right = ctx.expression(1)
+
+        compare(left, right, IF_ICMPLE)
+    }
+
+    override fun visitEquality(ctx: EuclinParser.EqualityContext) {
+        val left = ctx.expression(0)
+        val right = ctx.expression(1)
+
+        compare(left, right, IF_ICMPEQ)
+    }
+
+    override fun visitInequality(ctx: EuclinParser.InequalityContext) {
+        val left = ctx.expression(0)
+        val right = ctx.expression(1)
+
+        compare(left, right, IF_ICMPNE)
+    }
+    // Fin des opérateurs de comparaison
+
+    /**
+     * Ne charge pas la valeur dans 'typeStack'
+     */
+    private fun loadBooleanRaw(value: Boolean) {
+        writer.visitIntInsn(BIPUSH, if(value) 1 else 0) // la JVM préfère ça au 'LDC' pour les booléens
     }
 }

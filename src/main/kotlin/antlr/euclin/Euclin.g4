@@ -23,9 +23,12 @@ instructions
     | memberAssign          #AssignMemberInstruction
     | transformBlock        #TransformBlockInstruction
     | functionDeclaration   #DeclareFuncInstruction
-    | If LeftBracket expression RightBracket LeftCurlyBracket instructions* RightCurlyBracket                                                       #IfBranchingInstruction
-    | If LeftBracket expression RightBracket LeftCurlyBracket instructions* RightCurlyBracket Else LeftCurlyBracket instructions* RightCurlyBracket #IfElseBranchingInstruction
-    | While LeftBracket expression RightBracket LeftCurlyBracket instructions* RightCurlyBracket                                                    #WhileLoopInstruction
+    | If LeftBracket expression RightBracket LeftCurlyBracket instructions* RightCurlyBracket elseBlock?    #IfBranchingInstruction
+    | While LeftBracket expression RightBracket LeftCurlyBracket instructions* RightCurlyBracket            #WhileLoopInstruction
+    ;
+
+elseBlock
+    : Else LeftCurlyBracket instructions* RightCurlyBracket
     ;
 
 type

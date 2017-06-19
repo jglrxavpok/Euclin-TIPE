@@ -1,0 +1,17 @@
+func main(): Unit {
+    if("abc" == "ded") {
+        writeln("Hello!")
+    }
+    if("abc" != "ded") {
+        writeln("Hello!")
+    }
+    if("abc" <= "ded") {
+        writeln("Hello!")
+    }
+
+    if(45 == 49) {
+        writeln(":)")
+    } else {
+        writeln("hello2")
+    }
+}

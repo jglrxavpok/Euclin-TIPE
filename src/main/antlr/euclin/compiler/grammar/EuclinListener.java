@@ -136,18 +136,6 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitIfBranchingInstruction(EuclinParser.IfBranchingInstructionContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code IfElseBranchingInstruction}
-	 * labeled alternative in {@link EuclinParser#instructions}.
-	 * @param ctx the parse tree
-	 */
-	void enterIfElseBranchingInstruction(EuclinParser.IfElseBranchingInstructionContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code IfElseBranchingInstruction}
-	 * labeled alternative in {@link EuclinParser#instructions}.
-	 * @param ctx the parse tree
-	 */
-	void exitIfElseBranchingInstruction(EuclinParser.IfElseBranchingInstructionContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code WhileLoopInstruction}
 	 * labeled alternative in {@link EuclinParser#instructions}.
 	 * @param ctx the parse tree
@@ -159,6 +147,16 @@ public interface EuclinListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitWhileLoopInstruction(EuclinParser.WhileLoopInstructionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EuclinParser#elseBlock}.
+	 * @param ctx the parse tree
+	 */
+	void enterElseBlock(EuclinParser.ElseBlockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EuclinParser#elseBlock}.
+	 * @param ctx the parse tree
+	 */
+	void exitElseBlock(EuclinParser.ElseBlockContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code FunctionType}
 	 * labeled alternative in {@link EuclinParser#type}.

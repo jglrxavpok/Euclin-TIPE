@@ -148,18 +148,6 @@ public class EuclinBaseListener implements EuclinListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIfElseBranchingInstruction(EuclinParser.IfElseBranchingInstructionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitIfElseBranchingInstruction(EuclinParser.IfElseBranchingInstructionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterWhileLoopInstruction(EuclinParser.WhileLoopInstructionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -167,6 +155,18 @@ public class EuclinBaseListener implements EuclinListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitWhileLoopInstruction(EuclinParser.WhileLoopInstructionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterElseBlock(EuclinParser.ElseBlockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitElseBlock(EuclinParser.ElseBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

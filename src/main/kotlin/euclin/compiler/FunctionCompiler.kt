@@ -446,17 +446,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
             visitJumpInsn(IFEQ, endLabel) // si la condition = false alors on va à 'endLabel'
             typeStack.pop()
 
-            for(instruction in code) {
-                addLineInfos(instruction)
-                visit(instruction) // on compile l'instruction
-
-                // on vide le stack si nécessaire
-                if (typeStack.isNotEmpty()) {
-                    assert(typeStack.size == 1) { "Il ne doit y avoir qu'une seule valeur sur le stack à la fin d'une instruction!" }
-                    typeStack.pop()
-                    visitInsn(POP)
-                }
-            }
+            compileInstructions(code)
 
             visitJumpInsn(GOTO, conditionLabel) // on retourne au début de la boucle
 
@@ -465,11 +455,53 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         }
     }
 
+    private fun compileInstructions(code: List<EuclinParser.InstructionsContext>) {
+        for(instruction in code) {
+            addLineInfos(instruction)
+            visit(instruction) // on compile l'instruction
+
+            // on vide le stack si nécessaire
+            if (typeStack.isNotEmpty()) {
+                assert(typeStack.size == 1) { "Il ne doit y avoir qu'une seule valeur sur le stack à la fin d'une instruction!" }
+                typeStack.pop()
+                writer.visitInsn(POP)
+            }
+        }
+    }
+
+    override fun visitIfBranchingInstruction(ctx: EuclinParser.IfBranchingInstructionContext) {
+        val conditionExpr = ctx.expression()
+        val condition = translator.translate(conditionExpr)
+        assert(condition.type != BooleanType) { "La condition doit être un booléen!" }
+        val code = ctx.instructions()
+        val endLabel = Label()
+        val elseStartLabel = Label()
+
+        val hasElseBlock = ctx.elseBlock() != null
+
+        with(writer) {
+            visit(conditionExpr)
+            visitJumpInsn(IFEQ, if(hasElseBlock) elseStartLabel else endLabel) // soit on va dans le bloc else, soit on va à la fin (parce qu'il n'y a pas de else)
+            typeStack.pop()
+
+            compileInstructions(code)
+            visitJumpInsn(GOTO, endLabel) // on a fini le code dans le 'if', on va à la fin
+
+            if(hasElseBlock) {
+                val elseBlock = ctx.elseBlock()
+                visitLabel(elseStartLabel)
+                compileInstructions(elseBlock.instructions())
+            }
+
+            visitLabel(endLabel)
+        }
+    }
+
     // Opérateurs de comparaison
     private fun compare(left: EuclinParser.ExpressionContext, right: EuclinParser.ExpressionContext, jumpOpcode: Int) {
         val valueType = translator.translate(left).type
 
-        assert(valueType == RealType || valueType == IntType) { "On ne peut comparer que les types Int et Real!" }
+        assert(valueType == RealType || valueType == IntType || valueType == StringType) { "On ne peut comparer que les types String, Int et Real!" }
 
         val trueLabel = Label()
         val endLabel = Label()
@@ -484,6 +516,9 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
                 visitInsn(FCMPL) // on compare
                 visitIntInsn(BIPUSH, 0)
                 visitInsn(SWAP)
+            } else if(valueType == StringType) {
+                visitMethodInsn(INVOKEINTERFACE, "java/lang/String", "compareTo", "(Ljava/lang/Object;)I", true)
+                visitIntInsn(BIPUSH, 0)
             }
 
             visitJumpInsn(jumpOpcode, trueLabel) // c'est une valeur > donc on charge 'true'
@@ -531,14 +566,51 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         val left = ctx.expression(0)
         val right = ctx.expression(1)
 
-        compare(left, right, IF_ICMPEQ)
+        val leftType = translator.translate(left).type
+        val rightType = translator.translate(right).type
+        if(leftType == StringType && rightType == StringType) {
+            compareStrings(left, right, negate=false)
+        } else {
+            compare(left, right, IF_ICMPEQ)
+        }
     }
 
     override fun visitInequality(ctx: EuclinParser.InequalityContext) {
         val left = ctx.expression(0)
         val right = ctx.expression(1)
 
-        compare(left, right, IF_ICMPNE)
+        val leftType = translator.translate(left).type
+        val rightType = translator.translate(right).type
+        if(leftType == StringType && rightType == StringType) {
+            compareStrings(left, right, negate=true)
+        } else {
+            compare(left, right, IF_ICMPNE)
+        }
+    }
+
+    private fun compareStrings(left: EuclinParser.ExpressionContext, right: EuclinParser.ExpressionContext, negate: Boolean) {
+        with(writer) {
+            visit(left)
+            visit(right)
+            typeStack.pop()
+            typeStack.pop()
+
+            // on utilise la méthode de comparaison de la classe String
+            visitMethodInsn(INVOKEINTERFACE, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", true)
+            if(negate) {
+                val negateEnd = Label()
+                val branchFalse = Label()
+                visitJumpInsn(IFNE, branchFalse)
+                loadBooleanRaw(true)
+                visitJumpInsn(GOTO, negateEnd)
+
+                visitLabel(branchFalse)
+                loadBooleanRaw(false)
+                visitLabel(negateEnd)
+            }
+        }
+
+        typeStack.push(BooleanType)
     }
     // Fin des opérateurs de comparaison
 

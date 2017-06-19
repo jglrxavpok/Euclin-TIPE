@@ -419,4 +419,10 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         typeStack.pop()
         writer.visitVarInsn(correctOpcode(ISTORE, type), varID) // et on la stocke dans la variable
     }
+
+    override fun visitTransformBlock(ctx: EuclinParser.TransformBlockContext) {
+        writer.visitMethodInsn(INVOKESTATIC, "euclin/std/Geometry", "pushTransform", "()V", false)
+        visit(ctx.codeBlock())
+        writer.visitMethodInsn(INVOKESTATIC, "euclin/std/Geometry", "popTransform", "()V", false)
+    }
 }

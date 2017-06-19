@@ -1,0 +1,5 @@
+func something(): Unit {
+    transform {
+        writeln("Un truc bidon")
+    }
+}

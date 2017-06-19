@@ -1,7 +1,7 @@
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
-import org.jglrxavpok.euclin.grammar.EuclinLexer
-import org.jglrxavpok.euclin.grammar.EuclinParser
+import euclin.compiler.grammar.EuclinLexer
+import euclin.compiler.grammar.EuclinParser
 import org.junit.Test
 
 class TestModifiers {

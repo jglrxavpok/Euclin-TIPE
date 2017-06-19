@@ -1,14 +1,14 @@
-package org.jglrxavpok.euclin
+package euclin.compiler
 
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.jglr.inference.types.FunctionType
-import org.jglrxavpok.euclin.functions.MemoizedFunctionCompiler
-import org.jglrxavpok.euclin.functions.FunctionPurityInquisition
-import org.jglrxavpok.euclin.grammar.EuclinLexer
-import org.jglrxavpok.euclin.grammar.EuclinParser
-import org.jglrxavpok.euclin.lambda.LambdaCompiler
-import org.jglrxavpok.euclin.types.*
+import euclin.compiler.functions.MemoizedFunctionCompiler
+import euclin.compiler.functions.FunctionPurityInquisition
+import euclin.compiler.grammar.EuclinLexer
+import euclin.compiler.grammar.EuclinParser
+import euclin.compiler.types.*
+import euclin.compiler.lambda.LambdaCompiler
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes.*
 import java.io.File

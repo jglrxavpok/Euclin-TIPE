@@ -1,14 +1,11 @@
-package org.jglrxavpok.euclin
+package euclin.compiler
 
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
-import org.jglrxavpok.euclin.grammar.EuclinBaseVisitor
-import org.jglrxavpok.euclin.grammar.EuclinParser
-import org.jglrxavpok.euclin.types.BasicType
-import org.jglrxavpok.euclin.types.IntType
-import org.jglrxavpok.euclin.types.RealType
-import org.jglrxavpok.euclin.types.TypeConverter
+import euclin.compiler.grammar.EuclinBaseVisitor
+import euclin.compiler.grammar.EuclinParser
+import euclin.compiler.types.TypeConverter
 
 class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignature>() {
 

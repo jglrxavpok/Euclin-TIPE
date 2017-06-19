@@ -1,5 +1,5 @@
 // Generated from F:/Programming/Kotlin/Languages/Euclin-TIPE/src/main/kotlin/antlr/euclin\Euclin.g4 by ANTLR 4.7
-package org.jglrxavpok.euclin.grammar;
+package euclin.compiler.grammar;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**

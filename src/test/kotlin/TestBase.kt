@@ -1,4 +1,4 @@
-import org.jglrxavpok.euclin.EuclinCompiler
+import euclin.compiler.EuclinCompiler
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.util.CheckClassAdapter

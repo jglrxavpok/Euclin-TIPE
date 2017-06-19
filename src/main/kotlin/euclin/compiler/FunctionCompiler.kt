@@ -1,12 +1,12 @@
-package org.jglrxavpok.euclin
+package euclin.compiler
 
 import org.antlr.v4.runtime.tree.TerminalNode
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TypeDefinition
-import org.jglrxavpok.euclin.grammar.EuclinBaseVisitor
-import org.jglrxavpok.euclin.grammar.EuclinParser
-import org.jglrxavpok.euclin.lambda.LambdaCompiler
-import org.jglrxavpok.euclin.types.*
+import euclin.compiler.grammar.EuclinBaseVisitor
+import euclin.compiler.grammar.EuclinParser
+import euclin.compiler.types.*
+import euclin.compiler.lambda.LambdaCompiler
 import org.objectweb.asm.*
 import org.objectweb.asm.Opcodes.*
 import java.util.*
@@ -138,7 +138,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         val returnType = function.expression.type
 
         // si l'expression n'est que '_', on change le nom
-        val name = LambdaCompiler.generateLambdaName(functionExpression)+"\$constant"
+        val name = LambdaCompiler.Companion.generateLambdaName(functionExpression) +"\$constant"
         val lambdaSignature = FunctionSignature(name, listOf(Argument("_", RealType)), returnType, functionSignature.ownerClass)
         val functionBody = generateLambdaBody(functionExpression)
 

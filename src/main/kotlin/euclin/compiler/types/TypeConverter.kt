@@ -1,10 +1,10 @@
-package org.jglrxavpok.euclin.types
+package euclin.compiler.types
 
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
-import org.jglrxavpok.euclin.grammar.EuclinBaseVisitor
-import org.jglrxavpok.euclin.grammar.EuclinParser
+import euclin.compiler.grammar.EuclinBaseVisitor
+import euclin.compiler.grammar.EuclinParser
 
 object TypeConverter: EuclinBaseVisitor<TypeDefinition>() {
 

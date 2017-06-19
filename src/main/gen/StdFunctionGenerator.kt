@@ -1,7 +1,7 @@
+import euclin.compiler.types.*
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TypeDefinition
-import org.jglrxavpok.euclin.types.basicType
-import org.jglrxavpok.euclin.types.*
+import euclin.compiler.types.basicType
 import java.io.File
 import java.io.FileWriter
 

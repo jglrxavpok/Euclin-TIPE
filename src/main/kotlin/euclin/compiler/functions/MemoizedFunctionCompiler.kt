@@ -1,9 +1,10 @@
-package org.jglrxavpok.euclin.functions
+package euclin.compiler.functions
 
+import euclin.compiler.FunctionCompiler
+import euclin.compiler.FunctionSignature
 import org.jglr.inference.types.TypeDefinition
-import org.jglrxavpok.euclin.*
-import org.jglrxavpok.euclin.grammar.EuclinParser
-import org.jglrxavpok.euclin.types.*
+import euclin.compiler.grammar.EuclinParser
+import euclin.compiler.types.*
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor

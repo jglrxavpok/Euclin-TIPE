@@ -1,12 +1,12 @@
-package org.jglrxavpok.euclin.lambda
+package euclin.compiler.lambda
 
-import org.jglrxavpok.euclin.Argument
-import org.jglrxavpok.euclin.FunctionCompiler
-import org.jglrxavpok.euclin.FunctionSignature
-import org.jglrxavpok.euclin.grammar.EuclinBaseVisitor
-import org.jglrxavpok.euclin.grammar.EuclinParser
-import org.jglrxavpok.euclin.types.ExpressionTranslator
-import org.jglrxavpok.euclin.types.RealType
+import euclin.compiler.Argument
+import euclin.compiler.FunctionCompiler
+import euclin.compiler.FunctionSignature
+import euclin.compiler.grammar.EuclinBaseVisitor
+import euclin.compiler.grammar.EuclinParser
+import euclin.compiler.types.ExpressionTranslator
+import euclin.compiler.types.RealType
 import org.objectweb.asm.ClassWriter
 
 class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val availableFunctions: Map<String, FunctionSignature>):
@@ -63,7 +63,7 @@ class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val a
 
         fun generateLambdaName(functionExpression: EuclinParser.ExpressionContext): String {
             // si l'expression n'est que '_', on change le nom
-            val name = if (functionExpression.text.trim() == "_") "lambda\$identity" else "lambda\$$lambdaID"
+            val name = if (functionExpression.text.trim() == "_") "lambda\$identity" else "lambda\$${lambdaID}"
             lambdaID++
             return name
         }

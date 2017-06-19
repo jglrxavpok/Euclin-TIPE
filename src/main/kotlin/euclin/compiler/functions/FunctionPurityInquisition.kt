@@ -1,8 +1,8 @@
-package org.jglrxavpok.euclin.functions
+package euclin.compiler.functions
 
-import org.jglrxavpok.euclin.FunctionSignature
-import org.jglrxavpok.euclin.grammar.EuclinBaseVisitor
-import org.jglrxavpok.euclin.grammar.EuclinParser
+import euclin.compiler.FunctionSignature
+import euclin.compiler.grammar.EuclinBaseVisitor
+import euclin.compiler.grammar.EuclinParser
 
 /**
  * Vérifie qu'une fonction est bien pure, quand elle l'indique.

@@ -1,12 +1,12 @@
-package org.jglrxavpok.euclin.types
+package euclin.compiler.types
 
 import org.jglr.inference.TypeInferer
 import org.jglr.inference.expressions.*
 import org.jglr.inference.expressions.Function
 import org.jglr.inference.types.TypeDefinition
-import org.jglrxavpok.euclin.FunctionSignature
-import org.jglrxavpok.euclin.grammar.EuclinBaseVisitor
-import org.jglrxavpok.euclin.grammar.EuclinParser
+import euclin.compiler.FunctionSignature
+import euclin.compiler.grammar.EuclinBaseVisitor
+import euclin.compiler.grammar.EuclinParser
 
 class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature>) : EuclinBaseVisitor<Expression>() {
 

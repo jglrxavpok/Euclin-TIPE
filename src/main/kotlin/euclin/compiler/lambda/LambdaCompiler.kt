@@ -27,7 +27,7 @@ class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val a
 
         // on ne compile pas deux fois la même fonction!
         if(alreadyCompiled.containsKey(functionExpression.text)) {
-            resultMap[functionExpression.text] = alreadyCompiled[functionExpression.text]!!
+            resultMap[functionExpression.text] = alreadyCompiled[functionExpression.text] ?: error("Pas de lambda correspondant à ${functionExpression.text}")
             return alreadyCompiled[functionExpression.text]
         }
         val function = translator.translateLambdaExpression(functionExpression)
@@ -63,7 +63,7 @@ class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val a
 
         fun generateLambdaName(functionExpression: EuclinParser.ExpressionContext): String {
             // si l'expression n'est que '_', on change le nom
-            val name = if (functionExpression.text.trim() == "_") "lambda\$identity" else "lambda\$${lambdaID}"
+            val name = if (functionExpression.text.trim() == "_") "lambda\$identity" else "lambda\$$lambdaID"
             lambdaID++
             return name
         }

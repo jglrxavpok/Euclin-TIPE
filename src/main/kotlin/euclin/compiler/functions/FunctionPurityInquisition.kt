@@ -15,7 +15,8 @@ class FunctionPurityInquisition(val availableFunctions: Map<String, FunctionSign
     }
 
     override fun visitFunctionCall(call: EuclinParser.FunctionCallContext): Boolean {
-        val signature = availableFunctions[call.Identifier().text]!!
+        val name = call.Identifier().text
+        val signature = availableFunctions[name] ?: error("Pas de fonction trouvée avec le nom $name")
         return signature.pure && call.expression().all { visit(it) }
     }
 }

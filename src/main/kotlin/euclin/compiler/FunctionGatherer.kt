@@ -12,7 +12,10 @@ class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignat
     fun gather(code: EuclinParser.CodeBlockContext): Map<String, FunctionSignature> {
         val result = hashMapOf<String, FunctionSignature>()
         code.instructions().filterIsInstance<EuclinParser.DeclareFuncInstructionContext>().map { it.functionDeclaration() }  // on récupére les déclarations de fonctions
-                .forEach { result[it.Identifier().text] = visit(it) } // on assigne à chaque nom de fonction sa signature
+                .forEach {
+                    val name = it.Identifier().text
+                    result[name] = visit(it)
+                } // on assigne à chaque nom de fonction sa signature
         return result
     }
 

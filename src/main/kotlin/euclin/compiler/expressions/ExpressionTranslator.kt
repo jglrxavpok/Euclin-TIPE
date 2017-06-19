@@ -20,12 +20,14 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
     val variableTypes = hashMapOf<String, TypeDefinition>()
 
     init {
-        // Ceci rajoute un nouveau type d'expression à l'inféreur de types: les comparaisons entre deux valeurs (<, <=, >, >=, ==, !=)
-        inferer.defineProcessingOf<ComparisonExpression> {
-            inferer.infer(it.left)
-            inferer.infer(it.right)
-            if(it.left.type != it.right.type) { // on vérifie que les deux membres sont bien du même type
-                throw ImpossibleUnificationExpression("Les comparaisons doivent être faites avec des termes de même type! (${it.left.type} != ${it.right.type})")
+        with(inferer) {
+            // Ceci rajoute un nouveau type d'expression à l'inféreur de types: les comparaisons entre deux valeurs (<, <=, >, >=, ==, !=)
+            defineProcessingOf<ComparisonExpression> {
+                infer(it.left)
+                infer(it.right)
+                if(it.left.type != it.right.type) { // on vérifie que les deux membres sont bien du même type
+                    throw ImpossibleUnificationExpression("Les comparaisons doivent être faites avec des termes de même type! (${it.left.type} != ${it.right.type})")
+                }
             }
         }
     }
@@ -53,7 +55,7 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
         val call = ctx.functionCall()
         val arguments = call.expression().map { visit(it) }
         val funcName = call.Identifier().text
-        val signature = availableFunctions[funcName]!!
+        val signature = availableFunctions[funcName] ?: error("Pas de fonction trouvée pour le nom $funcName")
         val f = function(signature)
         if(arguments.size == 1)
             return f(arguments[0])
@@ -71,9 +73,9 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
     override fun visitVarExpr(ctx: EuclinParser.VarExprContext): Expression {
         val name = ctx.Identifier().text
         if(variableTypes.containsKey(name)) // est-ce une variable locale ?
-            return Variable(name) of variableTypes[name]!!
+            return Variable(name) of (variableTypes[name] ?: error("Pas de variable trouvée avec le nom $name"))
         else if(availableFunctions.containsKey(name)) // est-ce une fonction ?
-            return function(availableFunctions[name]!!)
+            return function(availableFunctions[name] ?: error("Pas de variable trouvée avec le nom $name"))
         else
             error("Unknown variable $name") // non c'est un symbole inconnu!
     }

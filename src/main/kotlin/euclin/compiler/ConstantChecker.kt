@@ -20,7 +20,8 @@ class ConstantChecker(val availableFunctions: Map<String, FunctionSignature>): E
     }
 
     override fun visitFunctionCall(call: EuclinParser.FunctionCallContext): Boolean {
-        val signature = availableFunctions[call.Identifier().text]!!
+        val name = call.Identifier().text
+        val signature = availableFunctions[name] ?: error("Aucune fonction correspondant à $name")
         return signature.pure && call.expression().all { visit(it) }
     }
 
@@ -33,6 +34,10 @@ class ConstantChecker(val availableFunctions: Map<String, FunctionSignature>): E
     }
 
     override fun visitIntExpr(ctx: EuclinParser.IntExprContext?): Boolean {
+        return true
+    }
+
+    override fun visitStringExpr(ctx: EuclinParser.StringExprContext?): Boolean {
         return true
     }
 

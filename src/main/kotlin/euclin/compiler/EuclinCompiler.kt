@@ -18,6 +18,7 @@ object EuclinCompiler {
     val OBJECT_TYPE = ASMType.getType(Object::class.java)
 
     fun compile(sourceCode: String, filename: String): ByteArray {
+        val startTime = System.nanoTime()
         val classWriter = ClassWriter(ClassWriter.COMPUTE_FRAMES) // laisse ASM générer les frames et maxs
         val className = filename.substringAfterLast(File.separator).substringBefore(".") // dernier fichier du chemin et on retire l'extension
         val classType = ASMType.getObjectType(className)
@@ -47,6 +48,9 @@ object EuclinCompiler {
         // TODO
 
         classWriter.visitEnd()
+        val endTime = System.nanoTime()
+        val elapsedTime = (endTime - startTime) / 1000000.0f
+        println("Compiled $filename in $elapsedTime ms")
         return classWriter.toByteArray()
     }
 

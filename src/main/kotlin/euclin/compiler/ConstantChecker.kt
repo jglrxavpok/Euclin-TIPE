@@ -25,6 +25,14 @@ class ConstantChecker(val availableFunctions: Map<String, FunctionSignature>): E
         return signature.pure && call.expression().all { visit(it) }
     }
 
+    override fun visitCoupleExpr(ctx: EuclinParser.CoupleExprContext): Boolean {
+        return visit(ctx.couple())
+    }
+
+    override fun visitCouple(ctx: EuclinParser.CoupleContext): Boolean {
+        return visit(ctx.expression(0)) && visit(ctx.expression(1))
+    }
+
     override fun visitLambdaVarExpr(ctx: EuclinParser.LambdaVarExprContext?): Boolean {
         return false
     }
@@ -39,6 +47,50 @@ class ConstantChecker(val availableFunctions: Map<String, FunctionSignature>): E
 
     override fun visitStringExpr(ctx: EuclinParser.StringExprContext?): Boolean {
         return true
+    }
+
+    override fun visitSubExpr(ctx: EuclinParser.SubExprContext): Boolean {
+        return visit(ctx.expression(0)) && visit(ctx.expression(1))
+    }
+
+    override fun visitGreaterExpr(ctx: EuclinParser.GreaterExprContext): Boolean {
+        return visit(ctx.expression(0)) && visit(ctx.expression(1))
+    }
+
+    override fun visitGreaterEqualExpr(ctx: EuclinParser.GreaterEqualExprContext): Boolean {
+        return visit(ctx.expression(0)) && visit(ctx.expression(1))
+    }
+
+    override fun visitAddExpr(ctx: EuclinParser.AddExprContext): Boolean {
+        return visit(ctx.expression(0)) && visit(ctx.expression(1))
+    }
+
+    override fun visitWrappedExpr(ctx: EuclinParser.WrappedExprContext): Boolean {
+        return visit(ctx.expression())
+    }
+
+    override fun visitLessExpr(ctx: EuclinParser.LessExprContext): Boolean {
+        return visit(ctx.expression(0)) && visit(ctx.expression(1))
+    }
+
+    override fun visitLessEqualExpr(ctx: EuclinParser.LessEqualExprContext): Boolean {
+        return visit(ctx.expression(0)) && visit(ctx.expression(1))
+    }
+
+    override fun visitDivExpr(ctx: EuclinParser.DivExprContext): Boolean {
+        return visit(ctx.expression(0)) && visit(ctx.expression(1))
+    }
+
+    override fun visitUnitExpr(ctx: EuclinParser.UnitExprContext): Boolean {
+        return true
+    }
+
+    override fun visitEquality(ctx: EuclinParser.EqualityContext): Boolean {
+        return visit(ctx.expression(0)) && visit(ctx.expression(1))
+    }
+
+    override fun visitInequality(ctx: EuclinParser.InequalityContext): Boolean {
+        return visit(ctx.expression(0)) && visit(ctx.expression(1))
     }
 
     override fun aggregateResult(aggregate: Boolean, nextResult: Boolean): Boolean {

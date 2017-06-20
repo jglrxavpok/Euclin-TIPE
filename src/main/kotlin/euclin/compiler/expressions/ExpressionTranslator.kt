@@ -9,6 +9,7 @@ import euclin.compiler.compileError
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
+import org.antlr.v4.runtime.ParserRuleContext
 import org.jglr.inference.ImpossibleUnificationExpression
 
 class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature>) : EuclinBaseVisitor<Expression>() {
@@ -18,6 +19,7 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
     private val False = Literal(false, BooleanType)
     private val UnitValue = Literal(Unit, UnitType)
     private val inferer = TypeInferer()
+    private val alreadyTranslated = hashMapOf<ParserRuleContext, Expression>()
     val variableTypes = hashMapOf<String, TypeDefinition>()
 
     init {
@@ -43,6 +45,8 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
     }
 
     fun translate(ctx: EuclinParser.ExpressionContext): Expression {
+        if(alreadyTranslated.containsKey(ctx)) // on évite de recalculer les résultats
+            return alreadyTranslated[ctx]!!
         val result = visit(ctx)
         inferer.infer(result)
         return result

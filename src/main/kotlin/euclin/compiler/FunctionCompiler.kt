@@ -111,6 +111,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
                             val constantExpr = call.expression(index)
                             compileMethodReference(createConstantFunction(constantExpr)) // alors on référence la fonction correspondant
                             actuallyValid = true
+                            typeStack.pop() // on retire l'argument de la pile
                         }
                     }
                     if(!actuallyValid)
@@ -142,23 +143,11 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         // si l'expression n'est que '_', on change le nom
         val name = LambdaCompiler.Companion.generateLambdaName(functionExpression) +"\$constant"
         val lambdaSignature = FunctionSignature(name, listOf(Argument("_", RealType)), returnType, functionSignature.ownerClass)
-        val functionBody = generateLambdaBody(functionExpression)
+        val functionBody = LambdaCompiler.generateLambdaBody(functionExpression)
 
         val funcCompiler = FunctionCompiler(classWriter, lambdaSignature, availableFunctions, lambdaExpressions)
         funcCompiler.visitFunctionCodeBlock(functionBody)
         return lambdaSignature
-    }
-
-    fun generateLambdaBody(instruction: EuclinParser.ExpressionContext): EuclinParser.FunctionCodeBlockContext {
-        val result = EuclinParser.FunctionCodeBlockContext(null, -1)
-        val instructions = EuclinParser.FunctionInstructionsContext()
-        result.addChild(instructions)
-
-        val returnInstructionWrapper = EuclinParser.ReturnFuncInstructionContext(instructions)
-        returnInstructionWrapper.addChild(instruction)
-
-        instructions.addChild(returnInstructionWrapper)
-        return result
     }
 
     override fun visitLambdaVarExpr(ctx: EuclinParser.LambdaVarExprContext?) {
@@ -210,7 +199,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         if(inferredType > functionSignature.returnType)
             compileError("La valeur de retour n'est pas compatible avec celui de la signature de la fonction ($inferredType > ${functionSignature.returnType})", functionSignature.ownerClass, ctx)
         writer.visitInsn(correctOpcode(IRETURN, functionSignature.returnType))
-        compileAssert(typeStack.isEmpty(), functionSignature.ownerClass, ctx) { "La pile n'était pas vide au retour" }
+        compileAssert(typeStack.isEmpty(), functionSignature.ownerClass, ctx) { "La pile n'était pas vide au retour, il reste au moins: ${typeStack.peek()}" }
     }
 
     override fun visitFunctionCodeBlock(ctx: EuclinParser.FunctionCodeBlockContext) {
@@ -254,7 +243,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
                             }
                         } else { // si on est pas une instruction 'return' et que le stack est vide
                             compileAssert(functionSignature.returnType == UnitType, functionSignature.ownerClass, ctx)
-                                { "Aucune valeur renvoyée pour une fonction qui n'est pas une 'Unit function'!" }
+                                { "Aucune valeur renvoyée pour une fonction qui n'est pas une 'Unit function'! ${it.text} ${it.javaClass} ${ctx.text}" }
                             loadUnitOnStack()
                             writer.visitInsn(ARETURN) // on renvoit le Unit
                         }
@@ -346,6 +335,11 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
                 // renvoi du résultat
                 visitMethodInsn(INVOKESPECIAL, stringBuilderInternalName, "toString", "()Ljava/lang/String;", false)
             }
+
+            // on retire les termes du stack
+            typeStack.pop()
+            typeStack.pop()
+            typeStack.push(StringType)
         } else {
             compileOperation(left, right, IADD, "plus")
         }
@@ -437,7 +431,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
     override fun visitWhileLoopInstruction(ctx: EuclinParser.WhileLoopInstructionContext) {
         val conditionExpr = ctx.expression()
         val condition = translator.translate(conditionExpr)
-        compileAssert(condition.type != BooleanType, functionSignature.ownerClass, ctx) { "La condition doit être un booléen!" }
+        compileAssert(condition.type == BooleanType, functionSignature.ownerClass, ctx) { "La condition doit être un booléen!" }
         val code = ctx.instructions()
         val conditionLabel = Label()
         val endLabel = Label()

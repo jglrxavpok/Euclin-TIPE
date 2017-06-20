@@ -46,18 +46,6 @@ class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val a
         return lambdaSignature
     }
 
-    fun generateLambdaBody(instruction: EuclinParser.ExpressionContext): EuclinParser.FunctionCodeBlockContext {
-        val result = EuclinParser.FunctionCodeBlockContext(null, -1)
-        val instructions = EuclinParser.FunctionInstructionsContext()
-        result.addChild(instructions)
-
-        val returnInstructionWrapper = EuclinParser.ReturnFuncInstructionContext(instructions)
-        returnInstructionWrapper.addChild(instruction)
-
-        instructions.addChild(returnInstructionWrapper)
-        return result
-    }
-
     companion object {
 
         private var lambdaID = 1
@@ -67,6 +55,18 @@ class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val a
             val name = if (functionExpression.text.trim() == "_") "lambda\$identity" else "lambda\$$lambdaID"
             lambdaID++
             return name
+        }
+
+        fun generateLambdaBody(instruction: EuclinParser.ExpressionContext): EuclinParser.FunctionCodeBlockContext {
+            val result = EuclinParser.FunctionCodeBlockContext(null, 0)
+            val instructions = EuclinParser.FunctionInstructionsContext()
+            //result.addChild(instructions)
+
+            val returnInstructionWrapper = EuclinParser.ReturnFuncInstructionContext(instructions)
+            returnInstructionWrapper.addChild(instruction)
+
+            result.addChild(returnInstructionWrapper)
+            return result
         }
     }
 }

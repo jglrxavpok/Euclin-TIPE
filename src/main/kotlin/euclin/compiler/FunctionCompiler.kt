@@ -69,7 +69,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         val leftType = translator.translate(left).type
         val rightType = translator.translate(right).type
 
-        assert(rightType == leftType) { "Les éléments d'un couple doivent avoir le même type!" }
+        compileAssert(rightType == leftType, functionSignature.ownerClass, ctx) { "Les éléments d'un couple doivent avoir le même type!" }
 
         // TODO: autres types
         // crée un nouvel objet couple:
@@ -91,7 +91,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
     }
 
     override fun visitFunctionDeclaration(ctx: EuclinParser.FunctionDeclarationContext) {
-        error("Il est interdit d'avoir des déclarations de fonctions dans des fonctions!")
+        compileError("Il est interdit d'avoir des déclarations de fonctions dans des fonctions!", functionSignature.ownerClass, ctx)
     }
 
     override fun visitFunctionCall(call: EuclinParser.FunctionCallContext) {
@@ -114,7 +114,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
                         }
                     }
                     if(!actuallyValid)
-                        error("Appel d'une fonction avec le mauvais type d'arguments! $expected != $actual dans ${call.text} pour l'argument $argName")
+                        compileError("Appel d'une fonction avec le mauvais type d'arguments! $expected != $actual dans ${call.text} pour l'argument $argName", functionSignature.ownerClass, argumentContext)
                 } else {
                     visit(argumentContext) // compile l'argument
                     typeStack.pop() // on retire directement car on s'en fiche en fait ici
@@ -208,9 +208,9 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         super.visitReturnFuncInstruction(ctx) // compile l'expression
         val inferredType = typeStack.pop()
         if(inferredType > functionSignature.returnType)
-            error("La valeur de retour n'est pas compatible avec celui de la signature de la fonction ($inferredType > ${functionSignature.returnType})")
+            compileError("La valeur de retour n'est pas compatible avec celui de la signature de la fonction ($inferredType > ${functionSignature.returnType})", functionSignature.ownerClass, ctx)
         writer.visitInsn(correctOpcode(IRETURN, functionSignature.returnType))
-        assert(typeStack.isEmpty()) { "La pile n'était pas vide au retour" }
+        compileAssert(typeStack.isEmpty(), functionSignature.ownerClass, ctx) { "La pile n'était pas vide au retour" }
     }
 
     override fun visitFunctionCodeBlock(ctx: EuclinParser.FunctionCodeBlockContext) {
@@ -234,7 +234,8 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
                 if(index == lastIndex) {
                     if(it !is EuclinParser.ReturnFuncInstructionContext) {
                         if(typeStack.isNotEmpty()) {
-                            assert(typeStack.size == 1) { "Il ne doit y avoir qu'une seule valeur sur le stack pour insérer automatiquement un 'return'!" }
+                            compileAssert(typeStack.size == 1, functionSignature.ownerClass, it)
+                                { "Il ne doit y avoir qu'une seule valeur sur le stack pour insérer automatiquement un 'return'!" }
                             val expected = functionSignature.returnType
                             val actual = typeStack.pop() // on retire l'élement de la pile
 
@@ -246,13 +247,14 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
                                     loadUnitOnStack()
                                     writer.visitInsn(ARETURN)
                                 } else {
-                                    error("Incompatibilité de types lors de l'insertion automatique de 'return' $expected != $actual (${functionSignature.name})")
+                                    compileError("Incompatibilité de types lors de l'insertion automatique de 'return' $expected != $actual (${functionSignature.name})", functionSignature.ownerClass, it)
                                 }
                             } else { // tout va bien
                                 writer.visitInsn(correctOpcode(IRETURN, functionSignature.returnType))
                             }
                         } else { // si on est pas une instruction 'return' et que le stack est vide
-                            assert(functionSignature.returnType == UnitType) { "Aucune valeur renvoyée pour une fonction qui n'est pas une 'Unit function'!" }
+                            compileAssert(functionSignature.returnType == UnitType, functionSignature.ownerClass, ctx)
+                                { "Aucune valeur renvoyée pour une fonction qui n'est pas une 'Unit function'!" }
                             loadUnitOnStack()
                             writer.visitInsn(ARETURN) // on renvoit le Unit
                         }
@@ -382,7 +384,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
             // cet appel de fonction fonctionne car l'instance de l'objet sur laquelle on agit est considérée comme 'left'
             RealPointType -> writer.visitMethodInsn(INVOKEVIRTUAL, "euclin/std/RealPoint", functionName, "(Leuclin/std/RealPoint;)Leuclin/std/RealPoint;", false)
             IntPointType -> writer.visitMethodInsn(INVOKEVIRTUAL, "euclin/std/IntPoint", functionName, "(Leuclin/std/IntPoint;)Leuclin/std/IntPoint;", false)
-            else -> error("Impossible d'ajouter deux valeurs du type ${leftExpr.type}")
+            else -> compileError("Impossible d'ajouter deux valeurs du type ${leftExpr.type}", functionSignature.ownerClass, left)
         }
 
         // on retire les termes
@@ -396,7 +398,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         // FIXME: Créer des fields pour la méthode principale à la place de variables locales
         val name = ctx.Identifier().text
         if(localVariableIDs.containsKey(name))
-            error("Il y a déjà une variable appelée $name!")
+            compileError("Il y a déjà une variable appelée $name!", functionSignature.ownerClass, ctx)
 
         val expression = ctx.expression()
         val value = translator.translate(expression)
@@ -414,7 +416,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         val expression = ctx.expression()
         val value = translator.translate(expression)
         val localType = localVariableTypes[name]!!
-        assert(localType >= value.type) { "Impossible de stocker une valeur de type ${value.type} dans une variable de type $localType" }
+        compileAssert(localType >= value.type, functionSignature.ownerClass, ctx) { "Impossible de stocker une valeur de type ${value.type} dans une variable de type $localType" }
 
         val varID = localVariableIDs[name]!!
         storeValue(expression, localType, varID)
@@ -435,7 +437,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
     override fun visitWhileLoopInstruction(ctx: EuclinParser.WhileLoopInstructionContext) {
         val conditionExpr = ctx.expression()
         val condition = translator.translate(conditionExpr)
-        assert(condition.type != BooleanType) { "La condition doit être un booléen!" }
+        compileAssert(condition.type != BooleanType, functionSignature.ownerClass, ctx) { "La condition doit être un booléen!" }
         val code = ctx.instructions()
         val conditionLabel = Label()
         val endLabel = Label()
@@ -472,7 +474,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
     override fun visitIfBranchingInstruction(ctx: EuclinParser.IfBranchingInstructionContext) {
         val conditionExpr = ctx.expression()
         val condition = translator.translate(conditionExpr)
-        assert(condition.type != BooleanType) { "La condition doit être un booléen!" }
+        compileAssert(condition.type == BooleanType, functionSignature.ownerClass, ctx) { "La condition doit être un booléen!" }
         val code = ctx.instructions()
         val endLabel = Label()
         val elseStartLabel = Label()
@@ -501,7 +503,8 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
     private fun compare(left: EuclinParser.ExpressionContext, right: EuclinParser.ExpressionContext, jumpOpcode: Int) {
         val valueType = translator.translate(left).type
 
-        assert(valueType == RealType || valueType == IntType || valueType == StringType) { "On ne peut comparer que les types String, Int et Real!" }
+        compileAssert(valueType == RealType || valueType == IntType || valueType == StringType, functionSignature.ownerClass, left)
+            { "On ne peut comparer que les types String, Int et Real!" }
 
         val trueLabel = Label()
         val endLabel = Label()

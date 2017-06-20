@@ -1,6 +1,7 @@
 package euclin.compiler.functions
 
 import euclin.compiler.FunctionSignature
+import euclin.compiler.compileError
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 
@@ -16,7 +17,7 @@ class FunctionPurityInquisition(val availableFunctions: Map<String, FunctionSign
 
     override fun visitFunctionCall(call: EuclinParser.FunctionCallContext): Boolean {
         val name = call.Identifier().text
-        val signature = availableFunctions[name] ?: error("Pas de fonction trouvée avec le nom $name")
+        val signature = availableFunctions[name] ?: compileError("Pas de fonction trouvée avec le nom $name", "?", call)
         return signature.pure && call.expression().all { visit(it) }
     }
 }

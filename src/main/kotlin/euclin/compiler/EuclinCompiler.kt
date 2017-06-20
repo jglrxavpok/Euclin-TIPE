@@ -98,14 +98,14 @@ object EuclinCompiler {
             // (ne devrait jamais arriver)
 
             if(modifiersHave(func, "pure") && modifiersHave(func, "impure")) {
-                error("A function cannot be both pure and impure")
+                compileError("A function cannot be both pure and impure", signature.ownerClass, func)
             }
 
             val isPure = inquisition.visit(func)
             signature.pure = isPure
             if(modifiersHave(func, "pure")) {
                 if( ! isPure) {
-                    error("Function '$funcName' is declared pure but is not")
+                    compileError("Function '$funcName' is declared pure but is not", signature.ownerClass, func)
                 }
             }
             if(modifiersHave(func, "impure")) {

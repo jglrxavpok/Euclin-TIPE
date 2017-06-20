@@ -5,6 +5,7 @@ import org.jglr.inference.expressions.*
 import org.jglr.inference.expressions.Function
 import org.jglr.inference.types.TypeDefinition
 import euclin.compiler.FunctionSignature
+import euclin.compiler.compileError
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
@@ -55,7 +56,7 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
         val call = ctx.functionCall()
         val arguments = call.expression().map { visit(it) }
         val funcName = call.Identifier().text
-        val signature = availableFunctions[funcName] ?: error("Pas de fonction trouvée pour le nom $funcName")
+        val signature = availableFunctions[funcName] ?: compileError("Pas de fonction trouvée pour le nom $funcName", "?", ctx)
         val f = function(signature)
         if(arguments.size == 1)
             return f(arguments[0])
@@ -73,11 +74,11 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
     override fun visitVarExpr(ctx: EuclinParser.VarExprContext): Expression {
         val name = ctx.Identifier().text
         if(variableTypes.containsKey(name)) // est-ce une variable locale ?
-            return Variable(name) of (variableTypes[name] ?: error("Pas de variable trouvée avec le nom $name"))
+            return Variable(name) of (variableTypes[name] ?: compileError("Pas de variable trouvée avec le nom $name", "?", ctx))
         else if(availableFunctions.containsKey(name)) // est-ce une fonction ?
-            return function(availableFunctions[name] ?: error("Pas de variable trouvée avec le nom $name"))
+            return function(availableFunctions[name] ?: compileError("Pas de variable trouvée avec le nom $name", "?", ctx))
         else
-            error("Unknown variable $name") // non c'est un symbole inconnu!
+            compileError("Unknown variable $name", "?", ctx) // non c'est un symbole inconnu!
     }
 
     override fun visitIntExpr(ctx: EuclinParser.IntExprContext): Expression {

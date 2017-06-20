@@ -1,5 +1,6 @@
 package euclin.compiler.types
 
+import euclin.compiler.compileAssert
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
@@ -24,7 +25,7 @@ object TypeConverter: EuclinBaseVisitor<TypeDefinition>() {
         val right = visit(ctx.type(1))
 
         // TODO: Supporter plus que ces types
-        assert(left == right) { "Les deux types d'un couple doivent être les mêmes (pour l'instant)" }
+        compileAssert(left == right, "?", ctx) { "Les deux types d'un couple doivent être les mêmes (pour l'instant)" }
         if(left == IntType)
             return IntPointType
         return RealPointType

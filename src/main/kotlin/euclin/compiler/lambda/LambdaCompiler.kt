@@ -3,6 +3,7 @@ package euclin.compiler.lambda
 import euclin.compiler.Argument
 import euclin.compiler.FunctionCompiler
 import euclin.compiler.FunctionSignature
+import euclin.compiler.compileError
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.expressions.ExpressionTranslator
@@ -27,7 +28,7 @@ class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val a
 
         // on ne compile pas deux fois la même fonction!
         if(alreadyCompiled.containsKey(functionExpression.text)) {
-            resultMap[functionExpression.text] = alreadyCompiled[functionExpression.text] ?: error("Pas de lambda correspondant à ${functionExpression.text}")
+            resultMap[functionExpression.text] = alreadyCompiled[functionExpression.text] ?: compileError("Pas de lambda correspondant à ${functionExpression.text}", ownerClass, ctx)
             return alreadyCompiled[functionExpression.text]
         }
         val function = translator.translateLambdaExpression(functionExpression)

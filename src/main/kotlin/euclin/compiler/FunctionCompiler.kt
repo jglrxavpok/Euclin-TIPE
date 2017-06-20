@@ -458,7 +458,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
             // on vide le stack si nécessaire
             if (typeStack.isNotEmpty()) {
-                assert(typeStack.size == 1) { "Il ne doit y avoir qu'une seule valeur sur le stack à la fin d'une instruction!" }
+                compileAssert(typeStack.size == 1, functionSignature.ownerClass, instruction) { "Il ne doit y avoir qu'une seule valeur sur le stack à la fin d'une instruction!" }
                 typeStack.pop()
                 writer.visitInsn(POP)
             }
@@ -594,22 +594,26 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
             // on utilise la méthode de comparaison de la classe String
             visitMethodInsn(INVOKEINTERFACE, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", true)
-            if(negate) {
-                val negateEnd = Label()
-                val branchFalse = Label()
-                visitJumpInsn(IFNE, branchFalse)
-                loadBooleanRaw(true)
-                visitJumpInsn(GOTO, negateEnd)
-
-                visitLabel(branchFalse)
-                loadBooleanRaw(false)
-                visitLabel(negateEnd)
-            }
+            if(negate)
+                negateBoolean()
         }
 
         typeStack.push(BooleanType)
     }
+
     // Fin des opérateurs de comparaison
+
+    private fun negateBoolean() {
+        val negateEnd = Label()
+        val branchFalse = Label()
+        writer.visitJumpInsn(IFNE, branchFalse)
+        loadBooleanRaw(true)
+        writer.visitJumpInsn(GOTO, negateEnd)
+
+        writer.visitLabel(branchFalse)
+        loadBooleanRaw(false)
+        writer.visitLabel(negateEnd)
+    }
 
     /**
      * Ne charge pas la valeur dans 'typeStack'

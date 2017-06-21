@@ -369,7 +369,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
     private fun compileOperation(left: EuclinParser.ExpressionContext, right: EuclinParser.ExpressionContext, opcode: Int, functionName: String) {
         val leftExpr = translator.translate(left)
         val rightExpr = translator.translate(right)
-        assert(leftExpr.type == rightExpr.type) { "Les valeurs doivent être du même type! ${leftExpr.type} != ${rightExpr.type}" }
+        compileAssert(leftExpr.type == rightExpr.type, functionSignature.ownerClass, left) { "Les valeurs doivent être du même type! ${leftExpr.type} != ${rightExpr.type}" }
         visit(left)
         visit(right)
         when(leftExpr.type) {

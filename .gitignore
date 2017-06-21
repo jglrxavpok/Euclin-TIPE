@@ -11,5 +11,5 @@ helloVk_original.frag.spv
 hs_err_*.log
 tests/
 
-runtime/
+runtime/tests/
 classes/

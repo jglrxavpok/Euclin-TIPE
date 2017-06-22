@@ -571,4 +571,28 @@ public interface EuclinListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCouple(EuclinParser.CoupleContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code DirectFunctionIdentifier}
+	 * labeled alternative in {@link EuclinParser#functionIdentifier}.
+	 * @param ctx the parse tree
+	 */
+	void enterDirectFunctionIdentifier(EuclinParser.DirectFunctionIdentifierContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code DirectFunctionIdentifier}
+	 * labeled alternative in {@link EuclinParser#functionIdentifier}.
+	 * @param ctx the parse tree
+	 */
+	void exitDirectFunctionIdentifier(EuclinParser.DirectFunctionIdentifierContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code MemberFunctionIdentifier}
+	 * labeled alternative in {@link EuclinParser#functionIdentifier}.
+	 * @param ctx the parse tree
+	 */
+	void enterMemberFunctionIdentifier(EuclinParser.MemberFunctionIdentifierContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code MemberFunctionIdentifier}
+	 * labeled alternative in {@link EuclinParser#functionIdentifier}.
+	 * @param ctx the parse tree
+	 */
+	void exitMemberFunctionIdentifier(EuclinParser.MemberFunctionIdentifierContext ctx);
 }

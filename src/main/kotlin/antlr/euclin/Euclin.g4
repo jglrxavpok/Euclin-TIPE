@@ -53,7 +53,7 @@ modifiers
     | Memoized;
 
 functionCall
-    : Identifier LeftBracket (expression (Comma expression)*)? RightBracket
+    : functionIdentifier LeftBracket (expression (Comma expression)*)? RightBracket
     ;
 
 variableDeclaration
@@ -101,6 +101,11 @@ expression
 
 couple
     : LeftBracket expression Comma expression RightBracket
+    ;
+
+functionIdentifier
+    : Identifier                                #DirectFunctionIdentifier
+    | Identifier (Period Identifier)+           #MemberFunctionIdentifier
     ;
 
 // Mots clés

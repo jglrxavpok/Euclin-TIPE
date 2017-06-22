@@ -1,5 +1,8 @@
-package euclin.compiler
+package euclin.compiler.functions
 
+import euclin.compiler.ConstantChecker
+import euclin.compiler.compileAssert
+import euclin.compiler.compileError
 import euclin.compiler.expressions.ExpressionTranslator
 import org.antlr.v4.runtime.tree.TerminalNode
 import org.jglr.inference.types.FunctionType
@@ -17,12 +20,12 @@ import java.lang.invoke.CallSite
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodType
 
-
 class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: FunctionSignature, val availableFunctions: Map<String, FunctionSignature>, val lambdaExpressions: Map<String, FunctionSignature>): EuclinBaseVisitor<Unit>() {
 
     private val writer: MethodVisitor
     private val translator = ExpressionTranslator(availableFunctions)
-    private val constantChecker = ConstantChecker(availableFunctions)
+    private val funcMatcher = FunctionMatcher(availableFunctions, translator)
+    private val constantChecker = ConstantChecker(availableFunctions, translator)
     private val typeStack = Stack<TypeDefinition>()
     private val localVariableIDs = hashMapOf<String, Int>()
     private val localVariableTypes = hashMapOf<String, TypeDefinition>()
@@ -96,7 +99,8 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
     override fun visitFunctionCall(call: EuclinParser.FunctionCallContext) {
         with(writer) {
-            val function = availableFunctions[call.Identifier().text] ?: error("Aucune fonction correspondante!")
+
+            val function = funcMatcher.visit(call.functionIdentifier())
 
             // on compile les arguments de la fonction
             for (index in 0 until function.arguments.size) {
@@ -141,7 +145,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         val returnType = function.expression.type
 
         // si l'expression n'est que '_', on change le nom
-        val name = LambdaCompiler.Companion.generateLambdaName(functionExpression) +"\$constant"
+        val name = LambdaCompiler.generateLambdaName(functionExpression) +"\$constant"
         val lambdaSignature = FunctionSignature(name, listOf(Argument("_", RealType)), returnType, functionSignature.ownerClass)
         val functionBody = LambdaCompiler.generateLambdaBody(functionExpression)
 

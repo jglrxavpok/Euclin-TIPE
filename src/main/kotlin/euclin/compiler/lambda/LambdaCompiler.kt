@@ -1,12 +1,12 @@
 package euclin.compiler.lambda
 
-import euclin.compiler.Argument
-import euclin.compiler.FunctionCompiler
-import euclin.compiler.FunctionSignature
+import euclin.compiler.functions.FunctionCompiler
+import euclin.compiler.functions.FunctionSignature
 import euclin.compiler.compileError
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.expressions.ExpressionTranslator
+import euclin.compiler.functions.Argument
 import euclin.compiler.types.RealType
 import org.objectweb.asm.ClassWriter
 

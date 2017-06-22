@@ -1,10 +1,10 @@
 package euclin.compiler
 
+import euclin.compiler.expressions.ExpressionTranslator
+import euclin.compiler.functions.*
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.jglr.inference.types.FunctionType
-import euclin.compiler.functions.MemoizedFunctionCompiler
-import euclin.compiler.functions.FunctionPurityInquisition
 import euclin.compiler.grammar.EuclinLexer
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
@@ -94,7 +94,9 @@ object EuclinCompiler {
     }
 
     private fun compileFunctions(classWriter: ClassWriter, code: EuclinParser.CodeBlockContext, availableFunctions: Map<String, FunctionSignature>, lambdaExpressions: Map<String, FunctionSignature>) {
-        val inquisition = FunctionPurityInquisition(availableFunctions)
+        val globalTranslator = ExpressionTranslator(availableFunctions) // TODO: Utiliser ce translator partout?
+        // TODO: Instaurer un système de contexte pour le 'translator' et 'availableFunctions'
+        val inquisition = FunctionPurityInquisition(availableFunctions, globalTranslator)
         val declarations = code.instructions().filterIsInstance<EuclinParser.DeclareFuncInstructionContext>().map { it.functionDeclaration() } // on récupére les déclarations de fonctions
         for(func in declarations) {
             val funcName = func.Identifier().text

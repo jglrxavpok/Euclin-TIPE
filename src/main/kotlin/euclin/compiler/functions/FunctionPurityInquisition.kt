@@ -1,7 +1,7 @@
 package euclin.compiler.functions
 
-import euclin.compiler.FunctionSignature
 import euclin.compiler.compileError
+import euclin.compiler.expressions.ExpressionTranslator
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 
@@ -9,15 +9,16 @@ import euclin.compiler.grammar.EuclinParser
  * Vérifie qu'une fonction est bien pure, quand elle l'indique.
  * Conditions: n'appeler que des fonctions elles-aussi pures
  */
-class FunctionPurityInquisition(val availableFunctions: Map<String, FunctionSignature>): EuclinBaseVisitor<Boolean>() {
+class FunctionPurityInquisition(val availableFunctions: Map<String, FunctionSignature>, val translator: ExpressionTranslator): EuclinBaseVisitor<Boolean>() {
+
+    private val funcMatcher = FunctionMatcher(availableFunctions, translator)
 
     override fun defaultResult(): Boolean {
         return true
     }
 
     override fun visitFunctionCall(call: EuclinParser.FunctionCallContext): Boolean {
-        val name = call.Identifier().text
-        val signature = availableFunctions[name] ?: compileError("Pas de fonction trouvée avec le nom $name", "?", call)
+        val signature = funcMatcher.visit(call.functionIdentifier())
         return signature.pure && call.expression().all { visit(it) }
     }
 }

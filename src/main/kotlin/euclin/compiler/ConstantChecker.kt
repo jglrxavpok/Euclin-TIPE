@@ -1,12 +1,18 @@
 package euclin.compiler
 
+import euclin.compiler.expressions.ExpressionTranslator
+import euclin.compiler.functions.FunctionMatcher
+import euclin.compiler.functions.FunctionSignature
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 
 /**
  * Vérifies si une expression donnée est constante (ie tous les appels de fonctions sont faits vers des fonctions *pures* et les arguments sont constants)
  */
-class ConstantChecker(val availableFunctions: Map<String, FunctionSignature>): EuclinBaseVisitor<Boolean>() {
+class ConstantChecker(val availableFunctions: Map<String, FunctionSignature>, val translator: ExpressionTranslator): EuclinBaseVisitor<Boolean>() {
+
+    private val funcMatcher = FunctionMatcher(availableFunctions, translator)
+
     fun assertConstant(constantExpr: EuclinParser.ExpressionContext) {
         compileAssert(visit(constantExpr), "?", constantExpr) { "L'expression '${constantExpr.text}' n'est pas une constante" }
     }
@@ -20,8 +26,7 @@ class ConstantChecker(val availableFunctions: Map<String, FunctionSignature>): E
     }
 
     override fun visitFunctionCall(call: EuclinParser.FunctionCallContext): Boolean {
-        val name = call.Identifier().text
-        val signature = availableFunctions[name] ?: error("Aucune fonction correspondant à $name")
+        val signature = funcMatcher.visit(call.functionIdentifier())
         return signature.pure && call.expression().all { visit(it) }
     }
 

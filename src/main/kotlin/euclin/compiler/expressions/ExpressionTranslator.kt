@@ -4,8 +4,9 @@ import org.jglr.inference.TypeInferer
 import org.jglr.inference.expressions.*
 import org.jglr.inference.expressions.Function
 import org.jglr.inference.types.TypeDefinition
-import euclin.compiler.FunctionSignature
+import euclin.compiler.functions.FunctionSignature
 import euclin.compiler.compileError
+import euclin.compiler.functions.FunctionMatcher
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
@@ -20,6 +21,7 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
     private val UnitValue = Literal(Unit, UnitType)
     private val inferer = TypeInferer()
     private val alreadyTranslated = hashMapOf<ParserRuleContext, Expression>()
+    private val funcMatcher = FunctionMatcher(availableFunctions, this)
     val variableTypes = hashMapOf<String, TypeDefinition>()
 
     init {
@@ -59,8 +61,7 @@ class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature
     override fun visitCallExpr(ctx: EuclinParser.CallExprContext): Expression {
         val call = ctx.functionCall()
         val arguments = call.expression().map { visit(it) }
-        val funcName = call.Identifier().text
-        val signature = availableFunctions[funcName] ?: compileError("Pas de fonction trouvée pour le nom $funcName", "?", ctx)
+        val signature = funcMatcher.visit(call.functionIdentifier())
         val f = function(signature)
         if(arguments.size == 1)
             return f(arguments[0])

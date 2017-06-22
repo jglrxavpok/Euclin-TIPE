@@ -1,7 +1,5 @@
 package euclin.compiler.functions
 
-import euclin.compiler.FunctionCompiler
-import euclin.compiler.FunctionSignature
 import org.jglr.inference.types.TypeDefinition
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*

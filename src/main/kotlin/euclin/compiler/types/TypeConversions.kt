@@ -1,6 +1,6 @@
 package euclin.compiler.types
 
-import euclin.compiler.Argument
+import euclin.compiler.functions.Argument
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition

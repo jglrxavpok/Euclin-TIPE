@@ -341,4 +341,18 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitCouple(EuclinParser.CoupleContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code DirectFunctionIdentifier}
+	 * labeled alternative in {@link EuclinParser#functionIdentifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDirectFunctionIdentifier(EuclinParser.DirectFunctionIdentifierContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code MemberFunctionIdentifier}
+	 * labeled alternative in {@link EuclinParser#functionIdentifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMemberFunctionIdentifier(EuclinParser.MemberFunctionIdentifierContext ctx);
 }

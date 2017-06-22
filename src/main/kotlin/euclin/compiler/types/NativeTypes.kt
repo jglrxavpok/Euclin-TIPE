@@ -48,10 +48,21 @@ class BasicType(private val toString: String): TypeDefinition() {
 }
 
 // Extensions pour définir une structure associée à un type
-fun TypeDefinition.listFields(): List<TypedMember> {
-    return emptyList()
+private val typeFields = hashMapOf<TypeDefinition, MutableList<TypedMember>>()
+private val typeMethods = hashMapOf<TypeDefinition, MutableList<FunctionSignature>>()
+
+fun TypeDefinition.listFields(): MutableList<TypedMember> {
+    if(this in typeFields)
+        return typeFields[this]!!
+    val list = mutableListOf<TypedMember>()
+    typeFields[this] = list
+    return list
 }
 
-fun TypeDefinition.listMethods(): List<FunctionSignature> {
-    return emptyList()
+fun TypeDefinition.listMethods(): MutableList<FunctionSignature> {
+    if(this in typeMethods)
+        return typeMethods[this]!!
+    val list = mutableListOf<FunctionSignature>()
+    typeMethods[this] = list
+    return list
 }

@@ -93,7 +93,7 @@ object EuclinCompiler {
         return lambdaCompiler.compileLambdas(code)
     }
 
-    private fun compileFunctions(classWriter: ClassWriter, code: EuclinParser.CodeBlockContext, availableFunctions: Map<String, FunctionSignature>, lambdaExpressions: Map<String, FunctionSignature>) {
+    private fun compileFunctions(classWriter: ClassWriter, code: EuclinParser.CodeBlockContext, availableFunctions: FunctionList, lambdaExpressions: Map<String, FunctionSignature>) {
         val globalTranslator = ExpressionTranslator(availableFunctions) // TODO: Utiliser ce translator partout?
         // TODO: Instaurer un système de contexte pour le 'translator' et 'availableFunctions'
         val inquisition = FunctionPurityInquisition(availableFunctions, globalTranslator)

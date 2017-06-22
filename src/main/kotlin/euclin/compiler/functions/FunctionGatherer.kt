@@ -1,5 +1,6 @@
 package euclin.compiler.functions
 
+import euclin.compiler.TypedMember
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
@@ -31,15 +32,6 @@ class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignat
         return TypeConverter.visit(type)
     }
 }
-
-/**
- * Un argument est un nom (String) + un type (String)
- */
-typealias TypedMember = Pair<String, TypeDefinition>
-val TypedMember.name
-    get() = this.first
-val TypedMember.type
-    get() = this.second
 
 // Définit la signature d'une fonction (nom, arguments, type de retour, la classe dans laquelle elle est et sa pureté)
 data class FunctionSignature(val name: String, val arguments: List<TypedMember>, val returnType: TypeDefinition, val ownerClass: String) {

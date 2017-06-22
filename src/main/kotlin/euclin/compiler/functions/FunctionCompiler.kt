@@ -1,8 +1,6 @@
 package euclin.compiler.functions
 
-import euclin.compiler.ConstantChecker
-import euclin.compiler.compileAssert
-import euclin.compiler.compileError
+import euclin.compiler.*
 import euclin.compiler.expressions.ExpressionTranslator
 import org.antlr.v4.runtime.tree.TerminalNode
 import org.jglr.inference.types.FunctionType
@@ -20,7 +18,7 @@ import java.lang.invoke.CallSite
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodType
 
-class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: FunctionSignature, val availableFunctions: Map<String, FunctionSignature>, val lambdaExpressions: Map<String, FunctionSignature>): EuclinBaseVisitor<Unit>() {
+class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: FunctionSignature, val availableFunctions: FunctionList, val lambdaExpressions: Map<String, FunctionSignature>): EuclinBaseVisitor<Unit>() {
 
     private val writer: MethodVisitor
     private val translator = ExpressionTranslator(availableFunctions)

@@ -1,16 +1,17 @@
 package euclin.compiler.lambda
 
+import euclin.compiler.FunctionList
+import euclin.compiler.TypedMember
 import euclin.compiler.functions.FunctionCompiler
 import euclin.compiler.functions.FunctionSignature
 import euclin.compiler.compileError
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.expressions.ExpressionTranslator
-import euclin.compiler.functions.TypedMember
 import euclin.compiler.types.RealType
 import org.objectweb.asm.ClassWriter
 
-class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val availableFunctions: Map<String, FunctionSignature>):
+class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val availableFunctions: FunctionList):
     EuclinBaseVisitor<FunctionSignature?>() {
 
     private var resultMap = hashMapOf<String, FunctionSignature>()

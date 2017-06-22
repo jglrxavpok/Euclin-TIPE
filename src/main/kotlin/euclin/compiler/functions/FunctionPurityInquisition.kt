@@ -1,5 +1,6 @@
 package euclin.compiler.functions
 
+import euclin.compiler.FunctionList
 import euclin.compiler.compileError
 import euclin.compiler.expressions.ExpressionTranslator
 import euclin.compiler.grammar.EuclinBaseVisitor
@@ -9,7 +10,7 @@ import euclin.compiler.grammar.EuclinParser
  * Vérifie qu'une fonction est bien pure, quand elle l'indique.
  * Conditions: n'appeler que des fonctions elles-aussi pures
  */
-class FunctionPurityInquisition(val availableFunctions: Map<String, FunctionSignature>, val translator: ExpressionTranslator): EuclinBaseVisitor<Boolean>() {
+class FunctionPurityInquisition(val availableFunctions: FunctionList, val translator: ExpressionTranslator): EuclinBaseVisitor<Boolean>() {
 
     private val funcMatcher = FunctionMatcher(availableFunctions, translator)
 

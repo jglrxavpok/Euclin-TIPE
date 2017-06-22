@@ -1,5 +1,6 @@
 package euclin.compiler.expressions
 
+import euclin.compiler.FunctionList
 import org.jglr.inference.TypeInferer
 import org.jglr.inference.expressions.*
 import org.jglr.inference.expressions.Function
@@ -13,7 +14,7 @@ import euclin.compiler.types.*
 import org.antlr.v4.runtime.ParserRuleContext
 import org.jglr.inference.ImpossibleUnificationExpression
 
-class ExpressionTranslator(val availableFunctions: Map<String, FunctionSignature>) : EuclinBaseVisitor<Expression>() {
+class ExpressionTranslator(val availableFunctions: FunctionList) : EuclinBaseVisitor<Expression>() {
 
     private var lambdaVar = Variable("_") of RealType
     private val True = Literal(true, BooleanType)

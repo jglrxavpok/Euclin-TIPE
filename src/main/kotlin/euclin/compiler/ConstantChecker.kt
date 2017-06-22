@@ -2,14 +2,13 @@ package euclin.compiler
 
 import euclin.compiler.expressions.ExpressionTranslator
 import euclin.compiler.functions.FunctionMatcher
-import euclin.compiler.functions.FunctionSignature
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 
 /**
  * Vérifies si une expression donnée est constante (ie tous les appels de fonctions sont faits vers des fonctions *pures* et les arguments sont constants)
  */
-class ConstantChecker(val availableFunctions: Map<String, FunctionSignature>, val translator: ExpressionTranslator): EuclinBaseVisitor<Boolean>() {
+class ConstantChecker(val availableFunctions: FunctionList, val translator: ExpressionTranslator): EuclinBaseVisitor<Boolean>() {
 
     private val funcMatcher = FunctionMatcher(availableFunctions, translator)
 

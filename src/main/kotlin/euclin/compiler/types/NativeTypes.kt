@@ -1,6 +1,6 @@
 package euclin.compiler.types
 
-import euclin.compiler.functions.TypedMember
+import euclin.compiler.TypedMember
 import euclin.compiler.functions.FunctionSignature
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition

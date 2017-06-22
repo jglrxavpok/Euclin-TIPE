@@ -1,6 +1,6 @@
 package euclin.compiler.types
 
-import euclin.compiler.functions.Argument
+import euclin.compiler.functions.TypedMember
 import euclin.compiler.functions.FunctionSignature
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
@@ -48,7 +48,7 @@ class BasicType(private val toString: String): TypeDefinition() {
 }
 
 // Extensions pour définir une structure associée à un type
-fun TypeDefinition.listFields(): List<Argument> {
+fun TypeDefinition.listFields(): List<TypedMember> {
     return emptyList()
 }
 

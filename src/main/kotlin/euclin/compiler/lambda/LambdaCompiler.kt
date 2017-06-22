@@ -6,7 +6,7 @@ import euclin.compiler.compileError
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.expressions.ExpressionTranslator
-import euclin.compiler.functions.Argument
+import euclin.compiler.functions.TypedMember
 import euclin.compiler.types.RealType
 import org.objectweb.asm.ClassWriter
 
@@ -35,7 +35,7 @@ class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val a
         val returnType = function.expression.type
 
         val name = generateLambdaName(functionExpression)
-        val lambdaSignature = FunctionSignature(name, listOf(Argument("_", RealType)), returnType, ownerClass)
+        val lambdaSignature = FunctionSignature(name, listOf(TypedMember("_", RealType)), returnType, ownerClass)
         val functionBody = generateLambdaBody(functionExpression)
 
         alreadyCompiled[functionExpression.text] = lambdaSignature

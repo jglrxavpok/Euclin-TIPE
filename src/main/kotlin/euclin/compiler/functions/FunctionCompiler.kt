@@ -80,7 +80,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         val type = if(baseType == IntType) IntPointType else RealPointType
         with(writer) {
             val asmType = basicType(type)
-            val descriptor = methodType(listOf(Argument("first", baseType), Argument("second", baseType)), JVMVoid).descriptor
+            val descriptor = methodType(listOf(TypedMember("first", baseType), TypedMember("second", baseType)), JVMVoid).descriptor
             visitTypeInsn(NEW, asmType.internalName) // on crée l'objet
             visitInsn(DUP) // on duplique l'objet créé (permet de le réutiliser après)
             visit(left)
@@ -146,7 +146,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
         // si l'expression n'est que '_', on change le nom
         val name = LambdaCompiler.generateLambdaName(functionExpression) +"\$constant"
-        val lambdaSignature = FunctionSignature(name, listOf(Argument("_", RealType)), returnType, functionSignature.ownerClass)
+        val lambdaSignature = FunctionSignature(name, listOf(TypedMember("_", RealType)), returnType, functionSignature.ownerClass)
         val functionBody = LambdaCompiler.generateLambdaBody(functionExpression)
 
         val funcCompiler = FunctionCompiler(classWriter, lambdaSignature, availableFunctions, lambdaExpressions)

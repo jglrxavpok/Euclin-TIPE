@@ -1,6 +1,6 @@
 package euclin.compiler.types
 
-import euclin.compiler.functions.Argument
+import euclin.compiler.functions.TypedMember
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
@@ -11,7 +11,7 @@ private val RealPointASMType = ASMType.getObjectType("euclin/std/RealPoint")
 private val IntegerPointASMType = ASMType.getObjectType("euclin/std/IntPoint")
 private val UnitASMType = ASMType.getObjectType("euclin/std/UnitObject")
 
-fun methodType(arguments: List<Argument>, returnType: TypeDefinition): ASMType {
+fun methodType(arguments: List<TypedMember>, returnType: TypeDefinition): ASMType {
     return ASMType.getMethodType(basicType(returnType), *(arguments.map { basicType(it.second) }.toTypedArray()))
 }
 

@@ -22,7 +22,7 @@ class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignat
     override fun visitFunctionDeclaration(ctx: EuclinParser.FunctionDeclarationContext): FunctionSignature {
         val name = ctx.Identifier().text
         // on convertit les 'parameter' en arguments en décomposant selon le nom et le type
-        val arguments = ctx.parameter().map { Argument(it.Identifier().text, toType(it.type())) }
+        val arguments = ctx.parameter().map { TypedMember(it.Identifier().text, toType(it.type())) }
         val returnType = toType(ctx.type())
         return FunctionSignature(name, arguments, returnType, ownerClass)
     }
@@ -35,14 +35,14 @@ class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignat
 /**
  * Un argument est un nom (String) + un type (String)
  */
-typealias Argument = Pair<String, TypeDefinition>
-val Argument.name
+typealias TypedMember = Pair<String, TypeDefinition>
+val TypedMember.name
     get() = this.first
-val Argument.type
+val TypedMember.type
     get() = this.second
 
 // Définit la signature d'une fonction (nom, arguments, type de retour, la classe dans laquelle elle est et sa pureté)
-data class FunctionSignature(val name: String, val arguments: List<Argument>, val returnType: TypeDefinition, val ownerClass: String) {
+data class FunctionSignature(val name: String, val arguments: List<TypedMember>, val returnType: TypeDefinition, val ownerClass: String) {
 
     fun toType(): TypeDefinition {
         if(arguments.size == 1)

@@ -56,28 +56,28 @@ object EuclinCompiler {
 
     private fun addStandardFunctions(functions: MutableMap<String, FunctionSignature>) {
         val circleFunction = FunctionSignature("circle", listOf(
-                Argument("center", FunctionType(RealType, RealPointType)),
-                Argument("radius", FunctionType(RealType, RealType))
+                TypedMember("center", FunctionType(RealType, RealPointType)),
+                TypedMember("radius", FunctionType(RealType, RealType))
         ), ObjectType("Circle", ShapeType), "euclin.std.Geometry")
 
         val sinFunction = FunctionSignature("sin", listOf(
-                Argument("angle", RealType)
+                TypedMember("angle", RealType)
         ), RealType, "euclin.std.MathFunctions")
 
         val cosFunction = FunctionSignature("cos", listOf(
-                Argument("angle", RealType)
+                TypedMember("angle", RealType)
         ), RealType, "euclin.std.MathFunctions")
 
         val tanFunction = FunctionSignature("tan", listOf(
-                Argument("angle", RealType)
+                TypedMember("angle", RealType)
         ), RealType, "euclin.std.MathFunctions")
 
         val writeFunction = FunctionSignature("write", listOf(
-                Argument("text", StringType)
+                TypedMember("text", StringType)
         ), JVMVoid, "euclin.std.Console")
 
         val writelnFunction = FunctionSignature("writeln", listOf(
-                Argument("text", StringType)
+                TypedMember("text", StringType)
         ), JVMVoid, "euclin.std.Console")
 
         functions["sin"] = sinFunction

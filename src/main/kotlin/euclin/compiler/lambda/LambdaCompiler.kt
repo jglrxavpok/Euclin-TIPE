@@ -36,7 +36,7 @@ class LambdaCompiler(val classWriter: ClassWriter, val ownerClass: String, val a
         val returnType = function.expression.type
 
         val name = generateLambdaName(functionExpression)
-        val lambdaSignature = FunctionSignature(name, listOf(TypedMember("_", RealType)), returnType, ownerClass)
+        val lambdaSignature = FunctionSignature(name, listOf(TypedMember("_", RealType)), returnType, ownerClass, static = true)
         val functionBody = generateLambdaBody(functionExpression)
 
         alreadyCompiled[functionExpression.text] = lambdaSignature

@@ -25,4 +25,10 @@ public class RealPoint {
     public RealPoint div(RealPoint other) {
         return new RealPoint(x/other.x, y/other.y);
     }
+
+    public RealPoint set(float x, float y) {
+        this.x = x;
+        this.y = y;
+        return this;
+    }
 }

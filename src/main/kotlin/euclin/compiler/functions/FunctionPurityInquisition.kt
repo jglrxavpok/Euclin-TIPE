@@ -1,7 +1,7 @@
 package euclin.compiler.functions
 
+import euclin.compiler.CompileError
 import euclin.compiler.FunctionList
-import euclin.compiler.compileError
 import euclin.compiler.expressions.ExpressionTranslator
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
@@ -12,14 +12,26 @@ import euclin.compiler.grammar.EuclinParser
  */
 class FunctionPurityInquisition(val availableFunctions: FunctionList, val translator: ExpressionTranslator): EuclinBaseVisitor<Boolean>() {
 
-    private val funcMatcher = FunctionMatcher(availableFunctions, translator)
+    private val funcMatcher = FunctionMatcher(availableFunctions, translator, emptyMap())
 
     override fun defaultResult(): Boolean {
         return true
     }
 
+    override fun visitDeclareVarInstruction(ctx: EuclinParser.DeclareVarInstructionContext?): Boolean {
+        return false
+    }
+
+    override fun visitAssignVarInstruction(ctx: EuclinParser.AssignVarInstructionContext?): Boolean {
+        return false
+    }
+
     override fun visitFunctionCall(call: EuclinParser.FunctionCallContext): Boolean {
-        val signature = funcMatcher.visit(call.functionIdentifier())
-        return signature.pure && call.expression().all { visit(it) }
+        try {
+            val signature = funcMatcher.visit(call.functionIdentifier())
+            return signature.pure && call.expression().all { visit(it) }
+        } catch (e: CompileError) {
+            return false
+        }
     }
 }

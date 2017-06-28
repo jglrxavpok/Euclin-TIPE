@@ -26,4 +26,10 @@ public class IntPoint {
     public IntPoint div(IntPoint other) {
         return new IntPoint(x/other.x, y/other.y);
     }
+
+    public IntPoint set(int x, int y) {
+        this.x = x;
+        this.y = y;
+        return this;
+    }
 }

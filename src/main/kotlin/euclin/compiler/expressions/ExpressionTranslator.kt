@@ -10,9 +10,12 @@ import euclin.compiler.compileError
 import euclin.compiler.functions.FunctionMatcher
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
+import euclin.compiler.name
+import euclin.compiler.type
 import euclin.compiler.types.*
 import org.antlr.v4.runtime.ParserRuleContext
 import org.jglr.inference.ImpossibleUnificationExpression
+import org.objectweb.asm.Opcodes
 
 class ExpressionTranslator(val availableFunctions: FunctionList) : EuclinBaseVisitor<Expression>() {
 
@@ -22,8 +25,8 @@ class ExpressionTranslator(val availableFunctions: FunctionList) : EuclinBaseVis
     private val UnitValue = Literal(Unit, UnitType)
     private val inferer = TypeInferer()
     private val alreadyTranslated = hashMapOf<ParserRuleContext, Expression>()
-    private val funcMatcher = FunctionMatcher(availableFunctions, this)
     val variableTypes = hashMapOf<String, TypeDefinition>()
+    private val funcMatcher = FunctionMatcher(availableFunctions, this, variableTypes)
 
     init {
         with(inferer) {
@@ -53,6 +56,23 @@ class ExpressionTranslator(val availableFunctions: FunctionList) : EuclinBaseVis
         val result = visit(ctx)
         inferer.infer(result)
         return result
+    }
+
+    override fun visitAccessExpr(ctx: EuclinParser.AccessExprContext): Expression {
+        val chain = ctx.Identifier()
+        val first = translate(ctx.expression())
+        val lineNumber = chain[0].symbol.line
+        var deepest = first
+        for(id in chain) { // on regarde les identifiants qui sont nécessairement des membres
+            val name = id.text
+            val fields = deepest.type.listFields()
+            val parent = deepest
+            val field = fields.find { it.name == name }
+            deepest = AccessExpression(parent, field?.name
+                    ?: compileError("Aucun membre du nom de $name dans $deepest", lineNumber, "?"))
+            deepest of field.type
+        }
+        return deepest
     }
 
     override fun visitLambdaVarExpr(ctx: EuclinParser.LambdaVarExprContext?): Expression {

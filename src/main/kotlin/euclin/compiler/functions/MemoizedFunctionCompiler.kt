@@ -16,7 +16,7 @@ object MemoizedFunctionCompiler {
         createCacheField(fieldName, classWriter)
         createCacheInitialization(fieldName, signature, classWriter)
 
-        val computeFunction = FunctionSignature("${signature.name}\$compute", signature.arguments, signature.returnType, signature.ownerClass)
+        val computeFunction = FunctionSignature("${signature.name}\$compute", signature.arguments, signature.returnType, signature.ownerClass, signature.static)
         val functionCompiler = FunctionCompiler(classWriter, computeFunction, availableFunctions, lambdaExpressions)
         functionCompiler.visit(functionCodeBlock)
 

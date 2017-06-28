@@ -9,6 +9,10 @@ import euclin.compiler.grammar.EuclinLexer
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
 import euclin.compiler.lambda.LambdaCompiler
+import euclin.std.Console
+import euclin.std.IntPoint
+import euclin.std.MathFunctions
+import euclin.std.RealPoint
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes.*
 import java.io.File
@@ -19,6 +23,10 @@ object EuclinCompiler {
 
     fun compile(sourceCode: String, filename: String): ByteArray {
         val startTime = System.nanoTime()
+
+        // Inspection de la librairie standard
+        inspectStandardLibrary()
+
         val classWriter = ClassWriter(ClassWriter.COMPUTE_FRAMES) // laisse ASM générer les frames et maxs
         val className = filename.substringAfterLast(File.separator).substringBefore(".") // dernier fichier du chemin et on retire l'extension
         val classType = ASMType.getObjectType(className)
@@ -54,31 +62,37 @@ object EuclinCompiler {
         return classWriter.toByteArray()
     }
 
+    private fun inspectStandardLibrary() {
+        // TODO: + de classes?
+        TypeInspector.inspect(IntPoint::class.java, IntPointType)
+        TypeInspector.inspect(RealPoint::class.java, RealPointType)
+    }
+
     private fun addStandardFunctions(functions: MutableMap<String, FunctionSignature>) {
         val circleFunction = FunctionSignature("circle", listOf(
                 TypedMember("center", FunctionType(RealType, RealPointType)),
                 TypedMember("radius", FunctionType(RealType, RealType))
-        ), ObjectType("Circle", ShapeType), "euclin.std.Geometry")
+        ), ObjectType("Circle", ShapeType), "euclin.std.Geometry", static = true)
 
         val sinFunction = FunctionSignature("sin", listOf(
                 TypedMember("angle", RealType)
-        ), RealType, "euclin.std.MathFunctions")
+        ), RealType, "euclin.std.MathFunctions", static = true)
 
         val cosFunction = FunctionSignature("cos", listOf(
                 TypedMember("angle", RealType)
-        ), RealType, "euclin.std.MathFunctions")
+        ), RealType, "euclin.std.MathFunctions", static = true)
 
         val tanFunction = FunctionSignature("tan", listOf(
                 TypedMember("angle", RealType)
-        ), RealType, "euclin.std.MathFunctions")
+        ), RealType, "euclin.std.MathFunctions", static = true)
 
         val writeFunction = FunctionSignature("write", listOf(
                 TypedMember("text", StringType)
-        ), JVMVoid, "euclin.std.Console")
+        ), JVMVoid, "euclin.std.Console", static = true)
 
         val writelnFunction = FunctionSignature("writeln", listOf(
                 TypedMember("text", StringType)
-        ), JVMVoid, "euclin.std.Console")
+        ), JVMVoid, "euclin.std.Console", static = true)
 
         functions["sin"] = sinFunction
         functions["cos"] = cosFunction

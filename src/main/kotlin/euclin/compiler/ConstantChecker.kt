@@ -10,7 +10,7 @@ import euclin.compiler.grammar.EuclinParser
  */
 class ConstantChecker(val availableFunctions: FunctionList, val translator: ExpressionTranslator): EuclinBaseVisitor<Boolean>() {
 
-    private val funcMatcher = FunctionMatcher(availableFunctions, translator)
+    private val funcMatcher = FunctionMatcher(availableFunctions, translator, emptyMap())
 
     fun assertConstant(constantExpr: EuclinParser.ExpressionContext) {
         compileAssert(visit(constantExpr), "?", constantExpr) { "L'expression '${constantExpr.text}' n'est pas une constante" }

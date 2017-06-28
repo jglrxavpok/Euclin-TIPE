@@ -22,11 +22,11 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
     private val writer: MethodVisitor
     private val translator = ExpressionTranslator(availableFunctions)
-    private val funcMatcher = FunctionMatcher(availableFunctions, translator)
     private val constantChecker = ConstantChecker(availableFunctions, translator)
     private val typeStack = Stack<TypeDefinition>()
     private val localVariableIDs = hashMapOf<String, Int>()
     private val localVariableTypes = hashMapOf<String, TypeDefinition>()
+    private val funcMatcher = FunctionMatcher(availableFunctions, translator, localVariableTypes)
     private var localIndex = 0
     private val startLabel = Label()
     private val endLabel = Label()
@@ -98,7 +98,10 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
     override fun visitFunctionCall(call: EuclinParser.FunctionCallContext) {
         with(writer) {
 
+            visit(call.functionIdentifier()) // on charge l'instance s'il faut
             val function = funcMatcher.visit(call.functionIdentifier())
+            if( ! function.static)
+                typeStack.pop()
 
             // on compile les arguments de la fonction
             for (index in 0 until function.arguments.size) {
@@ -125,11 +128,48 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
             }
 
             val descriptor = methodType(function.arguments, function.returnType).descriptor
-            visitMethodInsn(INVOKESTATIC, toInternalName(function.ownerClass), function.name, descriptor, false)
+            val opcode = if(function.static) INVOKESTATIC else INVOKEVIRTUAL
+            visitMethodInsn(opcode, toInternalName(function.ownerClass), function.name, descriptor, false)
 
             // les méthodes ayant 'void' en type de retour n'ajoutent rien sur le stack
             if(function.returnType != JVMVoid)
                 typeStack.push(function.returnType)
+        }
+    }
+
+    override fun visitAccessExpr(ctx: EuclinParser.AccessExprContext) {
+        visit(ctx.expression())
+        val chain = ctx.Identifier()
+        compileSubAccessChain(chain)
+    }
+
+    override fun visitMemberFunctionIdentifier(ctx: EuclinParser.MemberFunctionIdentifierContext) {
+        val identifierList = ctx.Identifier()
+        compileAccessChain(identifierList.dropLast(1))
+    }
+
+    /**
+     * Compiles a chain of identifiers to a chain of 'getfield' opcodes
+     */
+    private fun compileAccessChain(chain: List<TerminalNode>) {
+        val first = chain[0].text
+        val lineNumber = chain[0].symbol.line
+        val type = localVariableTypes[first] ?: compileError("Aucune variable du nom de $first", lineNumber, functionSignature.ownerClass)
+        writer.visitVarInsn(correctOpcode(ILOAD, type), localVariableIDs[first]!!)
+        typeStack.push(type)
+        compileSubAccessChain(chain.drop(1))
+    }
+
+    private fun compileSubAccessChain(chain: List<TerminalNode>) {
+        val lineNumber = if(chain.isEmpty()) -1 else chain[0].symbol.line
+        for(id in chain) { // on regarde les identifiants qui sont nécessairement des membres
+            val deepest = typeStack.pop()
+            val name = id.text
+            val fields = deepest.listFields()
+            val parent = deepest
+            val child = fields.find { it.name == name }?.type ?: compileError("Aucun membre du nom de $name dans $deepest", lineNumber, functionSignature.ownerClass)
+            writer.visitFieldInsn(GETFIELD, basicType(parent).internalName, name, basicType(child).descriptor)
+            typeStack.push(child)
         }
     }
 
@@ -144,7 +184,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
 
         // si l'expression n'est que '_', on change le nom
         val name = LambdaCompiler.generateLambdaName(functionExpression) +"\$constant"
-        val lambdaSignature = FunctionSignature(name, listOf(TypedMember("_", RealType)), returnType, functionSignature.ownerClass)
+        val lambdaSignature = FunctionSignature(name, listOf(TypedMember("_", RealType)), returnType, functionSignature.ownerClass, static = true)
         val functionBody = LambdaCompiler.generateLambdaBody(functionExpression)
 
         val funcCompiler = FunctionCompiler(classWriter, lambdaSignature, availableFunctions, lambdaExpressions)
@@ -226,7 +266,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
                     if(it !is EuclinParser.ReturnFuncInstructionContext) {
                         if(typeStack.isNotEmpty()) {
                             compileAssert(typeStack.size == 1, functionSignature.ownerClass, it)
-                                { "Il ne doit y avoir qu'une seule valeur sur le stack pour insérer automatiquement un 'return'!" }
+                                { "Il ne doit y avoir qu'une seule valeur sur le stack pour insérer automatiquement un 'return'! (il y en avait ${typeStack.size})" }
                             val expected = functionSignature.returnType
                             val actual = typeStack.pop() // on retire l'élement de la pile
 
@@ -388,6 +428,14 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         typeStack.pop()
         // on ajoute le type du résultat (on pourrait juste retirer un élément, mais cela ne serait pas clair et on laisse ainsi la possibilité de casts implicites)
         typeStack.push(leftExpr.type)
+    }
+
+    override fun visitDeclareVarInstruction(ctx: EuclinParser.DeclareVarInstructionContext) {
+        visit(ctx.variableDeclaration())
+    }
+
+    override fun visitAssignVarInstruction(ctx: EuclinParser.AssignVarInstructionContext) {
+        visit(ctx.variableAssign())
     }
 
     override fun visitVariableDeclaration(ctx: EuclinParser.VariableDeclarationContext) {

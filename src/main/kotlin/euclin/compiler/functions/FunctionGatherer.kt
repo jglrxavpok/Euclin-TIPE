@@ -25,7 +25,7 @@ class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignat
         // on convertit les 'parameter' en arguments en décomposant selon le nom et le type
         val arguments = ctx.parameter().map { TypedMember(it.Identifier().text, toType(it.type())) }
         val returnType = toType(ctx.type())
-        return FunctionSignature(name, arguments, returnType, ownerClass)
+        return FunctionSignature(name, arguments, returnType, ownerClass, static = true) // TODO: Make those functions not static ?
     }
 
     private fun toType(type: EuclinParser.TypeContext): TypeDefinition {
@@ -34,7 +34,7 @@ class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignat
 }
 
 // Définit la signature d'une fonction (nom, arguments, type de retour, la classe dans laquelle elle est et sa pureté)
-data class FunctionSignature(val name: String, val arguments: List<TypedMember>, val returnType: TypeDefinition, val ownerClass: String) {
+class FunctionSignature(val name: String, val arguments: List<TypedMember>, val returnType: TypeDefinition, val ownerClass: String, val static: Boolean) {
 
     fun toType(): TypeDefinition {
         if(arguments.size == 1)

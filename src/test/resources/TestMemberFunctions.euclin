@@ -3,4 +3,5 @@ func somefunc(): Unit {
     point.add((0,0))
     var x = point.x
     point.set(x, x)
+    point.y = 10
 }

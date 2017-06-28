@@ -455,6 +455,20 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         storeValue(expression, value.type, varID)
     }
 
+    override fun visitMemberAssign(ctx: EuclinParser.MemberAssignContext) {
+        visit(ctx.expression(0))
+        val chain = ctx.Identifier().dropLast(1)
+        compileSubAccessChain(chain)
+
+        val targetName = ctx.Identifier().last().text
+        val targetType = typeStack.pop()
+        val field = targetType.listFields().find { it.name == targetName } ?: compileError("Aucun membre du nom de $targetName dans $targetType", functionSignature.ownerClass, ctx)
+        visit(ctx.expression(1))
+        val value = translator.translate(ctx.expression(1))
+        writer.visitFieldInsn(PUTFIELD, basicType(targetType).internalName, field.name, basicType(value.type).descriptor)
+        typeStack.pop()
+    }
+
     override fun visitVariableAssign(ctx: EuclinParser.VariableAssignContext) {
         val name = ctx.Identifier().text
         val expression = ctx.expression()

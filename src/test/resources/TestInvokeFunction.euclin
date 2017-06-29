@@ -1,0 +1,3 @@
+func something(f: (Int) -> Real): Real {
+    return f(0)
+}

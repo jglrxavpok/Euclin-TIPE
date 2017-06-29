@@ -5,5 +5,5 @@ import euclin.std.IntPoint
 import euclin.std.UnitObject
 
 interface FuncUnitObject2IntPoint {
-    fun apply(input: UnitObject): IntPoint
+    fun invoke(input: UnitObject): IntPoint
 }

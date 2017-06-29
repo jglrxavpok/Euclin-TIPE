@@ -158,6 +158,22 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         compileAccessChain(identifierList.dropLast(1))
     }
 
+    override fun visitDirectFunctionIdentifier(ctx: EuclinParser.DirectFunctionIdentifierContext) {
+        val name = ctx.Identifier().text
+        if(localVariableTypes.containsKey(name)) {
+            val type = localVariableTypes[name]!!
+            val id = localVariableIDs[name]!!
+            writer.visitVarInsn(correctOpcode(ILOAD, type), id)
+            typeStack.push(type)
+        } else {
+            val field = parentContext.field(name)
+            if (field != null) {
+                writer.visitFieldInsn(GETSTATIC, parentContext.currentClass, name, basicType(field.type).descriptor)
+                typeStack.push(field.type)
+            }
+        }
+    }
+
     /**
      * Compiles a chain of identifiers to a chain of 'getfield' opcodes
      */
@@ -243,7 +259,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         // /!\ signatureType et funcType ne sont pas du même type! (l'un TypeDefinition et l'autre ASMType)
         val signatureType = signature.toType()
         val funcType = methodType(signature.arguments, signature.returnType)
-        writer.visitInvokeDynamicInsn("apply", methodType(emptyList(), signatureType).descriptor, bootstrapHandle, funcType, methodHandle, funcType)
+        writer.visitInvokeDynamicInsn("invoke", methodType(emptyList(), signatureType).descriptor, bootstrapHandle, funcType, methodHandle, funcType)
         typeStack.push(signature.toType()) // on crée le type correspondant à notre signature de fonction
     }
 

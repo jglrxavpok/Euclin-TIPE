@@ -8,8 +8,10 @@ import euclin.compiler.grammar.EuclinLexer
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
 import euclin.compiler.lambda.LambdaCompiler
-import euclin.std.IntPoint
-import euclin.std.RealPoint
+import euclin.intrisincs.EuclinApplication
+import euclin.intrisincs.MemoizationCache
+import euclin.std.*
+import euclin.std.functions.FuncF2F
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes.*
 import java.io.File
@@ -80,6 +82,25 @@ object EuclinCompiler {
         // TODO: + de classes?
         TypeInspector.inspect(IntPoint::class.java, IntPointType)
         TypeInspector.inspect(RealPoint::class.java, RealPointType)
+        TypeInspector.inspect(UnitObject::class.java, UnitType)
+        TypeInspector.inspect(Console::class.java, BasicType("euclin.std.Console"))
+        TypeInspector.inspect(MathFunctions::class.java, BasicType("euclin.std.MathFunctions"))
+        TypeInspector.inspect(EuclinApplication::class.java, BasicType("euclin.intrisincs.EuclinApplication"))
+        TypeInspector.inspect(MemoizationCache::class.java, BasicType("euclin.intrisincs.MemoizationCache"))
+
+        val types = mutableListOf(RealType, RealPointType, IntType, IntPointType, UnitType)
+
+        val rootFolder = File("./src/main/euclin/lang/euclin/std/functions")
+        rootFolder.mkdirs()
+        for(argument in types) {
+            for (returnType in types) {
+                val funcType = FunctionType(argument, returnType)
+                val correspondingType = basicType(FunctionType(argument, returnType)).internalName
+                val name = correspondingType.substringAfterLast("/")
+                val clazz = Class.forName("euclin.std.functions.$name")
+                TypeInspector.inspect(clazz, funcType)
+            }
+        }
     }
 
     private fun addStandardFunctions(functions: MutableMap<String, FunctionSignature>) {

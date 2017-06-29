@@ -5,5 +5,5 @@ import euclin.std.IntPoint
 import euclin.std.UnitObject
 
 interface FuncF2F {
-    fun apply(input: Float): Float
+    fun invoke(input: Float): Float
 }

@@ -16,8 +16,28 @@ class FunctionMatcher(val parentContext: Context): EuclinBaseVisitor<FunctionSig
 
     override fun visitDirectFunctionIdentifier(ctx: EuclinParser.DirectFunctionIdentifierContext): FunctionSignature {
         val name = ctx.Identifier().text
-        val signature = availableFunctions[name] ?: compileError("Pas de fonction trouvée avec le nom $name", parentContext.currentClass, ctx)
-        return signature
+        if(localVariableTypes.containsKey(name)) {
+            val localType = localVariableTypes[name]!!
+            if(localType.listMethods().any{ it.name == "invoke" }) {
+                val method = localType.listMethods().find { it.name == "invoke" }!!
+                return FunctionSignature("invoke", method.arguments, method.returnType, method.ownerClass, static = false)
+            }
+            compileError("Le type $localType n'a pas de méthode 'invoke'!", parentContext.currentClass, ctx)
+        }
+        if(availableFunctions.containsKey(name)) {
+            val signature = availableFunctions[name]!!
+            return signature
+        }
+
+        val field = parentContext.field(name)
+        if(field != null) {
+            if(field.type.listMethods().any{ it.name == "invoke" }) {
+                val method = field.type.listMethods().find { it.name == "invoke" }!!
+                return FunctionSignature("invoke", method.arguments, method.returnType, method.ownerClass, static = false)
+            }
+            compileError("Le type ${field.type} n'a pas de méthode 'invoke'!", parentContext.currentClass, ctx)
+        }
+        compileError("Pas de fonction trouvée avec le nom $name", parentContext.currentClass, ctx)
     }
 
     override fun visitMemberFunctionIdentifier(ctx: EuclinParser.MemberFunctionIdentifierContext): FunctionSignature {

@@ -15,13 +15,14 @@ class MemoizationCache(val argCount: Int) {
         return currentMap.containsKey(arguments[argCount-1])
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun get(arguments: Array<out Any>): Any? {
         assert(arguments.size == argCount)
         var currentMap = mainMap
-        for(i in 0 until (arguments.size-1)) {
-            val arg = arguments[i]
-            currentMap = currentMap[arg] as HashMap<Any, Any>
-        }
+        (0 until (arguments.size-1))
+                .asSequence()
+                .map { arguments[it] }
+                .forEach { currentMap = currentMap[it] as HashMap<Any, Any> }
         return currentMap[arguments[argCount-1]]
     }
 

@@ -1,7 +1,6 @@
 package euclin.compiler.functions
 
 import euclin.compiler.*
-import euclin.compiler.expressions.ExpressionTranslator
 import org.antlr.v4.runtime.tree.TerminalNode
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TypeDefinition
@@ -98,7 +97,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         typeStack.push(type)
     }
 
-    override open fun visitFunctionDeclaration(ctx: EuclinParser.FunctionDeclarationContext) {
+    override fun visitFunctionDeclaration(ctx: EuclinParser.FunctionDeclarationContext) {
         compileError("Il est interdit d'avoir des déclarations de fonctions dans des fonctions!", functionSignature.ownerClass, ctx)
     }
 

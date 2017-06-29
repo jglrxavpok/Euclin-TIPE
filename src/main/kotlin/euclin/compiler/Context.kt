@@ -18,9 +18,11 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
     val functionMatcher = FunctionMatcher(this)
     val constantChecker = ConstantChecker(this)
 
-    fun withSignature(newSignature: FunctionSignature): Context {
+    fun withSignature(newSignature: FunctionSignature): Context = copy().apply { currentFunction = newSignature }
+
+    fun copy(): Context {
         val copy = Context(currentClass, classWriter, availableFunctions)
-        copy.currentFunction = newSignature
+        copy.currentFunction = currentFunction
         copy.localVariableTypes.putAll(localVariableTypes)
         copy.localVariableIDs.putAll(localVariableIDs)
         copy.lambdaExpressions.putAll(lambdaExpressions)

@@ -1,6 +1,5 @@
 package euclin.compiler
 
-import euclin.compiler.expressions.ExpressionTranslator
 import euclin.compiler.functions.*
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
@@ -9,9 +8,7 @@ import euclin.compiler.grammar.EuclinLexer
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
 import euclin.compiler.lambda.LambdaCompiler
-import euclin.std.Console
 import euclin.std.IntPoint
-import euclin.std.MathFunctions
 import euclin.std.RealPoint
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes.*
@@ -19,7 +16,7 @@ import java.io.File
 
 object EuclinCompiler {
 
-    val OBJECT_TYPE = ASMType.getType(Object::class.java)
+    val OBJECT_TYPE: ASMType = ASMType.getType(Object::class.java)
 
     fun compile(sourceCode: String, filename: String): ByteArray {
         val startTime = System.nanoTime()
@@ -110,7 +107,6 @@ object EuclinCompiler {
     }
 
     private fun compileFunctions(code: EuclinParser.CodeBlockContext, context: Context) {
-        val globalTranslator = context.translator // TODO: Utiliser ce translator partout?
         val inquisition = FunctionPurityInquisition(context)
         val declarations = code.instructions().filterIsInstance<EuclinParser.DeclareFuncInstructionContext>().map { it.functionDeclaration() } // on récupére les déclarations de fonctions
         for(func in declarations) {

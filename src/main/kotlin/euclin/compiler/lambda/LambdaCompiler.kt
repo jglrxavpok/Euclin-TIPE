@@ -8,16 +8,13 @@ import euclin.compiler.functions.FunctionSignature
 import euclin.compiler.compileError
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
-import euclin.compiler.expressions.ExpressionTranslator
 import euclin.compiler.types.RealType
 import org.objectweb.asm.ClassWriter
 
 class LambdaCompiler(val parentContext: Context):
     EuclinBaseVisitor<FunctionSignature?>() {
 
-    private val classWriter: ClassWriter = parentContext.classWriter
-    private val ownerClass: String = parentContext.currentClass
-    private val availableFunctions: FunctionList = parentContext.availableFunctions
+    private val ownerClass = parentContext.currentClass
     private val translator = parentContext.translator
     private var resultMap = hashMapOf<String, FunctionSignature>()
     private val alreadyCompiled = hashMapOf<String, FunctionSignature>()

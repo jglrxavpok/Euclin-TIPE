@@ -43,5 +43,4 @@ class FunctionSignature(val name: String, val arguments: List<TypedMember>, val 
     }
 
     var pure: Boolean = false
-    var cached: Boolean = false
 }

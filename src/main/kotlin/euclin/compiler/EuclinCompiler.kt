@@ -27,7 +27,7 @@ object EuclinCompiler {
         val classWriter = ClassWriter(ClassWriter.COMPUTE_FRAMES) // laisse ASM générer les frames et maxs
         val className = filename.substringAfterLast(File.separator).substringBefore(".") // dernier fichier du chemin et on retire l'extension
         val classType = ASMType.getObjectType(className)
-        classWriter.visit(V1_8, ACC_PUBLIC, classType.internalName, null, OBJECT_TYPE.internalName, emptyArray())
+        classWriter.visit(V1_8, ACC_PUBLIC, classType.internalName, null, OBJECT_TYPE.internalName, arrayOf("euclin/intrisincs/EuclinApplication"))
 
         val functionGatherer = FunctionGatherer(className)
 
@@ -48,11 +48,26 @@ object EuclinCompiler {
         val context = Context(className, classWriter, functions)
         val lambdaExpressions = compileLambdas(code, context)
         context.lambdaExpressions.putAll(lambdaExpressions)
+
+        // on génére la fonction principale
+        val mainSignature = FunctionSignature("__main", emptyList(), JVMVoid, className, static = false)
+        context.currentFunction = mainSignature
+        val mainCompiler = MainFunctionCompiler(context.clearLocals())
+        mainCompiler.compileMainFunction(code)
+
         // on génére les fonctions
         compileFunctions(code, context)
 
-        // on génére la fonction principale
-        // TODO
+        // on génère un constructeur basique
+        val constructor = classWriter.visitMethod(ACC_PUBLIC, "<init>", "()V", null, emptyArray())
+        with(constructor) {
+            visitCode()
+            visitVarInsn(ALOAD, 0) // load 'this'
+            visitMethodInsn(INVOKESPECIAL, OBJECT_TYPE.internalName, "<init>", "()V", false) // 'super.<init>()'
+            visitInsn(RETURN)
+            visitMaxs(0,0)
+            visitEnd()
+        }
 
         classWriter.visitEnd()
         val endTime = System.nanoTime()

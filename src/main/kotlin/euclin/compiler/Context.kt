@@ -35,4 +35,8 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
         localVariableIDs.clear()
         return this
     }
+
+    fun field(name: String): TypedMember? {
+        return fields.find { it.name == name }
+    }
 }

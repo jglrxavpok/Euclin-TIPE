@@ -31,14 +31,18 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         get() = parentContext.localVariableTypes
     private val funcMatcher = parentContext.functionMatcher
 
-    private val writer: MethodVisitor
+    internal val writer: MethodVisitor
     private val typeStack = Stack<TypeDefinition>()
     private var localIndex = 0
     private val startLabel = Label()
     private val endLabel = Label()
 
+    private val isMainFunction = functionSignature.name == "__main"
+
     init {
-        val access = ACC_FINAL or ACC_PUBLIC or ACC_STATIC
+        var access = ACC_FINAL or ACC_PUBLIC
+        if(functionSignature.static)
+            access = access or ACC_STATIC
         val methodType = methodType(functionSignature.arguments, functionSignature.returnType)
         val description = methodType.descriptor
         writer = classWriter.visitMethod(access, functionSignature.name, description, null, emptyArray())
@@ -210,9 +214,15 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
             val id = localVariableIDs[name]!!
             writer.visitVarInsn(correctOpcode(ILOAD, varType), id)
             typeStack.push(varType)
-        } else if(availableFunctions.containsKey(name)) { // ça peut être une fonction utilisée comme valeur, on vérifie
-            val func = availableFunctions[name]!!
-            compileMethodReference(func)
+        } else {
+            val field = parentContext.field(name)
+            if(field != null) {
+                writer.visitFieldInsn(GETSTATIC, parentContext.currentClass, name, basicType(field.type).descriptor)
+                typeStack.push(field.type)
+            } else if(availableFunctions.containsKey(name)) { // ça peut être une fonction utilisée comme valeur, on vérifie
+                val func = availableFunctions[name]!!
+                compileMethodReference(func)
+            }
         }
     }
 
@@ -251,33 +261,26 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
     }
 
     override fun visitFunctionCodeBlock(ctx: EuclinParser.FunctionCodeBlockContext) {
+        compileFuncHeader()
         with(writer) {
-            for((index, arg) in functionSignature.arguments.withIndex()) {
-                val (name, type) = arg
-                visitParameter(name, Opcodes.ACC_FINAL)
-                localVariableIDs[name] = index
-                localVariableTypes[name] = type
-            }
-            visitCode()
-            visitLabel(startLabel)
 
-            val lastIndex = ctx.functionInstructions().size-1
+            val lastIndex = ctx.functionInstructions().size - 1
             ctx.functionInstructions().forEachIndexed { index, it ->
                 addLineInfos(it)
                 visit(it)
 
                 // insertion automatique de return si on est à la fin de la fonction
-                if(index == lastIndex) {
-                    if(it !is EuclinParser.ReturnFuncInstructionContext) {
-                        if(typeStack.isNotEmpty()) {
+                if (index == lastIndex) {
+                    if (it !is EuclinParser.ReturnFuncInstructionContext) {
+                        if (typeStack.isNotEmpty()) {
                             compileAssert(typeStack.size == 1, functionSignature.ownerClass, it)
-                                { "Il ne doit y avoir qu'une seule valeur sur le stack pour insérer automatiquement un 'return'! (il y en avait ${typeStack.size})" }
+                            { "Il ne doit y avoir qu'une seule valeur sur le stack pour insérer automatiquement un 'return'! (il y en avait ${typeStack.size})" }
                             val expected = functionSignature.returnType
                             val actual = typeStack.pop() // on retire l'élement de la pile
 
                             // la première condition permet d'éviter les exceptions dûes à l'impossibilité de la comparaison dans certains cas
-                            if(expected != actual || expected < actual) { // le type actuel ne peut rentrer dans le type attendu
-                                if(expected == UnitType) { // on ne s'occupe pas de la dernière valeur
+                            if (expected != actual || expected < actual) { // le type actuel ne peut rentrer dans le type attendu
+                                if (expected == UnitType) { // on ne s'occupe pas de la dernière valeur
                                     // on retire l'élément, on charge Unit et on le renvoit
                                     writer.visitInsn(POP)
                                     loadUnitOnStack()
@@ -290,20 +293,26 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
                             }
                         } else { // si on est pas une instruction 'return' et que le stack est vide
                             compileAssert(functionSignature.returnType == UnitType, functionSignature.ownerClass, ctx)
-                                { "Aucune valeur renvoyée pour une fonction qui n'est pas une 'Unit function'! ${it.text} ${it.javaClass} ${ctx.text}" }
+                            { "Aucune valeur renvoyée pour une fonction qui n'est pas une 'Unit function'! ${it.text} ${it.javaClass} ${ctx.text}" }
                             loadUnitOnStack()
                             writer.visitInsn(ARETURN) // on renvoit le Unit
                         }
                     }
                 } else {
                     // s'il reste des valeurs sur le stack à la fin de l'instruction, on les retire
-                    while(typeStack.isNotEmpty()) {
+                    while (typeStack.isNotEmpty()) {
                         writer.visitInsn(POP)
                         typeStack.pop()
                     }
                 }
             }
+        }
 
+        compileFuncFooter()
+    }
+
+    internal fun compileFuncFooter() {
+        with(writer) {
             visitLabel(endLabel)
 
             val names = localVariableTypes.keys
@@ -317,7 +326,20 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         }
     }
 
-    private fun addLineInfos(ctx: ParserRuleContext) {
+    internal fun compileFuncHeader() {
+        with(writer) {
+            for ((index, arg) in functionSignature.arguments.withIndex()) {
+                val (name, type) = arg
+                visitParameter(name, Opcodes.ACC_FINAL)
+                localVariableIDs[name] = index
+                localVariableTypes[name] = type
+            }
+            visitCode()
+            visitLabel(startLabel)
+        }
+    }
+
+    internal fun addLineInfos(ctx: ParserRuleContext) {
         if(ctx.start != null) { // si on a bien une info sur la ligne dans le code source
             val label = Label()
             writer.visitLabel(label)
@@ -444,19 +466,29 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
     }
 
     override fun visitVariableDeclaration(ctx: EuclinParser.VariableDeclarationContext) {
-        // FIXME: Créer des fields pour la méthode principale à la place de variables locales
         val name = ctx.Identifier().text
         if(localVariableIDs.containsKey(name))
             compileError("Il y a déjà une variable appelée $name!", functionSignature.ownerClass, ctx)
+        if(parentContext.field(name) != null)
+            compileWarning("La variable $name obscure le champ du même nom", parentContext.currentClass, ctx)
 
         val expression = ctx.expression()
         val value = translator.translate(expression)
 
-        val varID = localIndex++
-        localVariableIDs[name] = varID
-        localVariableTypes[name] = value.type
+        if(isMainFunction) {
+            val declaredField = TypedMember(name, value.type)
+            parentContext.fields += declaredField
 
-        storeValue(expression, value.type, varID)
+            visit(expression)
+            writer.visitFieldInsn(PUTSTATIC, parentContext.currentClass, name, basicType(value.type).descriptor)
+            typeStack.pop()
+        } else {
+            val varID = localIndex++
+            localVariableIDs[name] = varID
+            localVariableTypes[name] = value.type
+
+            storeValue(expression, value.type, varID)
+        }
     }
 
     override fun visitMemberAssign(ctx: EuclinParser.MemberAssignContext) {
@@ -477,11 +509,24 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         val name = ctx.Identifier().text
         val expression = ctx.expression()
         val value = translator.translate(expression)
-        val localType = localVariableTypes[name]!!
-        compileAssert(localType >= value.type, functionSignature.ownerClass, ctx) { "Impossible de stocker une valeur de type ${value.type} dans une variable de type $localType" }
 
-        val varID = localVariableIDs[name]!!
-        storeValue(expression, localType, varID)
+        if(localVariableTypes.containsKey(name)) {
+            val localType = localVariableTypes[name]!!
+            compileAssert(localType >= value.type, functionSignature.ownerClass, ctx) { "Impossible de stocker une valeur de type ${value.type} dans une variable de type $localType" }
+
+            val varID = localVariableIDs[name]!!
+            storeValue(expression, localType, varID)
+        } else {
+            val field = parentContext.field(name)
+            if(field != null) {
+                visit(expression)
+                writer.visitFieldInsn(PUTSTATIC, parentContext.currentClass, name, basicType(field.type).descriptor)
+                compileAssert(field.type >= value.type, functionSignature.ownerClass, ctx) { "Impossible de stocker une valeur de type ${value.type} dans un champ de type ${field.type}" }
+                typeStack.pop()
+            } else {
+                compileError("Aucune variable du nom de $name", parentContext.currentClass, ctx)
+            }
+        }
     }
 
     private fun storeValue(expression: EuclinParser.ExpressionContext, type: TypeDefinition, varID: Int) {

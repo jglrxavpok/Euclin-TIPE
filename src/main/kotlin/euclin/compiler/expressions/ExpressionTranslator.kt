@@ -99,8 +99,14 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
             return Variable(name) of (variableTypes[name] ?: compileError("Pas de variable trouvée avec le nom $name", parentContext.currentClass, ctx))
         else if(availableFunctions.containsKey(name)) // est-ce une fonction ?
             return function(availableFunctions[name] ?: compileError("Pas de variable trouvée avec le nom $name", parentContext.currentClass, ctx))
-        else
-            compileError("Unknown variable $name", parentContext.currentClass, ctx) // non c'est un symbole inconnu!
+        else {
+            val field = parentContext.field(name)
+            if(field != null) {
+                return Variable(name) of field.type
+            } else {
+                compileError("Unknown variable $name", parentContext.currentClass, ctx) // non c'est un symbole inconnu!
+            }
+        }
     }
 
     override fun visitIntExpr(ctx: EuclinParser.IntExprContext): Expression {

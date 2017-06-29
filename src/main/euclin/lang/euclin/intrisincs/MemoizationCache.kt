@@ -20,7 +20,6 @@ class MemoizationCache(val argCount: Int) {
         assert(arguments.size == argCount)
         var currentMap = mainMap
         (0 until (arguments.size-1))
-                .asSequence()
                 .map { arguments[it] }
                 .forEach { currentMap = currentMap[it] as HashMap<Any, Any> }
         return currentMap[arguments[argCount-1]]

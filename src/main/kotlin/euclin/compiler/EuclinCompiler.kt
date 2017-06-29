@@ -47,10 +47,12 @@ object EuclinCompiler {
         addStandardFunctions(functions)
 
         // on génére le code des lambda-fonctions
-        val lambdaExpressions = compileLambdas(classWriter, code, className, functions)
 
+        val context = Context(className, classWriter, functions)
+        val lambdaExpressions = compileLambdas(code, context)
+        context.lambdaExpressions.putAll(lambdaExpressions)
         // on génére les fonctions
-        compileFunctions(classWriter, code, functions, lambdaExpressions)
+        compileFunctions(code, context)
 
         // on génére la fonction principale
         // TODO
@@ -102,20 +104,22 @@ object EuclinCompiler {
         functions["writeln"] = writelnFunction
     }
 
-    private fun compileLambdas(classWriter: ClassWriter, code: EuclinParser.CodeBlockContext, ownerClass: String, functions: Map<String, FunctionSignature>): Map<String, FunctionSignature> {
-        val lambdaCompiler = LambdaCompiler(classWriter, ownerClass, functions)
+    private fun compileLambdas(code: EuclinParser.CodeBlockContext, context: Context): Map<String, FunctionSignature> {
+        val lambdaCompiler = LambdaCompiler(context)
         return lambdaCompiler.compileLambdas(code)
     }
 
-    private fun compileFunctions(classWriter: ClassWriter, code: EuclinParser.CodeBlockContext, availableFunctions: FunctionList, lambdaExpressions: Map<String, FunctionSignature>) {
-        val globalTranslator = ExpressionTranslator(availableFunctions) // TODO: Utiliser ce translator partout?
-        // TODO: Instaurer un système de contexte pour le 'translator' et 'availableFunctions'
-        val inquisition = FunctionPurityInquisition(availableFunctions, globalTranslator)
+    private fun compileFunctions(code: EuclinParser.CodeBlockContext, context: Context) {
+        val globalTranslator = context.translator // TODO: Utiliser ce translator partout?
+        val inquisition = FunctionPurityInquisition(context)
         val declarations = code.instructions().filterIsInstance<EuclinParser.DeclareFuncInstructionContext>().map { it.functionDeclaration() } // on récupére les déclarations de fonctions
         for(func in declarations) {
             val funcName = func.Identifier().text
-            val signature = availableFunctions[funcName] ?: error("Aucune signature correspondante") // renvoit une erreur si on ne trouve pas la signature correspondant au nom
+            val signature = context.availableFunctions[funcName] ?: error("Aucune signature correspondante") // renvoit une erreur si on ne trouve pas la signature correspondant au nom
             // (ne devrait jamais arriver)
+
+            context.currentFunction = signature
+            context.clearLocals()
 
             if(modifiersHave(func, "pure") && modifiersHave(func, "impure")) {
                 compileError("A function cannot be both pure and impure", signature.ownerClass, func)
@@ -133,9 +137,9 @@ object EuclinCompiler {
             }
             if(modifiersHave(func, "memoized")) {
                 signature.pure = true // Les fonctions avec un cache renvoient par définition toujours le même résultat pour les mêmes arguments
-                MemoizedFunctionCompiler.compile(func.functionCodeBlock(), classWriter, signature, availableFunctions, lambdaExpressions)
+                MemoizedFunctionCompiler.compile(func.functionCodeBlock(), context)
             } else {
-                val funcCompiler = FunctionCompiler(classWriter, signature, availableFunctions, lambdaExpressions)
+                val funcCompiler = FunctionCompiler(context)
                 funcCompiler.visit(func.functionCodeBlock())
             }
         }

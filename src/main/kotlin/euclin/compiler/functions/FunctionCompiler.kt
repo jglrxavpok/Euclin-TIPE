@@ -18,15 +18,22 @@ import java.lang.invoke.CallSite
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodType
 
-class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: FunctionSignature, val availableFunctions: FunctionList, val lambdaExpressions: Map<String, FunctionSignature>): EuclinBaseVisitor<Unit>() {
+open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisitor<Unit>() {
+
+    val classWriter = parentContext.classWriter
+    val functionSignature = parentContext.currentFunction
+    val availableFunctions = parentContext.availableFunctions
+    val lambdaExpressions = parentContext.lambdaExpressions
+    private val translator = parentContext.translator
+    private val constantChecker = parentContext.constantChecker
+    private val localVariableIDs: HashMap<String, Int>
+        get() = parentContext.localVariableIDs
+    private val localVariableTypes: HashMap<String, TypeDefinition>
+        get() = parentContext.localVariableTypes
+    private val funcMatcher = parentContext.functionMatcher
 
     private val writer: MethodVisitor
-    private val translator = ExpressionTranslator(availableFunctions)
-    private val constantChecker = ConstantChecker(availableFunctions, translator)
     private val typeStack = Stack<TypeDefinition>()
-    private val localVariableIDs = hashMapOf<String, Int>()
-    private val localVariableTypes = hashMapOf<String, TypeDefinition>()
-    private val funcMatcher = FunctionMatcher(availableFunctions, translator, localVariableTypes)
     private var localIndex = 0
     private val startLabel = Label()
     private val endLabel = Label()
@@ -91,7 +98,7 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         typeStack.push(type)
     }
 
-    override fun visitFunctionDeclaration(ctx: EuclinParser.FunctionDeclarationContext) {
+    override open fun visitFunctionDeclaration(ctx: EuclinParser.FunctionDeclarationContext) {
         compileError("Il est interdit d'avoir des déclarations de fonctions dans des fonctions!", functionSignature.ownerClass, ctx)
     }
 
@@ -183,11 +190,11 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         val returnType = function.expression.type
 
         // si l'expression n'est que '_', on change le nom
-        val name = LambdaCompiler.generateLambdaName(functionExpression) +"\$constant"
+        val name = LambdaCompiler.generateLambdaName(functionExpression, parentContext) +"\$constant"
         val lambdaSignature = FunctionSignature(name, listOf(TypedMember("_", RealType)), returnType, functionSignature.ownerClass, static = true)
         val functionBody = LambdaCompiler.generateLambdaBody(functionExpression)
 
-        val funcCompiler = FunctionCompiler(classWriter, lambdaSignature, availableFunctions, lambdaExpressions)
+        val funcCompiler = FunctionCompiler(parentContext.withSignature(lambdaSignature).clearLocals())
         funcCompiler.visitFunctionCodeBlock(functionBody)
         return lambdaSignature
     }
@@ -251,7 +258,6 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
                 visitParameter(name, Opcodes.ACC_FINAL)
                 localVariableIDs[name] = index
                 localVariableTypes[name] = type
-                translator.variableTypes[name] = type
             }
             visitCode()
             visitLabel(startLabel)
@@ -450,7 +456,6 @@ class FunctionCompiler(val classWriter: ClassWriter, val functionSignature: Func
         val varID = localIndex++
         localVariableIDs[name] = varID
         localVariableTypes[name] = value.type
-        translator.variableTypes[name] = value.type
 
         storeValue(expression, value.type, varID)
     }

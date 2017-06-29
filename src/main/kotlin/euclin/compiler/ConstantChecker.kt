@@ -1,19 +1,17 @@
 package euclin.compiler
 
-import euclin.compiler.expressions.ExpressionTranslator
-import euclin.compiler.functions.FunctionMatcher
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 
 /**
  * Vérifies si une expression donnée est constante (ie tous les appels de fonctions sont faits vers des fonctions *pures* et les arguments sont constants)
  */
-class ConstantChecker(val availableFunctions: FunctionList, val translator: ExpressionTranslator): EuclinBaseVisitor<Boolean>() {
+class ConstantChecker(val parentContext: Context): EuclinBaseVisitor<Boolean>() {
 
-    private val funcMatcher = FunctionMatcher(availableFunctions, translator, emptyMap())
+    private val funcMatcher = parentContext.functionMatcher
 
     fun assertConstant(constantExpr: EuclinParser.ExpressionContext) {
-        compileAssert(visit(constantExpr), "?", constantExpr) { "L'expression '${constantExpr.text}' n'est pas une constante" }
+        compileAssert(visit(constantExpr), parentContext.currentClass, constantExpr) { "L'expression '${constantExpr.text}' n'est pas une constante" }
     }
 
     override fun visitBoolTrueExpr(ctx: EuclinParser.BoolTrueExprContext?): Boolean {

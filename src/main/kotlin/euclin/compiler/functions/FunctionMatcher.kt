@@ -1,23 +1,22 @@
 package euclin.compiler.functions
 
-import euclin.compiler.FunctionList
-import euclin.compiler.compileError
-import euclin.compiler.expressions.ExpressionTranslator
+import euclin.compiler.*
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
-import euclin.compiler.name
-import euclin.compiler.type
 import euclin.compiler.types.listFields
 import euclin.compiler.types.listMethods
 import euclin.compiler.types.listStaticMethods
 import org.antlr.v4.runtime.tree.TerminalNode
 import org.jglr.inference.types.TypeDefinition
 
-class FunctionMatcher(val availableFunctions: FunctionList, val translator: ExpressionTranslator, val localVariableTypes: Map<String, TypeDefinition>): EuclinBaseVisitor<FunctionSignature>() {
+class FunctionMatcher(val parentContext: Context): EuclinBaseVisitor<FunctionSignature>() {
+
+    val availableFunctions = parentContext.availableFunctions
+    val localVariableTypes = parentContext.localVariableTypes
 
     override fun visitDirectFunctionIdentifier(ctx: EuclinParser.DirectFunctionIdentifierContext): FunctionSignature {
         val name = ctx.Identifier().text
-        val signature = availableFunctions[name] ?: compileError("Pas de fonction trouvée avec le nom $name", "?", ctx)
+        val signature = availableFunctions[name] ?: compileError("Pas de fonction trouvée avec le nom $name", parentContext.currentClass, ctx)
         return signature
     }
 
@@ -30,7 +29,7 @@ class FunctionMatcher(val availableFunctions: FunctionList, val translator: Expr
         val funcName = identifierList.last().text
         val method = deepest.listMethods().find { it.name == funcName }
                 ?: deepest.listStaticMethods().find { it.name == funcName }
-                ?: compileError("Aucune fonction du nom $funcName dans le type $deepest", "?", ctx)
+                ?: compileError("Aucune fonction du nom $funcName dans le type $deepest", parentContext.currentClass, ctx)
         return method
     }
 
@@ -42,13 +41,13 @@ class FunctionMatcher(val availableFunctions: FunctionList, val translator: Expr
                 val type = localVariableTypes[name]!!
                 return type
             } else {
-                compileError("Aucune variable du nom $name", identifier.symbol.line, "?")
+                compileError("Aucune variable du nom $name", identifier.symbol.line, parentContext.currentClass)
             }
         } else {
             if(parent.listFields().any { it.name == name }) { // si un des champs a le bon nom
                 return parent.listFields().find { it.name == name }!!.type
             } else {
-                compileError("Aucun membre du nom de $name dans le type $parent", identifier.symbol.line, "?")
+                compileError("Aucun membre du nom de $name dans le type $parent", identifier.symbol.line, parentContext.currentClass)
             }
         }
     }

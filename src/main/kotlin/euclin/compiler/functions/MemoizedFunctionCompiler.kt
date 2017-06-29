@@ -1,5 +1,6 @@
 package euclin.compiler.functions
 
+import euclin.compiler.Context
 import org.jglr.inference.types.TypeDefinition
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
@@ -9,15 +10,19 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 
 object MemoizedFunctionCompiler {
-    fun compile(functionCodeBlock: EuclinParser.FunctionCodeBlockContext, classWriter: ClassWriter, signature: FunctionSignature,
-                availableFunctions: Map<String, FunctionSignature>, lambdaExpressions: Map<String, FunctionSignature>) {
+    fun compile(functionCodeBlock: EuclinParser.FunctionCodeBlockContext, context: Context) {
 
+        val classWriter = context.classWriter
+        val signature: FunctionSignature = context.currentFunction
+        val availableFunctions = context.availableFunctions
+        val lambdaExpressions = context.lambdaExpressions
         val fieldName = "${signature.name}\$cache"
         createCacheField(fieldName, classWriter)
         createCacheInitialization(fieldName, signature, classWriter)
 
         val computeFunction = FunctionSignature("${signature.name}\$compute", signature.arguments, signature.returnType, signature.ownerClass, signature.static)
-        val functionCompiler = FunctionCompiler(classWriter, computeFunction, availableFunctions, lambdaExpressions)
+        val computeContext = context.withSignature(computeFunction)
+        val functionCompiler = FunctionCompiler(computeContext)
         functionCompiler.visit(functionCodeBlock)
 
         createCacheSeekMethod(fieldName, signature, classWriter)

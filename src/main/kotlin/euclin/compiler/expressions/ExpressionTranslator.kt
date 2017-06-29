@@ -1,32 +1,29 @@
 package euclin.compiler.expressions
 
-import euclin.compiler.FunctionList
+import euclin.compiler.*
 import org.jglr.inference.TypeInferer
 import org.jglr.inference.expressions.*
 import org.jglr.inference.expressions.Function
-import org.jglr.inference.types.TypeDefinition
 import euclin.compiler.functions.FunctionSignature
-import euclin.compiler.compileError
 import euclin.compiler.functions.FunctionMatcher
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
-import euclin.compiler.name
-import euclin.compiler.type
 import euclin.compiler.types.*
 import org.antlr.v4.runtime.ParserRuleContext
 import org.jglr.inference.ImpossibleUnificationExpression
-import org.objectweb.asm.Opcodes
 
-class ExpressionTranslator(val availableFunctions: FunctionList) : EuclinBaseVisitor<Expression>() {
+class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expression>() {
 
+    private val availableFunctions = parentContext.availableFunctions
+    private val variableTypes = parentContext.localVariableTypes
     private var lambdaVar = Variable("_") of RealType
     private val True = Literal(true, BooleanType)
     private val False = Literal(false, BooleanType)
     private val UnitValue = Literal(Unit, UnitType)
     private val inferer = TypeInferer()
     private val alreadyTranslated = hashMapOf<ParserRuleContext, Expression>()
-    val variableTypes = hashMapOf<String, TypeDefinition>()
-    private val funcMatcher = FunctionMatcher(availableFunctions, this, variableTypes)
+    private val funcMatcher: FunctionMatcher
+        get() = parentContext.functionMatcher
 
     init {
         with(inferer) {
@@ -61,7 +58,6 @@ class ExpressionTranslator(val availableFunctions: FunctionList) : EuclinBaseVis
     override fun visitAccessExpr(ctx: EuclinParser.AccessExprContext): Expression {
         val chain = ctx.Identifier()
         val first = translate(ctx.expression())
-        val lineNumber = chain[0].symbol.line
         var deepest = first
         for(id in chain) { // on regarde les identifiants qui sont nécessairement des membres
             val name = id.text
@@ -69,7 +65,7 @@ class ExpressionTranslator(val availableFunctions: FunctionList) : EuclinBaseVis
             val parent = deepest
             val field = fields.find { it.name == name }
             deepest = AccessExpression(parent, field?.name
-                    ?: compileError("Aucun membre du nom de $name dans $deepest", lineNumber, "?"))
+                    ?: compileError("Aucun membre du nom de $name dans $deepest", parentContext.currentClass, ctx))
             deepest of field.type
         }
         return deepest
@@ -100,11 +96,11 @@ class ExpressionTranslator(val availableFunctions: FunctionList) : EuclinBaseVis
     override fun visitVarExpr(ctx: EuclinParser.VarExprContext): Expression {
         val name = ctx.Identifier().text
         if(variableTypes.containsKey(name)) // est-ce une variable locale ?
-            return Variable(name) of (variableTypes[name] ?: compileError("Pas de variable trouvée avec le nom $name", "?", ctx))
+            return Variable(name) of (variableTypes[name] ?: compileError("Pas de variable trouvée avec le nom $name", parentContext.currentClass, ctx))
         else if(availableFunctions.containsKey(name)) // est-ce une fonction ?
-            return function(availableFunctions[name] ?: compileError("Pas de variable trouvée avec le nom $name", "?", ctx))
+            return function(availableFunctions[name] ?: compileError("Pas de variable trouvée avec le nom $name", parentContext.currentClass, ctx))
         else
-            compileError("Unknown variable $name", "?", ctx) // non c'est un symbole inconnu!
+            compileError("Unknown variable $name", parentContext.currentClass, ctx) // non c'est un symbole inconnu!
     }
 
     override fun visitIntExpr(ctx: EuclinParser.IntExprContext): Expression {

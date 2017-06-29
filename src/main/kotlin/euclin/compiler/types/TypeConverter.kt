@@ -1,5 +1,6 @@
 package euclin.compiler.types
 
+import euclin.compiler.Context
 import euclin.compiler.compileAssert
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TupleType
@@ -7,17 +8,25 @@ import org.jglr.inference.types.TypeDefinition
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 
-object TypeConverter: EuclinBaseVisitor<TypeDefinition>() {
+class TypeConverter(val parentContext: Context): EuclinBaseVisitor<TypeDefinition>() {
 
     override fun visitBasicType(type: EuclinParser.BasicTypeContext): TypeDefinition {
-        return when(type.text) {
-            // Types de bases d'Euclin
+        return convertBasic(type.text)
+    }
+
+    fun convertBasic(text: String): TypeDefinition {
+        return when(text) {
+        // Types de bases d'Euclin
             "Int" -> IntType
             "Real" -> RealType
             "Unit" -> UnitType
             "String" -> StringType
-            else -> BasicType(type.text)
+            else -> parentContext.type(text)
         }
+    }
+
+    override fun visitWildcardType(ctx: EuclinParser.WildcardTypeContext?): TypeDefinition {
+        return WildcardType
     }
 
     override fun visitCoupleType(ctx: EuclinParser.CoupleTypeContext): TypeDefinition {

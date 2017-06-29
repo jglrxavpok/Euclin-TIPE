@@ -2,6 +2,7 @@ package euclin.compiler.types
 
 import euclin.compiler.TypedMember
 import euclin.compiler.functions.FunctionSignature
+import org.jglr.inference.types.PolymorphicType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
 
@@ -12,6 +13,7 @@ val BooleanType: TypeDefinition = BasicType("euclin.std.Boolean")
 val UnitType: TypeDefinition = BasicType("euclin.std.UnitObject")
 val StringType: TypeDefinition = BasicType("java.lang.String")
 val JVMVoid: TypeDefinition = BasicType("void")
+val WildcardType: TypeDefinition = PolymorphicType()
 
 val IntPointType = TupleType(arrayOf(IntType, IntType)) // TODO: 'Generic' types ?
 val RealPointType = TupleType(arrayOf(RealType, RealType))

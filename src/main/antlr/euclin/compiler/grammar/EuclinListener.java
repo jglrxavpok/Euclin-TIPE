@@ -76,6 +76,18 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitDeclareVarInstruction(EuclinParser.DeclareVarInstructionContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code DeclareStructInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 */
+	void enterDeclareStructInstruction(EuclinParser.DeclareStructInstructionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code DeclareStructInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 */
+	void exitDeclareStructInstruction(EuclinParser.DeclareStructInstructionContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code AssignVarInstruction}
 	 * labeled alternative in {@link EuclinParser#instructions}.
 	 * @param ctx the parse tree
@@ -148,6 +160,16 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitWhileLoopInstruction(EuclinParser.WhileLoopInstructionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link EuclinParser#structureDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterStructureDeclaration(EuclinParser.StructureDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EuclinParser#structureDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitStructureDeclaration(EuclinParser.StructureDeclarationContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link EuclinParser#elseBlock}.
 	 * @param ctx the parse tree
 	 */
@@ -205,6 +227,18 @@ public interface EuclinListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBasicType(EuclinParser.BasicTypeContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code WildcardType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void enterWildcardType(EuclinParser.WildcardTypeContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code WildcardType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void exitWildcardType(EuclinParser.WildcardTypeContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link EuclinParser#parameter}.
 	 * @param ctx the parse tree
@@ -489,6 +523,18 @@ public interface EuclinListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDivExpr(EuclinParser.DivExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code InstantiateExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstantiateExpr(EuclinParser.InstantiateExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code InstantiateExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstantiateExpr(EuclinParser.InstantiateExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code VarExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.

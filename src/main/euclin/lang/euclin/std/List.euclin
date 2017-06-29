@@ -1,0 +1,69 @@
+struct Node {
+    data: @
+    next: Node
+    prev: Node
+}
+
+struct List {
+    head: Node
+    last: Node
+    length: Int
+}
+
+func nullNode(): Node {
+    var nullNode = new Node
+    nullNode.data = ()
+    return nullNode
+}
+
+func new(): List {
+    var list = new List
+    list.length = 0
+    return list
+}
+
+func length(list: List): Int {
+    return list.length
+}
+
+func add(target: List, element: @): Unit {
+    var node = new Node
+    node.data = element
+    if(target.size == 0) {
+        target.head = node
+        target.last = node
+        target.length = 1
+    } else {
+        var prev = target.last
+        target.last = node
+        node.prev = prev
+        prev.next = node
+        target.length = target.length+1
+    }
+}
+
+func getNode(from: List, at: Int): Node {
+    if(at < 0) {
+        return nullNode()
+    }
+    if(at >= length(list)) {
+        return nullNode()
+    }
+    var index = at
+    var node = from.head
+    while(index > 0) {
+        index = index-1
+        node = node.next
+    }
+    return node
+}
+
+func get(from: List, at: Int): @ {
+    return getNode(from, at).data
+}
+
+func clear(target: List): Unit {
+    target.length = 0
+    target.head = nullNode()
+    target.last = nullNode()
+}

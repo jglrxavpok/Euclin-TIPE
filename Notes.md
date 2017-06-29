@@ -28,4 +28,4 @@ Différence fcmpl/fcmpg
 
 A faire:
 ========
-(Compileur) Remplacer les 'assert' et 'error' de Kotlin par un système d'exceptions permettant d'indiquer la position de l'erreur
+(Compileur+Std) Ajouter des soft et hard cast (soft cast -> juste remplacer le type (CHECKCAST?); hard cast -> un 'vrai' cast au sens de la JVM (CHECKCAST + i2f eg.))

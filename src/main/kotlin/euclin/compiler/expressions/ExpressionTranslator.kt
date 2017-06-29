@@ -200,4 +200,8 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
         return GreaterEqualThan(left, right)
     }
     // Fin des opérateurs de comparaison
+
+    override fun visitInstantiateExpr(ctx: EuclinParser.InstantiateExprContext): Expression {
+        return OpaqueExpression(ctx.text) of parentContext.typeConverter.convertBasic(ctx.Identifier().text)
+    }
 }

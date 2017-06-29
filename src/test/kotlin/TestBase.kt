@@ -13,7 +13,7 @@ object TestBase {
         val sourceCode = javaClass.getResourceAsStream("/$name.euclin").bufferedReader().use { it.readText() } // ferme le flux après
         val data = EuclinCompiler.compile(sourceCode, "$name.euclin")
 
-        FileOutputStream(File("runtime/tests", "$name.class")).use {
+        FileOutputStream(File("runtime/tests", "${name}Application.class")).use {
             it.write(data)
             it.flush()
             it.close()

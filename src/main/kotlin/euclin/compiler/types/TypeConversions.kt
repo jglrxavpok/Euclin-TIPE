@@ -1,5 +1,6 @@
 package euclin.compiler.types
 
+import euclin.compiler.EuclinCompiler.OBJECT_TYPE
 import euclin.compiler.TypedMember
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TupleType
@@ -23,6 +24,7 @@ fun basicType(type: TypeDefinition): ASMType {
         RealPointType -> RealPointASMType
         IntPointType -> IntegerPointASMType
         JVMVoid -> ASMType.VOID_TYPE
+        WildcardType -> OBJECT_TYPE
         is FunctionType -> generateFunctionObjectType(type)
         // TODO: Autres types?
         else -> ASMType.getObjectType(type.toString().replace(".", "/"))

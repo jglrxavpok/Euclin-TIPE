@@ -51,6 +51,13 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDeclareVarInstruction(EuclinParser.DeclareVarInstructionContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code DeclareStructInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeclareStructInstruction(EuclinParser.DeclareStructInstructionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code AssignVarInstruction}
 	 * labeled alternative in {@link EuclinParser#instructions}.
 	 * @param ctx the parse tree
@@ -93,6 +100,12 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitWhileLoopInstruction(EuclinParser.WhileLoopInstructionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link EuclinParser#structureDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStructureDeclaration(EuclinParser.StructureDeclarationContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link EuclinParser#elseBlock}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -126,6 +139,13 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitBasicType(EuclinParser.BasicTypeContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code WildcardType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWildcardType(EuclinParser.WildcardTypeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link EuclinParser#parameter}.
 	 * @param ctx the parse tree
@@ -293,6 +313,13 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDivExpr(EuclinParser.DivExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code InstantiateExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstantiateExpr(EuclinParser.InstantiateExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code VarExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.

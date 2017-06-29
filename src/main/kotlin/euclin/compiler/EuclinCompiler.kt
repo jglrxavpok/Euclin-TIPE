@@ -20,18 +20,11 @@ object EuclinCompiler {
 
     val OBJECT_TYPE: ASMType = ASMType.getType(Object::class.java)
 
-    fun compile(sourceCode: String, filename: String): ByteArray {
+    fun compile(sourceCode: String, filename: String, isApplication: Boolean = true): ByteArray {
         val startTime = System.nanoTime()
 
         // Inspection de la librairie standard
         inspectStandardLibrary()
-
-        val classWriter = ClassWriter(ClassWriter.COMPUTE_FRAMES) // laisse ASM générer les frames et maxs
-        val className = filename.substringAfterLast(File.separator).substringBefore(".") // dernier fichier du chemin et on retire l'extension
-        val classType = ASMType.getObjectType(className)
-        classWriter.visit(V1_8, ACC_PUBLIC, classType.internalName, null, OBJECT_TYPE.internalName, arrayOf("euclin/intrisincs/EuclinApplication"))
-
-        val functionGatherer = FunctionGatherer(className)
 
         // création du lexer et du parser
         val lexer = EuclinLexer(CharStreams.fromString(sourceCode, filename))
@@ -39,15 +32,23 @@ object EuclinCompiler {
 
         val code = parser.codeBlock() // on récupère le corps du code
 
+        val classWriter = ClassWriter(ClassWriter.COMPUTE_FRAMES) // laisse ASM générer les frames et maxs
+        val className = filename.substringAfterLast(File.separator).substringBefore(".")+ if(isApplication) "Application" else "" // dernier fichier du chemin et on retire l'extension
+        val classType = ASMType.getObjectType(className)
+        classWriter.visit(V1_8, ACC_PUBLIC, classType.internalName, null, OBJECT_TYPE.internalName, arrayOf("euclin/intrisincs/EuclinApplication"))
+
+        val context = Context(className, classWriter, hashMapOf())
+        val functionGatherer = FunctionGatherer(context)
+
         // on récupère la liste des signatures (ou têtes) de fonctions présentes dans le code
         val functions = functionGatherer.gather(code).toMutableMap()
 
         // on y ajoute les fonctions de la bibliothèque standard
         addStandardFunctions(functions)
+        context.availableFunctions.putAll(functions)
 
         // on génére le code des lambda-fonctions
 
-        val context = Context(className, classWriter, functions)
         val lambdaExpressions = compileLambdas(code, context)
         context.lambdaExpressions.putAll(lambdaExpressions)
 

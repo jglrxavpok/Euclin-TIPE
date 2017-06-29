@@ -1,5 +1,6 @@
 package euclin.compiler.functions
 
+import euclin.compiler.Context
 import euclin.compiler.TypedMember
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TupleType
@@ -8,7 +9,9 @@ import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.TypeConverter
 
-class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignature>() {
+class FunctionGatherer(val parentContext: Context): EuclinBaseVisitor<FunctionSignature>() {
+
+    val ownerClass: String = parentContext.currentClass
 
     fun gather(code: EuclinParser.CodeBlockContext): Map<String, FunctionSignature> {
         val result = hashMapOf<String, FunctionSignature>()
@@ -29,7 +32,7 @@ class FunctionGatherer(val ownerClass: String): EuclinBaseVisitor<FunctionSignat
     }
 
     private fun toType(type: EuclinParser.TypeContext): TypeDefinition {
-        return TypeConverter.visit(type)
+        return parentContext.typeConverter.visit(type)
     }
 }
 

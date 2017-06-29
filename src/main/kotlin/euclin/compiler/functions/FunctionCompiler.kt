@@ -561,7 +561,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         val conditionExpr = ctx.expression()
         val condition = translator.translate(conditionExpr)
         compileAssert(condition.type == BooleanType, functionSignature.ownerClass, ctx) { "La condition doit être un booléen!" }
-        val code = ctx.instructions()
+        val code = ctx.functionInstructions()
         val conditionLabel = Label()
         val endLabel = Label()
 
@@ -580,7 +580,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         }
     }
 
-    private fun compileInstructions(code: List<EuclinParser.InstructionsContext>) {
+    private fun compileInstructions(code: List<EuclinParser.FunctionInstructionsContext>) {
         for(instruction in code) {
             addLineInfos(instruction)
             visit(instruction) // on compile l'instruction
@@ -598,7 +598,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         val conditionExpr = ctx.expression()
         val condition = translator.translate(conditionExpr)
         compileAssert(condition.type == BooleanType, functionSignature.ownerClass, ctx) { "La condition doit être un booléen!" }
-        val code = ctx.instructions()
+        val code = ctx.functionInstructions()
         val endLabel = Label()
         val elseStartLabel = Label()
 
@@ -615,11 +615,26 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
             if(hasElseBlock) {
                 val elseBlock = ctx.elseBlock()
                 visitLabel(elseStartLabel)
-                compileInstructions(elseBlock.instructions())
+                compileInstructions(elseBlock.functionInstructions())
             }
 
             visitLabel(endLabel)
         }
+    }
+
+    override fun visitDeclareStructInstruction(ctx: EuclinParser.DeclareStructInstructionContext) {
+        // on ignore
+    }
+
+    override fun visitInstantiateExpr(ctx: EuclinParser.InstantiateExprContext) {
+        // seulement pour les structures!
+        // TODO: voir comment gérer la création d'objets qui ne viennent pas d'Euclin
+        val type = parentContext.typeConverter.convertBasic(ctx.Identifier().text)
+        val internalName = basicType(type).internalName
+        writer.visitTypeInsn(NEW, internalName)
+        writer.visitInsn(DUP)
+        writer.visitMethodInsn(INVOKESPECIAL, internalName, "<init>", "()V", false)
+        typeStack.push(type)
     }
 
     // Opérateurs de comparaison

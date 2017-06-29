@@ -41,6 +41,7 @@ object TypeInspector {
             UnitObject::class.java -> UnitType
             Void.TYPE -> JVMVoid
             Unit::class.java -> JVMVoid
+            Object::class.java -> WildcardType
             else -> BasicType(clazz.canonicalName)
         }
     }

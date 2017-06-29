@@ -19,16 +19,23 @@ functionInstructions
 instructions
     : expression            #ExpressionInstruction
     | variableDeclaration   #DeclareVarInstruction
+    | structureDeclaration  #DeclareStructInstruction
     | variableAssign        #AssignVarInstruction
     | memberAssign          #AssignMemberInstruction
     | transformBlock        #TransformBlockInstruction
     | functionDeclaration   #DeclareFuncInstruction
-    | If LeftBracket expression RightBracket LeftCurlyBracket instructions* RightCurlyBracket elseBlock?    #IfBranchingInstruction
-    | While LeftBracket expression RightBracket LeftCurlyBracket instructions* RightCurlyBracket            #WhileLoopInstruction
+    | If LeftBracket expression RightBracket LeftCurlyBracket functionInstructions* RightCurlyBracket elseBlock?    #IfBranchingInstruction
+    | While LeftBracket expression RightBracket LeftCurlyBracket functionInstructions* RightCurlyBracket            #WhileLoopInstruction
+    ;
+
+structureDeclaration
+    : StructStart Identifier LeftCurlyBracket
+        (parameter)* // ce sont les membres de cette structure
+    RightCurlyBracket
     ;
 
 elseBlock
-    : Else LeftCurlyBracket instructions* RightCurlyBracket
+    : Else LeftCurlyBracket functionInstructions* RightCurlyBracket
     ;
 
 type
@@ -36,6 +43,7 @@ type
     | LeftBracket type Comma type RightBracket                          #CoupleType
     | LeftBracket type RightBracket                                     #WrappedType
     | Identifier                                                        #BasicType
+    | Star                                                              #WildcardType
     ;
 
 parameter
@@ -75,6 +83,7 @@ transformBlock
 // définies par ordre de précédence
 expression
     : LambdaVariable                            #LambdaVarExpr
+    | New Identifier                          #InstantiateExpr
     | LeftSquareBracket expression RightSquareBracket   #LambdaFunctionExpr
     | expression (Period Identifier)+              #AccessExpr
     | functionCall                              #CallExpr
@@ -121,6 +130,8 @@ Memoized: 'memoized';
 Else: 'else';
 If: 'if';
 While: 'while';
+StructStart: 'struct';
+New: 'new';
 
 // Ponctuation
 LambdaVariable: '_';
@@ -141,6 +152,7 @@ Less: '<';
 LessEqual: '<=';
 Greater: '>';
 GreaterEqual: '>=';
+Star: '@';
 
 Identifier: IdentifierStart IdentifierPart*;
 Integer: Digits;

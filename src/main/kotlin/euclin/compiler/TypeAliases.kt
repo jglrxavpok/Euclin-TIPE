@@ -12,4 +12,4 @@ val TypedMember.name
 val TypedMember.type
     get() = this.second
 
-internal typealias FunctionList = Map<String, FunctionSignature>
+internal typealias FunctionList = HashMap<String, FunctionSignature>

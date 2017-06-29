@@ -7,7 +7,7 @@ object StdCompiler {
     private val output = File(".", "runtime/std")
 
     @JvmStatic fun main(args: Array<String>) {
-        val stdFolder = File(".", "src/main/euclin/lang/")
+        val stdFolder = File("./src/main/euclin/lang/", "")
         compileAllIn(stdFolder)
     }
 
@@ -17,13 +17,15 @@ object StdCompiler {
             if(file.isDirectory) {
                 compileAllIn(file)
             } else if(file.name.endsWith(".euclin")) {
-                val compiledCode = EuclinCompiler.compile(read(file), file.path)
-                val destination = File(output, file.path)
-                if(!destination.parentFile.exists())
-                    destination.parentFile.mkdirs()
-                destination.outputStream().use {
-                    it.write(compiledCode)
-                    it.flush()
+                val results = EuclinCompiler.compile(read(file), file.path, isApplication = false)
+                for((filename, compiledCode) in results) {
+                    val destination = File(output, "$filename.class")
+                    if(!destination.parentFile.exists())
+                        destination.parentFile.mkdirs()
+                    destination.outputStream().use {
+                        it.write(compiledCode)
+                        it.flush()
+                    }
                 }
             }
         }

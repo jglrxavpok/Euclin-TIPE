@@ -349,6 +349,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
                 visitParameter(name, Opcodes.ACC_FINAL)
                 localVariableIDs[name] = index
                 localVariableTypes[name] = type
+                localIndex++
             }
             visitCode()
             visitLabel(startLabel)

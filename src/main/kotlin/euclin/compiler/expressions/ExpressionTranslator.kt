@@ -20,7 +20,7 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
     private val True = Literal(true, BooleanType)
     private val False = Literal(false, BooleanType)
     private val UnitValue = Literal(Unit, UnitType)
-    private val inferer = TypeInferer()
+    internal val inferer = TypeInferer()
     private val alreadyTranslated = hashMapOf<ParserRuleContext, Expression>()
     private val funcMatcher: FunctionMatcher
         get() = parentContext.functionMatcher
@@ -65,7 +65,7 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
             val parent = deepest
             val field = fields.find { it.name == name }
             deepest = AccessExpression(parent, field?.name
-                    ?: compileError("Aucun membre du nom de $name dans $deepest", parentContext.currentClass, ctx))
+                    ?: compileError("Aucun membre du nom de $name dans ${deepest.type}", parentContext.currentClass, ctx))
             deepest of field.type
         }
         return deepest

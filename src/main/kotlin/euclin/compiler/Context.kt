@@ -4,7 +4,9 @@ import euclin.compiler.expressions.ExpressionTranslator
 import euclin.compiler.functions.FunctionMatcher
 import euclin.compiler.functions.FunctionSignature
 import euclin.compiler.types.BasicType
+import euclin.compiler.types.ObjectType
 import euclin.compiler.types.TypeConverter
+import euclin.compiler.types.WildcardType
 import org.jglr.inference.types.TypeDefinition
 import org.objectweb.asm.ClassWriter
 
@@ -48,8 +50,12 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
         if(knownTypes.containsKey(text))
             return knownTypes[text]!!
 
-        val value = BasicType(text)
+        val value = ObjectType(text, WildcardType)
         knownTypes[text] = value
         return value
+    }
+
+    fun registerType(name: String, type: BasicType) {
+        knownTypes[name] = type
     }
 }

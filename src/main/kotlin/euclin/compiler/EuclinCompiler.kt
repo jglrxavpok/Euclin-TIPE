@@ -11,7 +11,6 @@ import euclin.compiler.lambda.LambdaCompiler
 import euclin.intrisincs.EuclinApplication
 import euclin.intrisincs.MemoizationCache
 import euclin.std.*
-import euclin.std.functions.FuncF2F
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes.*
 import java.io.File
@@ -20,7 +19,7 @@ object EuclinCompiler {
 
     val OBJECT_TYPE: ASMType = ASMType.getType(Object::class.java)
 
-    fun compile(sourceCode: String, filename: String, isApplication: Boolean = true): ByteArray {
+    fun compile(sourceCode: String, filename: String, isApplication: Boolean = true): Map<String, ByteArray> {
         val startTime = System.nanoTime()
 
         // Inspection de la librairie standard
@@ -32,12 +31,14 @@ object EuclinCompiler {
 
         val code = parser.codeBlock() // on récupère le corps du code
 
-        val classWriter = ClassWriter(ClassWriter.COMPUTE_FRAMES) // laisse ASM générer les frames et maxs
         val className = filename.substringAfterLast(File.separator).substringBefore(".")+ if(isApplication) "Application" else "" // dernier fichier du chemin et on retire l'extension
+        val classWriter = EuclinClassWriter() // laisse ASM générer les frames et maxs
         val classType = ASMType.getObjectType(className)
         classWriter.visit(V1_8, ACC_PUBLIC, classType.internalName, null, OBJECT_TYPE.internalName, arrayOf("euclin/intrisincs/EuclinApplication"))
 
         val context = Context(className, classWriter, hashMapOf())
+        classWriter.context = context
+        val structures = StructureCompiler(context).compileStructs(code)
         val functionGatherer = FunctionGatherer(context)
 
         // on récupère la liste des signatures (ou têtes) de fonctions présentes dans le code
@@ -62,21 +63,23 @@ object EuclinCompiler {
         compileFunctions(code, context)
 
         // on génère un constructeur basique
-        val constructor = classWriter.visitMethod(ACC_PUBLIC, "<init>", "()V", null, emptyArray())
-        with(constructor) {
-            visitCode()
-            visitVarInsn(ALOAD, 0) // load 'this'
-            visitMethodInsn(INVOKESPECIAL, OBJECT_TYPE.internalName, "<init>", "()V", false) // 'super.<init>()'
-            visitInsn(RETURN)
-            visitMaxs(0,0)
-            visitEnd()
+        if(isApplication) {
+            val constructor = classWriter.visitMethod(ACC_PUBLIC, "<init>", "()V", null, emptyArray())
+            with(constructor) {
+                visitCode()
+                visitVarInsn(ALOAD, 0) // load 'this'
+                visitMethodInsn(INVOKESPECIAL, OBJECT_TYPE.internalName, "<init>", "()V", false) // 'super.<init>()'
+                visitInsn(RETURN)
+                visitMaxs(0,0)
+                visitEnd()
+            }
         }
 
         classWriter.visitEnd()
         val endTime = System.nanoTime()
         val elapsedTime = (endTime - startTime) / 1000000.0f
         println("Compiled $filename in $elapsedTime ms")
-        return classWriter.toByteArray()
+        return hashMapOf(className to classWriter.toByteArray()) + structures
     }
 
     private fun inspectStandardLibrary() {

@@ -25,6 +25,33 @@ class ObjectType(val name: String, val parent: TypeDefinition): TypeDefinition()
         return name
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other is ObjectType) {
+            return other.name == name && other.parent == parent
+        }
+        return false
+    }
+
+    override fun compare(other: TypeDefinition, firstCall: Boolean): Int {
+        if(this == other)
+            return 0
+        if(other is BasicType) {
+            if(parent >= other)
+                return 1
+            if(parent <= other)
+                return -1
+        }
+        if(other is ObjectType) {
+            if(other.parent >= parent)
+                return -1
+            if(parent >= other.parent)
+                return 1
+        }
+        if(!firstCall) {
+            return -other.compare(this, firstCall = false)
+        }
+        throw IllegalArgumentException("Cannot compare types $this and $other")
+    }
 }
 
 class BasicType(private val toString: String): TypeDefinition() {

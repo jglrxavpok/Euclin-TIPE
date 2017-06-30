@@ -290,7 +290,6 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
 
     override fun visitReturnFuncInstruction(ctx: EuclinParser.ReturnFuncInstructionContext) {
         visit(ctx.expression()) // compile l'expression
-        println(">> ${parentContext.currentFunction.name} / ${ctx.start.line}")
         val inferredType = typeStack.pop()
         if(inferredType > functionSignature.returnType)
             compileError("La valeur de retour n'est pas compatible avec celui de la signature de la fonction ($inferredType > ${functionSignature.returnType})", functionSignature.ownerClass, ctx)

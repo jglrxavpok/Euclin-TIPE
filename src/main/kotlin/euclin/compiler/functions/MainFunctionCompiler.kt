@@ -8,6 +8,9 @@ import euclin.compiler.types.basicType
 import org.objectweb.asm.Opcodes.*
 
 class MainFunctionCompiler(val parentContext: Context): FunctionCompiler(parentContext) {
+
+    override val isMainFunction: Boolean = true
+
     override fun visitFunctionDeclaration(ctx: EuclinParser.FunctionDeclarationContext) {
         // On ne fait rien
     }

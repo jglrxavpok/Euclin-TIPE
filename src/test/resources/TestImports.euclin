@@ -1,6 +1,6 @@
 import method euclin.std.ListOperations.create as createList
 import euclin.std.ListOperations as LOps
-import method LOps.*
+import method LOps.@
 import method euclin.std.Console.writeln as println
 
 var myList = createList()

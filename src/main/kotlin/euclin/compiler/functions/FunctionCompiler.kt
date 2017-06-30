@@ -37,7 +37,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
     private val startLabel = Label()
     private val endLabel = Label()
 
-    private val isMainFunction = functionSignature.name == "__main"
+    protected open val isMainFunction = false
 
     init {
         var access = ACC_FINAL or ACC_PUBLIC
@@ -53,7 +53,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
     }
 
     /**
-     * Corriges l'instruction donnée pour coller au type
+     * Corrige l'instruction donnée pour coller au type
      */
     fun correctOpcode(baseOpcode: Int, type: TypeDefinition): Int {
         return basicType(type).getOpcode(baseOpcode)
@@ -257,6 +257,8 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
             } else if(availableFunctions.containsKey(name)) { // ça peut être une fonction utilisée comme valeur, on vérifie
                 val func = availableFunctions[name]!!
                 compileMethodReference(func)
+            } else {
+                compileError("Aucune variable du nom de $name", parentContext.currentClass, ctx)
             }
         }
     }
@@ -287,7 +289,8 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
     }
 
     override fun visitReturnFuncInstruction(ctx: EuclinParser.ReturnFuncInstructionContext) {
-        super.visitReturnFuncInstruction(ctx) // compile l'expression
+        visit(ctx.expression()) // compile l'expression
+        println(">> ${parentContext.currentFunction.name} / ${ctx.start.line}")
         val inferredType = typeStack.pop()
         if(inferredType > functionSignature.returnType)
             compileError("La valeur de retour n'est pas compatible avec celui de la signature de la fonction ($inferredType > ${functionSignature.returnType})", functionSignature.ownerClass, ctx)

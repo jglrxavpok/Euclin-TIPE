@@ -36,7 +36,7 @@ importDeclaration
 
 methodImportDeclaration
     : ImportMethod Identifier (Period Identifier)* renamming?   #BasicMethodImport
-    | ImportMethod Identifier (Period Identifier)* Period '*'   #ImportAllMethods
+    | ImportMethod Identifier (Period Identifier)* Period Star   #ImportAllMethods
     ;
 
 renamming
@@ -215,7 +215,7 @@ fragment Digit
     ;
 
 fragment BinaryOperatorSuffix
-    : ('.')?
+    : '.'?
     ;
 
 // Commentaires et blancs

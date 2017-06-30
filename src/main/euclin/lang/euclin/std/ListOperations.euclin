@@ -10,11 +10,8 @@ struct List {
     length: Int
 }
 
-func nullNode(): Node {
-    var nullNode = new Node
-    nullNode.data = ()
-    return nullNode
-}
+var nullNode = new Node
+nullNode.data = ()
 
 func create(): List {
     var list = new List
@@ -44,10 +41,10 @@ func add(target: List, element: @): Unit {
 
 func getNode(from: List, at: Int): Node {
     if(at < 0) {
-        return nullNode()
+        return nullNode
     }
     if(at >= length(from)) {
-        return nullNode()
+        return nullNode
     }
     var index = at
     var node = from.head
@@ -64,6 +61,6 @@ func get(from: List, at: Int): @ {
 
 func clear(target: List): Unit {
     target.length = 0
-    target.head = nullNode()
-    target.last = nullNode()
+    target.head = nullNode
+    target.last = nullNode
 }

@@ -31,6 +31,13 @@ object TypeInspector {
                 destination.listMethods() += FunctionSignature(name, args, convert(returnType, context), target.canonicalName, static = false)
             }
         }
+
+        target.declaredConstructors.filter { Modifier.isPublic(it.modifiers) /* La fonction doit être publique */ }.forEach {
+            val name = it.name
+            val args = it.parameters.map { TypedMember(it.name, convert(it.type, context)) }
+
+            destination.listConstructors() += FunctionSignature(name, args, convert(Void.TYPE, context), target.canonicalName, static = false)
+        }
     }
 
     fun inspect(bytecode: ByteArray, destination: TypeDefinition, context: Context) {
@@ -51,7 +58,14 @@ object TypeInspector {
             Unit::class.java -> JVMVoid
             Object::class.java -> WildcardType
             String::class.java -> StringType
-            else -> context.typeConverter.convertBasic(clazz.canonicalName)
+            else -> {
+                val known = context.knowsType(clazz.canonicalName)
+                val basic = context.typeConverter.convertBasic(clazz.canonicalName)
+                if( ! known) {
+                    inspect(clazz, basic, context)
+                }
+                basic
+            }
         }
     }
 }

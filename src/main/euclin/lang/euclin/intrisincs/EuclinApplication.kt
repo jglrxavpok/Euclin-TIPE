@@ -1,5 +1,5 @@
 package euclin.intrisincs
 
 interface EuclinApplication {
-    fun __main(): Unit
+    fun _main(): Unit
 }

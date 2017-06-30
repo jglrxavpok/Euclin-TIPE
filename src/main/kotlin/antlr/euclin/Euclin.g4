@@ -98,7 +98,7 @@ transformBlock
 // définies par ordre de précédence
 expression
     : LambdaVariable                            #LambdaVarExpr
-    | New Identifier                          #InstantiateExpr
+    | New Identifier (LeftBracket (expression (Comma expression)*)? RightBracket)? #NewObjectExpr
     | LeftSquareBracket expression RightSquareBracket   #LambdaFunctionExpr
     | expression (Period Identifier)+              #AccessExpr
     | functionCall                              #CallExpr

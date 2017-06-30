@@ -1,5 +1,6 @@
 package euclin.compiler
 
+import euclin.compiler.functions.FunctionSignature
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
 import org.objectweb.asm.ClassWriter
@@ -41,6 +42,8 @@ class StructureCompiler(val parentContext: Context) {
             visitMaxs(0, 0)
             visitEnd()
         }
+
+        correspondingType.listConstructors() += FunctionSignature("<init>", emptyList(), JVMVoid, name, static = false)
 
         writer.visitEnd()
 

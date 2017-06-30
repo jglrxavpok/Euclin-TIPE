@@ -201,7 +201,13 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
     }
     // Fin des opérateurs de comparaison
 
-    override fun visitInstantiateExpr(ctx: EuclinParser.InstantiateExprContext): Expression {
-        return OpaqueExpression(ctx.text) of parentContext.typeConverter.convertBasic(ctx.Identifier().text)
+    override fun visitNewObjectExpr(ctx: EuclinParser.NewObjectExprContext): Expression {
+        val type = parentContext.typeConverter.convertBasic(ctx.Identifier().text)
+        val args = ctx.expression().map { visit(it) }
+        val constructor = type.constructor(args.map(Expression::type))
+        if(constructor != null) {
+            return OpaqueExpression("new $type($constructor)") of type
+        }
+        compileError("Aucun constructeur correspondant à $args dans $type", parentContext.currentClass, ctx)
     }
 }

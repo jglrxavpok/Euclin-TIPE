@@ -448,6 +448,18 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitBoolFalseExpr(EuclinParser.BoolFalseExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code NewObjectExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterNewObjectExpr(EuclinParser.NewObjectExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NewObjectExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitNewObjectExpr(EuclinParser.NewObjectExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code MultExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.
 	 * @param ctx the parse tree
@@ -591,18 +603,6 @@ public interface EuclinListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDivExpr(EuclinParser.DivExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code InstantiateExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterInstantiateExpr(EuclinParser.InstantiateExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code InstantiateExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitInstantiateExpr(EuclinParser.InstantiateExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code VarExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.

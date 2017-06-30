@@ -484,6 +484,18 @@ public class EuclinBaseListener implements EuclinListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterNewObjectExpr(EuclinParser.NewObjectExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNewObjectExpr(EuclinParser.NewObjectExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterMultExpr(EuclinParser.MultExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -623,18 +635,6 @@ public class EuclinBaseListener implements EuclinListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDivExpr(EuclinParser.DivExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterInstantiateExpr(EuclinParser.InstantiateExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitInstantiateExpr(EuclinParser.InstantiateExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

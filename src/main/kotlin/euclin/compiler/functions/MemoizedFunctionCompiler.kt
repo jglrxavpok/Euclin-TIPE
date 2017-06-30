@@ -18,7 +18,7 @@ object MemoizedFunctionCompiler {
         val lambdaExpressions = context.lambdaExpressions
         val fieldName = "${signature.name}\$cache"
         createCacheField(fieldName, classWriter)
-        createCacheInitialization(fieldName, signature, classWriter)
+        createCacheInitialization(fieldName, signature, context)
 
         val computeFunction = FunctionSignature("${signature.name}\$compute", signature.arguments, signature.returnType, signature.ownerClass, signature.static)
         val computeContext = context.withSignature(computeFunction)
@@ -143,21 +143,14 @@ object MemoizedFunctionCompiler {
         return basicType(type).getOpcode(baseOpcode)
     }
 
-    private fun createCacheInitialization(fieldName: String, signature: FunctionSignature, classWriter: ClassWriter) {
-        // TODO: Voir s'il faut initialiser d'autres valeurs dans <clinit>
-        val mWriter = classWriter.visitMethod(ACC_STATIC, "<clinit>", "()V", null, emptyArray())
-        with(mWriter) {
-            visitCode()
+    private fun createCacheInitialization(fieldName: String, signature: FunctionSignature, context: Context) {
+        context.staticInit += {
             visitTypeInsn(NEW, "euclin/intrisincs/MemoizationCache")
             visitInsn(DUP)
             visitLdcInsn(signature.arguments.size)
             visitMethodInsn(INVOKESPECIAL, "euclin/intrisincs/MemoizationCache", "<init>", "(I)V", false)
             visitFieldInsn(PUTSTATIC, ASMType.getObjectType(signature.ownerClass.replace(".", "/")).internalName, fieldName, "Leuclin/intrisincs/MemoizationCache;")
-            visitInsn(RETURN)
-            visitMaxs(0, 0)
-            visitEnd()
         }
-
     }
 
     private fun createCacheField(fieldName: String, classWriter: ClassWriter) {

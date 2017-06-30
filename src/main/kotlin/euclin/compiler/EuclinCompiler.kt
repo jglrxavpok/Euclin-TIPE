@@ -60,7 +60,7 @@ object EuclinCompiler {
         context.lambdaExpressions.putAll(lambdaExpressions)
 
         // on génére la fonction principale
-        val mainFunctionName = if(isApplication) "__main" else "<clinit>"
+        val mainFunctionName = if(isApplication) "_main" else "_init"
         val mainSignature = FunctionSignature(mainFunctionName, emptyList(), JVMVoid, className, static = ! isApplication)
         context.currentFunction = mainSignature
         val mainCompiler = MainFunctionCompiler(context.clearLocals())
@@ -81,6 +81,14 @@ object EuclinCompiler {
                 visitEnd()
             }
         }
+
+
+        if(!isApplication) {
+            context.staticInit += {
+                visitMethodInsn(INVOKESTATIC, toInternalName(className), "_init", "()V", false)
+            }
+        }
+        context.createStaticBlock()
 
         classWriter.visitEnd()
         val endTime = System.nanoTime()

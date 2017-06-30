@@ -32,7 +32,12 @@ class TypeInspectorVisitor(val destination: TypeDefinition, val context: Context
         val args = methodType.first.mapIndexed { index, type ->
             TypedMember("arg$index", type)
         }
-        toModify += FunctionSignature(name, args, methodType.second, currentClass, isStatic)
+        val function = FunctionSignature(name, args, methodType.second, currentClass, isStatic)
+        if(name != "<init>") {
+            toModify += function
+        } else {
+            destination.listConstructors() += function
+        }
         return super.visitMethod(access, name, desc, signature, exceptions)
     }
 

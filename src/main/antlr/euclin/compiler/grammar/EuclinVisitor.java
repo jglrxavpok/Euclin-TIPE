@@ -270,6 +270,13 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBoolFalseExpr(EuclinParser.BoolFalseExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code NewObjectExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNewObjectExpr(EuclinParser.NewObjectExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code MultExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.
 	 * @param ctx the parse tree
@@ -353,13 +360,6 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDivExpr(EuclinParser.DivExprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code InstantiateExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitInstantiateExpr(EuclinParser.InstantiateExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code VarExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.

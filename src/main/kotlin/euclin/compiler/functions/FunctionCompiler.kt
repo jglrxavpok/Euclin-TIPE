@@ -648,14 +648,16 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         // on ignore
     }
 
-    override fun visitInstantiateExpr(ctx: EuclinParser.InstantiateExprContext) {
-        // seulement pour les structures!
-        // TODO: voir comment gérer la création d'objets qui ne viennent pas d'Euclin
+    override fun visitNewObjectExpr(ctx: EuclinParser.NewObjectExprContext) {
         val type = parentContext.typeConverter.convertBasic(ctx.Identifier().text)
         val internalName = basicType(type).internalName
+        val args = ctx.expression().map { translator.translate(it).type }
+        val cons = type.constructor(args) ?: compileError("Aucun constructeur correspondant à $args dans $type", parentContext.currentClass, ctx)
         writer.visitTypeInsn(NEW, internalName)
         writer.visitInsn(DUP)
-        writer.visitMethodInsn(INVOKESPECIAL, internalName, "<init>", "()V", false)
+
+        ctx.expression().forEach(this::visit)
+        writer.visitMethodInsn(INVOKESPECIAL, internalName, "<init>", methodType(cons.arguments, JVMVoid).descriptor, false)
         typeStack.push(type)
     }
 

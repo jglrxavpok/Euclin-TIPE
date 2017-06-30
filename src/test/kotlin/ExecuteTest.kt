@@ -16,6 +16,6 @@ open class ExecuteTest {
         // on charge la classe, on crée une instance et on appelle la méthode principale
         val clazz = Class.forName(className)
         val app = clazz.newInstance() as EuclinApplication
-        app.__main()
+        app._main()
     }
 }

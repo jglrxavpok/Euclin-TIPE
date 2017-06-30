@@ -2,6 +2,7 @@ package euclin.compiler.types
 
 import euclin.compiler.TypedMember
 import euclin.compiler.functions.FunctionSignature
+import euclin.compiler.type
 import org.jglr.inference.types.PolymorphicType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
@@ -79,6 +80,7 @@ class BasicType(private val toString: String): TypeDefinition() {
 // Extensions pour définir une structure associée à un type
 private val typeFields = hashMapOf<TypeDefinition, MutableList<TypedMember>>()
 private val typeMethods = hashMapOf<TypeDefinition, MutableList<FunctionSignature>>()
+private val typeConstructors = hashMapOf<TypeDefinition, MutableList<FunctionSignature>>()
 private val typeStaticMethods = hashMapOf<TypeDefinition, MutableList<FunctionSignature>>()
 
 fun TypeDefinition.listFields(): MutableList<TypedMember> {
@@ -86,6 +88,14 @@ fun TypeDefinition.listFields(): MutableList<TypedMember> {
         return typeFields[this]!!
     val list = mutableListOf<TypedMember>()
     typeFields[this] = list
+    return list
+}
+
+fun TypeDefinition.listConstructors(): MutableList<FunctionSignature> {
+    if(this in typeConstructors)
+        return typeConstructors[this]!!
+    val list = mutableListOf<FunctionSignature>()
+    typeConstructors[this] = list
     return list
 }
 
@@ -103,4 +113,30 @@ fun TypeDefinition.listStaticMethods(): MutableList<FunctionSignature> {
     val list = mutableListOf<FunctionSignature>()
     typeStaticMethods[this] = list
     return list
+}
+
+fun TypeDefinition.constructor(arguments: List<TypeDefinition>): FunctionSignature? {
+    for(cons in listConstructors()) {
+        if(cons.arguments.size != arguments.size)
+            continue
+        var fit = true
+        arguments.forEachIndexed { index, actual ->
+            val expected = cons.arguments[index].type
+            if(actual != expected) {
+                try {
+                    if(actual >= expected) {
+                        fit = false
+                        return@forEachIndexed
+                    }
+                } catch (e: Exception) {
+                    // on ignore toute erreur due à une comparaison impossible
+                    fit = false
+                    return@forEachIndexed
+                }
+            }
+        }
+        if(fit)
+            return cons
+    }
+    return null
 }

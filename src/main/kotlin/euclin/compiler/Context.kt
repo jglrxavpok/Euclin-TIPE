@@ -9,6 +9,8 @@ import euclin.compiler.types.TypeConverter
 import euclin.compiler.types.WildcardType
 import org.jglr.inference.types.TypeDefinition
 import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.MethodVisitor
+import org.objectweb.asm.Opcodes
 
 data class Context(val currentClass: String, val classWriter: ClassWriter, val availableFunctions: FunctionList) {
 
@@ -24,6 +26,7 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
     val typeConverter = TypeConverter(this)
     internal val knownTypes = hashMapOf<String, TypeDefinition>()
     internal val importedTypes = hashMapOf<String, TypeDefinition>()
+    val staticInit = mutableListOf<MethodVisitor.() -> Unit>()
 
     init {
         knownTypes += "java.lang.Object" to WildcardType
@@ -74,5 +77,16 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
 
     fun knowsType(name: String): Boolean {
         return importedTypes.containsKey(name) || knownTypes.containsKey(name)
+    }
+
+    fun createStaticBlock() {
+        if(staticInit.isEmpty())
+            return
+        val writer = classWriter.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, emptyArray())
+        writer.visitCode()
+        staticInit.forEach { block -> block.invoke(writer) }
+        writer.visitInsn(Opcodes.RETURN)
+        writer.visitMaxs(0, 0)
+        writer.visitEnd()
     }
 }

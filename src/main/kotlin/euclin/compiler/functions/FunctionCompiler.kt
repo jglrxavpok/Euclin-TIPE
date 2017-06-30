@@ -766,4 +766,8 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
     private fun loadBooleanRaw(value: Boolean) {
         writer.visitIntInsn(BIPUSH, if(value) 1 else 0) // la JVM préfère ça au 'LDC' pour les booléens
     }
+
+    override fun visitImportInstruction(ctx: EuclinParser.ImportInstructionContext?) {
+        // on ignore
+    }
 }

@@ -64,6 +64,18 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitExpressionInstruction(EuclinParser.ExpressionInstructionContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code ImportInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 */
+	void enterImportInstruction(EuclinParser.ImportInstructionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ImportInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 */
+	void exitImportInstruction(EuclinParser.ImportInstructionContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code DeclareVarInstruction}
 	 * labeled alternative in {@link EuclinParser#instructions}.
 	 * @param ctx the parse tree
@@ -159,6 +171,16 @@ public interface EuclinListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitWhileLoopInstruction(EuclinParser.WhileLoopInstructionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EuclinParser#importDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterImportDeclaration(EuclinParser.ImportDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EuclinParser#importDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitImportDeclaration(EuclinParser.ImportDeclarationContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link EuclinParser#structureDeclaration}.
 	 * @param ctx the parse tree

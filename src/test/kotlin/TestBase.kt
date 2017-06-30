@@ -14,7 +14,10 @@ object TestBase {
         val results = EuclinCompiler.compile(sourceCode, "$name.euclin")
 
         for((filename, data) in results) {
-            FileOutputStream(File("runtime/tests", "$filename.class")).use {
+            val file = File("runtime/tests", "$filename.class")
+            if( ! file.parentFile.exists())
+                file.parentFile.mkdirs()
+            FileOutputStream(file).use {
                 it.write(data)
                 it.flush()
                 it.close()

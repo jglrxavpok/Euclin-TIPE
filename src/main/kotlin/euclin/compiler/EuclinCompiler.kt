@@ -11,19 +11,20 @@ import euclin.compiler.lambda.LambdaCompiler
 import euclin.intrisincs.EuclinApplication
 import euclin.intrisincs.MemoizationCache
 import euclin.std.*
-import org.objectweb.asm.ClassWriter
+import org.antlr.v4.runtime.tree.TerminalNode
 import org.objectweb.asm.Opcodes.*
 import java.io.File
+import java.io.FileInputStream
 
 object EuclinCompiler {
 
     val OBJECT_TYPE: ASMType = ASMType.getType(Object::class.java)
+    var stdLocation = File("runtime/std")
 
-    fun compile(sourceCode: String, filename: String, isApplication: Boolean = true): Map<String, ByteArray> {
+    fun compile(sourceCode: String, filename: String, isApplication: Boolean = true, sourceRoot: File = File(".")): Map<String, ByteArray> {
         val startTime = System.nanoTime()
 
         // Inspection de la librairie standard
-        inspectStandardLibrary()
 
         // création du lexer et du parser
         val lexer = EuclinLexer(CharStreams.fromString(sourceCode, filename))
@@ -31,14 +32,18 @@ object EuclinCompiler {
 
         val code = parser.codeBlock() // on récupère le corps du code
 
-        val className = filename.substringAfterLast(File.separator).substringBefore(".")+ if(isApplication) "Application" else "" // dernier fichier du chemin et on retire l'extension
+        val className = filename.substringBefore(".").replace(File.separator, ".")+ if(isApplication) "Application" else "" // dernier fichier du chemin et on retire l'extension
+        val inputFolder = filename.substringBeforeLast(File.separator)
         val classWriter = EuclinClassWriter() // laisse ASM générer les frames et maxs
-        val classType = ASMType.getObjectType(className)
-        classWriter.visit(V1_8, ACC_PUBLIC, classType.internalName, null, OBJECT_TYPE.internalName, arrayOf("euclin/intrisincs/EuclinApplication"))
+        val classType = ASMType.getObjectType(className.replace(".", "/"))
+        val interfaces = if(isApplication) arrayOf("euclin/intrisincs/EuclinApplication") else emptyArray()
+        classWriter.visit(V1_8, ACC_PUBLIC, classType.internalName, null, OBJECT_TYPE.internalName, interfaces)
 
         val context = Context(className, classWriter, hashMapOf())
+        inspectStandardLibrary(context)
         classWriter.context = context
-        val structures = StructureCompiler(context).compileStructs(code)
+        resolveImports(code, context, listOf(stdLocation, sourceRoot))
+        val structures = StructureCompiler(context).compileStructs(code, inputFolder)
         val functionGatherer = FunctionGatherer(context)
 
         // on récupère la liste des signatures (ou têtes) de fonctions présentes dans le code
@@ -54,7 +59,8 @@ object EuclinCompiler {
         context.lambdaExpressions.putAll(lambdaExpressions)
 
         // on génére la fonction principale
-        val mainSignature = FunctionSignature("__main", emptyList(), JVMVoid, className, static = false)
+        val mainFunctionName = if(isApplication) "__main" else "<clinit>"
+        val mainSignature = FunctionSignature(mainFunctionName, emptyList(), JVMVoid, className, static = ! isApplication)
         context.currentFunction = mainSignature
         val mainCompiler = MainFunctionCompiler(context.clearLocals())
         mainCompiler.compileMainFunction(code)
@@ -79,18 +85,57 @@ object EuclinCompiler {
         val endTime = System.nanoTime()
         val elapsedTime = (endTime - startTime) / 1000000.0f
         println("Compiled $filename in $elapsedTime ms")
-        return hashMapOf(className to classWriter.toByteArray()) + structures
+        return structures + (className to classWriter.toByteArray())
     }
 
-    private fun inspectStandardLibrary() {
+    /**
+     * Ordre:
+     * 1. 'Classpath'
+     * 2. On tente de charger depuis le classpath du compileur
+     */
+    private fun resolveImports(code: EuclinParser.CodeBlockContext, context: Context, classpath: List<File>) {
+        code.instructions().filterIsInstance<EuclinParser.ImportDeclarationContext>().forEach {
+            val importedName = it.Identifier().map(TerminalNode::getText).reduce { acc, s -> acc+"."+s }
+            val usageName = it.Identifier().last().text // TODO: permettre de renommer
+            val destination = ObjectType(importedName, WildcardType)
+            var found = false
+            for(c in classpath) {
+                val candidate = File(c, importedName.replace(".", File.separator))
+                if(candidate.exists()) {
+                    println(">> Found candidate for $importedName: ${candidate.absolutePath}")
+                    found = true
+                    val data = FileInputStream(candidate).buffered().use { it.readBytes() }
+                    TypeInspector.inspect(data, destination, context)
+                    break
+                }
+            }
+
+            if( ! found) {
+                try {
+                    val c = Class.forName(importedName)
+                    TypeInspector.inspect(c, destination, context)
+                    found = true
+                } catch (e: ClassNotFoundException) {
+                    compileError("Aucun fichier correspondant trouvé pour $importedName", context.currentClass, it)
+                }
+            }
+
+            if(found) {
+                context.registerType(importedName, destination)
+                context.importType(usageName, destination)
+            }
+        }
+    }
+
+    private fun inspectStandardLibrary(context: Context) {
         // TODO: + de classes?
-        TypeInspector.inspect(IntPoint::class.java, IntPointType)
-        TypeInspector.inspect(RealPoint::class.java, RealPointType)
-        TypeInspector.inspect(UnitObject::class.java, UnitType)
-        TypeInspector.inspect(Console::class.java, BasicType("euclin.std.Console"))
-        TypeInspector.inspect(MathFunctions::class.java, BasicType("euclin.std.MathFunctions"))
-        TypeInspector.inspect(EuclinApplication::class.java, BasicType("euclin.intrisincs.EuclinApplication"))
-        TypeInspector.inspect(MemoizationCache::class.java, BasicType("euclin.intrisincs.MemoizationCache"))
+        TypeInspector.inspect(IntPoint::class.java, IntPointType, context)
+        TypeInspector.inspect(RealPoint::class.java, RealPointType, context)
+        TypeInspector.inspect(UnitObject::class.java, UnitType, context)
+        TypeInspector.inspect(Console::class.java, BasicType("euclin.std.Console"), context)
+        TypeInspector.inspect(MathFunctions::class.java, BasicType("euclin.std.MathFunctions"), context)
+        TypeInspector.inspect(EuclinApplication::class.java, BasicType("euclin.intrisincs.EuclinApplication"), context)
+        TypeInspector.inspect(MemoizationCache::class.java, BasicType("euclin.intrisincs.MemoizationCache"), context)
 
         val types = mutableListOf(RealType, RealPointType, IntType, IntPointType, UnitType)
 
@@ -102,7 +147,7 @@ object EuclinCompiler {
                 val correspondingType = basicType(FunctionType(argument, returnType)).internalName
                 val name = correspondingType.substringAfterLast("/")
                 val clazz = Class.forName("euclin.std.functions.$name")
-                TypeInspector.inspect(clazz, funcType)
+                TypeInspector.inspect(clazz, funcType, context)
             }
         }
     }

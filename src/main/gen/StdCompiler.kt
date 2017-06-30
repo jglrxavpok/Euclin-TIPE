@@ -5,9 +5,9 @@ import java.nio.charset.Charset
 object StdCompiler {
 
     private val output = File(".", "runtime/std")
+    private val stdFolder = File(".", "src/main/euclin/lang/")
 
     @JvmStatic fun main(args: Array<String>) {
-        val stdFolder = File("./src/main/euclin/lang/", "")
         compileAllIn(stdFolder)
     }
 
@@ -17,9 +17,10 @@ object StdCompiler {
             if(file.isDirectory) {
                 compileAllIn(file)
             } else if(file.name.endsWith(".euclin")) {
-                val results = EuclinCompiler.compile(read(file), file.path, isApplication = false)
-                for((filename, compiledCode) in results) {
-                    val destination = File(output, "$filename.class")
+                val filename = file.path.replace(stdFolder.path+File.separator, "")
+                val results = EuclinCompiler.compile(read(file), filename, isApplication = false)
+                for((className, compiledCode) in results) {
+                    val destination = File(output, "${className.replace(".", File.separator)}.class")
                     if(!destination.parentFile.exists())
                         destination.parentFile.mkdirs()
                     destination.outputStream().use {

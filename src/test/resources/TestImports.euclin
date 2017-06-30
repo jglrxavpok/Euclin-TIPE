@@ -1,0 +1,6 @@
+import euclin.std.ListOperations
+import euclin.std.List
+import euclin.std.Node
+
+var myList = List.create()
+ListOperations.add(myList, "")

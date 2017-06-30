@@ -44,6 +44,13 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpressionInstruction(EuclinParser.ExpressionInstructionContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code ImportInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImportInstruction(EuclinParser.ImportInstructionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code DeclareVarInstruction}
 	 * labeled alternative in {@link EuclinParser#instructions}.
 	 * @param ctx the parse tree
@@ -99,6 +106,12 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitWhileLoopInstruction(EuclinParser.WhileLoopInstructionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link EuclinParser#importDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImportDeclaration(EuclinParser.ImportDeclarationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link EuclinParser#structureDeclaration}.
 	 * @param ctx the parse tree

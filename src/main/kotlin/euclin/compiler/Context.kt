@@ -23,6 +23,7 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
     val constantChecker = ConstantChecker(this)
     val typeConverter = TypeConverter(this)
     private val knownTypes = hashMapOf<String, TypeDefinition>()
+    private val importedTypes = hashMapOf<String, TypeDefinition>()
 
     fun withSignature(newSignature: FunctionSignature): Context = copy().apply { currentFunction = newSignature }
 
@@ -33,6 +34,8 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
         copy.localVariableIDs.putAll(localVariableIDs)
         copy.lambdaExpressions.putAll(lambdaExpressions)
         copy.fields.addAll(fields)
+        copy.importedTypes.putAll(importedTypes)
+        copy.knownTypes.putAll(knownTypes)
         return copy
     }
 
@@ -47,6 +50,8 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
     }
 
     fun type(text: String): TypeDefinition {
+        if(importedTypes.containsKey(text))
+            return importedTypes[text]!!
         if(knownTypes.containsKey(text))
             return knownTypes[text]!!
 
@@ -55,7 +60,11 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
         return value
     }
 
-    fun registerType(name: String, type: BasicType) {
+    fun registerType(name: String, type: TypeDefinition) {
         knownTypes[name] = type
+    }
+
+    fun importType(name: String, type: TypeDefinition) {
+        importedTypes[name] = type
     }
 }

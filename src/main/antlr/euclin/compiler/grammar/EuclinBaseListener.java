@@ -76,6 +76,18 @@ public class EuclinBaseListener implements EuclinListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterImportInstruction(EuclinParser.ImportInstructionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitImportInstruction(EuclinParser.ImportInstructionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterDeclareVarInstruction(EuclinParser.DeclareVarInstructionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -167,6 +179,18 @@ public class EuclinBaseListener implements EuclinListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitWhileLoopInstruction(EuclinParser.WhileLoopInstructionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterImportDeclaration(EuclinParser.ImportDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitImportDeclaration(EuclinParser.ImportDeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

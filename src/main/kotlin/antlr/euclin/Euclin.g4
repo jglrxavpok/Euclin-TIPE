@@ -18,6 +18,7 @@ functionInstructions
 
 instructions
     : expression            #ExpressionInstruction
+    | importDeclaration     #ImportInstruction
     | variableDeclaration   #DeclareVarInstruction
     | structureDeclaration  #DeclareStructInstruction
     | variableAssign        #AssignVarInstruction
@@ -26,6 +27,10 @@ instructions
     | functionDeclaration   #DeclareFuncInstruction
     | If LeftBracket expression RightBracket LeftCurlyBracket functionInstructions* RightCurlyBracket elseBlock?    #IfBranchingInstruction
     | While LeftBracket expression RightBracket LeftCurlyBracket functionInstructions* RightCurlyBracket            #WhileLoopInstruction
+    ;
+
+importDeclaration
+    : Import Identifier (Period Identifier)*
     ;
 
 structureDeclaration
@@ -132,6 +137,7 @@ If: 'if';
 While: 'while';
 StructStart: 'struct';
 New: 'new';
+Import: 'import';
 
 // Ponctuation
 LambdaVariable: '_';

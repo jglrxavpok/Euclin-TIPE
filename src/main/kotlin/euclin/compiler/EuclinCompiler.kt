@@ -12,6 +12,7 @@ import euclin.intrisincs.EuclinApplication
 import euclin.intrisincs.MemoizationCache
 import euclin.std.*
 import org.antlr.v4.runtime.tree.TerminalNode
+import org.jglr.inference.types.TypeDefinition
 import org.objectweb.asm.Opcodes.*
 import java.io.File
 import java.io.FileInputStream
@@ -94,37 +95,75 @@ object EuclinCompiler {
      * 2. On tente de charger depuis le classpath du compileur
      */
     private fun resolveImports(code: EuclinParser.CodeBlockContext, context: Context, classpath: List<File>) {
-        code.instructions().filterIsInstance<EuclinParser.ImportDeclarationContext>().forEach {
+        code.instructions().filterIsInstance<EuclinParser.ImportInstructionContext>().map(EuclinParser.ImportInstructionContext::importDeclaration).forEach {
             val importedName = it.Identifier().map(TerminalNode::getText).reduce { acc, s -> acc+"."+s }
-            val usageName = it.Identifier().last().text // TODO: permettre de renommer
-            val destination = ObjectType(importedName, WildcardType)
-            var found = false
-            for(c in classpath) {
-                val candidate = File(c, importedName.replace(".", File.separator))
-                if(candidate.exists()) {
-                    println(">> Found candidate for $importedName: ${candidate.absolutePath}")
-                    found = true
-                    val data = FileInputStream(candidate).buffered().use { it.readBytes() }
-                    TypeInspector.inspect(data, destination, context)
-                    break
-                }
-            }
+            val isRenamed = it.renamming() != null
+            val usageName = if(isRenamed) it.renamming().Identifier().text else it.Identifier().last().text
+            importIfNecessary(importedName, usageName, classpath, context)
+        }
 
-            if( ! found) {
-                try {
-                    val c = Class.forName(importedName)
-                    TypeInspector.inspect(c, destination, context)
-                    found = true
-                } catch (e: ClassNotFoundException) {
-                    compileError("Aucun fichier correspondant trouvé pour $importedName", context.currentClass, it)
-                }
-            }
+        code.instructions().filterIsInstance<EuclinParser.ImportMethodInstructionContext>()
+                .map(EuclinParser.ImportMethodInstructionContext::methodImportDeclaration)
+                .forEach {
+            if(it is EuclinParser.BasicMethodImportContext) {
+                val importedName = it.Identifier().map(TerminalNode::getText).reduce { acc, s -> acc+"."+s }
+                val isRenamed = it.renamming() != null
+                val funcName = it.Identifier().last().text
+                val usageName = if(isRenamed) it.renamming().Identifier().text else funcName
+                val owner = importedName.substringBeforeLast(".")
+                val type = importIfNecessary(owner, owner, classpath, context)
 
-            if(found) {
-                context.registerType(importedName, destination)
-                context.importType(usageName, destination)
+                val actualFunction = type.listStaticMethods().find { it.name == funcName }
+                if(actualFunction != null) {
+                    context.availableFunctions[usageName] = actualFunction
+                } else {
+                    compileError("Aucune fonction du nom de $funcName dans le type $type", context.currentClass, it)
+                }
+
+            } else if(it is EuclinParser.ImportAllMethodsContext) {
+                val importedName = it.Identifier().map(TerminalNode::getText).reduce { acc, s -> acc+"."+s }
+                val type = importIfNecessary(importedName, importedName, classpath, context)
+                type.listStaticMethods().forEach {
+                    context.availableFunctions[it.name] = it
+                }
             }
         }
+    }
+
+    /**
+     * Importe et charges le type correspondant (si présent dans le classpath)
+     */
+    private fun importIfNecessary(importedName: String, usageName: String, classpath: List<File>, context: Context): TypeDefinition {
+        if(context.knowsType(usageName))
+            return context.type(usageName)
+        val destination = ObjectType(importedName, WildcardType)
+        var found = false
+        for(c in classpath) {
+            val candidate = File(c, importedName.replace(".", File.separator)+".class")
+            if(candidate.exists()) {
+                println(">> Found candidate for $importedName: ${candidate.absolutePath}")
+                found = true
+                val data = FileInputStream(candidate).buffered().use { it.readBytes() }
+                TypeInspector.inspect(data, destination, context)
+                break
+            }
+        }
+
+        if( ! found) {
+            try {
+                val c = Class.forName(importedName)
+                TypeInspector.inspect(c, destination, context)
+                found = true
+            } catch (e: ClassNotFoundException) {
+                compileError("Aucun fichier correspondant trouvé pour $importedName", -1, context.currentClass)
+            }
+        }
+
+        if(found) {
+            context.registerType(importedName, destination)
+            context.importType(usageName, destination)
+        }
+        return destination
     }
 
     private fun inspectStandardLibrary(context: Context) {

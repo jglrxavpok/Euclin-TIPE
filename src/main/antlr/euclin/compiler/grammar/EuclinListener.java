@@ -52,18 +52,6 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitReturnFuncInstruction(EuclinParser.ReturnFuncInstructionContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code ExpressionInstruction}
-	 * labeled alternative in {@link EuclinParser#instructions}.
-	 * @param ctx the parse tree
-	 */
-	void enterExpressionInstruction(EuclinParser.ExpressionInstructionContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code ExpressionInstruction}
-	 * labeled alternative in {@link EuclinParser#instructions}.
-	 * @param ctx the parse tree
-	 */
-	void exitExpressionInstruction(EuclinParser.ExpressionInstructionContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code ImportInstruction}
 	 * labeled alternative in {@link EuclinParser#instructions}.
 	 * @param ctx the parse tree
@@ -75,6 +63,30 @@ public interface EuclinListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitImportInstruction(EuclinParser.ImportInstructionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ImportMethodInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 */
+	void enterImportMethodInstruction(EuclinParser.ImportMethodInstructionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ImportMethodInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 */
+	void exitImportMethodInstruction(EuclinParser.ImportMethodInstructionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ExpressionInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpressionInstruction(EuclinParser.ExpressionInstructionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ExpressionInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpressionInstruction(EuclinParser.ExpressionInstructionContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code DeclareVarInstruction}
 	 * labeled alternative in {@link EuclinParser#instructions}.
@@ -181,6 +193,40 @@ public interface EuclinListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitImportDeclaration(EuclinParser.ImportDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code BasicMethodImport}
+	 * labeled alternative in {@link EuclinParser#methodImportDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterBasicMethodImport(EuclinParser.BasicMethodImportContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code BasicMethodImport}
+	 * labeled alternative in {@link EuclinParser#methodImportDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitBasicMethodImport(EuclinParser.BasicMethodImportContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ImportAllMethods}
+	 * labeled alternative in {@link EuclinParser#methodImportDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterImportAllMethods(EuclinParser.ImportAllMethodsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ImportAllMethods}
+	 * labeled alternative in {@link EuclinParser#methodImportDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitImportAllMethods(EuclinParser.ImportAllMethodsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EuclinParser#renamming}.
+	 * @param ctx the parse tree
+	 */
+	void enterRenamming(EuclinParser.RenammingContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EuclinParser#renamming}.
+	 * @param ctx the parse tree
+	 */
+	void exitRenamming(EuclinParser.RenammingContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link EuclinParser#structureDeclaration}.
 	 * @param ctx the parse tree

@@ -121,7 +121,14 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
                 val actual = translated.type
                 if (expected != actual) {
                     var actuallyValid = false
-                    if(expected is FunctionType) {
+                    try {
+                        actuallyValid = expected >= actual
+                        visit(argumentContext)
+                        typeStack.pop()
+                    } catch (e: Exception) {
+                        // shhh
+                    }
+                    if(!actuallyValid && expected is FunctionType) {
                         if(expected.returnType == actual) { // si la conversion constante=>fonction est possible
                             val constantExpr = call.expression(index)
                             compileMethodReference(createConstantFunction(constantExpr)) // alors on référence la fonction correspondant
@@ -168,7 +175,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         } else {
             val field = parentContext.field(name)
             if (field != null) {
-                writer.visitFieldInsn(GETSTATIC, parentContext.currentClass, name, basicType(field.type).descriptor)
+                writer.visitFieldInsn(GETSTATIC, toInternalName(parentContext.currentClass), name, basicType(field.type).descriptor)
                 typeStack.push(field.type)
             }
         }
@@ -180,9 +187,21 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
     private fun compileAccessChain(chain: List<TerminalNode>) {
         val first = chain[0].text
         val lineNumber = chain[0].symbol.line
-        val type = localVariableTypes[first] ?: compileError("Aucune variable du nom de $first", lineNumber, functionSignature.ownerClass)
-        writer.visitVarInsn(correctOpcode(ILOAD, type), localVariableIDs[first]!!)
-        typeStack.push(type)
+        if( ! localVariableTypes.containsKey(first)) {
+            val field = parentContext.field(first)
+            if(field != null) {
+                writer.visitFieldInsn(GETSTATIC, toInternalName(parentContext.currentClass), first, basicType(field.type).descriptor)
+                typeStack.push(field.type)
+            } else {
+                if (parentContext.knowsType(first))
+                    return // on appelle une méthode ou un champ statique appartenant à un type connu
+                compileError("Aucune variable du nom de $first", lineNumber, functionSignature.ownerClass)
+            }
+        } else {
+            val type = localVariableTypes[first]!!
+            writer.visitVarInsn(correctOpcode(ILOAD, type), localVariableIDs[first]!!)
+            typeStack.push(type)
+        }
         compileSubAccessChain(chain.drop(1))
     }
 
@@ -233,7 +252,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         } else {
             val field = parentContext.field(name)
             if(field != null) {
-                writer.visitFieldInsn(GETSTATIC, parentContext.currentClass, name, basicType(field.type).descriptor)
+                writer.visitFieldInsn(GETSTATIC, toInternalName(parentContext.currentClass), name, basicType(field.type).descriptor)
                 typeStack.push(field.type)
             } else if(availableFunctions.containsKey(name)) { // ça peut être une fonction utilisée comme valeur, on vérifie
                 val func = availableFunctions[name]!!
@@ -497,7 +516,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
             parentContext.fields += declaredField
 
             visit(expression)
-            writer.visitFieldInsn(PUTSTATIC, parentContext.currentClass, name, basicType(value.type).descriptor)
+            writer.visitFieldInsn(PUTSTATIC, toInternalName(parentContext.currentClass), name, basicType(value.type).descriptor)
             typeStack.pop()
         } else {
             val varID = localIndex++
@@ -537,7 +556,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
             val field = parentContext.field(name)
             if(field != null) {
                 visit(expression)
-                writer.visitFieldInsn(PUTSTATIC, parentContext.currentClass, name, basicType(field.type).descriptor)
+                writer.visitFieldInsn(PUTSTATIC, toInternalName(parentContext.currentClass), name, basicType(field.type).descriptor)
                 compileAssert(field.type >= value.type, functionSignature.ownerClass, ctx) { "Impossible de stocker une valeur de type ${value.type} dans un champ de type ${field.type}" }
                 typeStack.pop()
             } else {

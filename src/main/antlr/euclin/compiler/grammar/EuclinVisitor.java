@@ -37,19 +37,26 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitReturnFuncInstruction(EuclinParser.ReturnFuncInstructionContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code ExpressionInstruction}
-	 * labeled alternative in {@link EuclinParser#instructions}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExpressionInstruction(EuclinParser.ExpressionInstructionContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code ImportInstruction}
 	 * labeled alternative in {@link EuclinParser#instructions}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitImportInstruction(EuclinParser.ImportInstructionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ImportMethodInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImportMethodInstruction(EuclinParser.ImportMethodInstructionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ExpressionInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpressionInstruction(EuclinParser.ExpressionInstructionContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code DeclareVarInstruction}
 	 * labeled alternative in {@link EuclinParser#instructions}.
@@ -112,6 +119,26 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitImportDeclaration(EuclinParser.ImportDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code BasicMethodImport}
+	 * labeled alternative in {@link EuclinParser#methodImportDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBasicMethodImport(EuclinParser.BasicMethodImportContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ImportAllMethods}
+	 * labeled alternative in {@link EuclinParser#methodImportDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImportAllMethods(EuclinParser.ImportAllMethodsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link EuclinParser#renamming}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRenamming(EuclinParser.RenammingContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link EuclinParser#structureDeclaration}.
 	 * @param ctx the parse tree

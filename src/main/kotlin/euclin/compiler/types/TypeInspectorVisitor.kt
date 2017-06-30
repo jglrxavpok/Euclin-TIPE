@@ -19,13 +19,13 @@ class TypeInspectorVisitor(val destination: TypeDefinition, val context: Context
         super.visit(version, access, name, signature, superName, interfaces)
     }
 
-    override fun visitField(access: Int, name: String, desc: String, signature: String?, value: Any?): FieldVisitor {
+    override fun visitField(access: Int, name: String, desc: String, signature: String?, value: Any?): FieldVisitor? {
         if(access and ACC_STATIC != 0)
             destination.listFields() += TypedMember(name, convertBaseDesc(desc))
         return super.visitField(access, name, desc, signature, value)
     }
 
-    override fun visitMethod(access: Int, name: String, desc: String, signature: String?, exceptions: Array<out String>?): MethodVisitor {
+    override fun visitMethod(access: Int, name: String, desc: String, signature: String?, exceptions: Array<out String>?): MethodVisitor? {
         val isStatic = access and ACC_STATIC != 0
         val methodType = convertMethodDesc(desc)
         val toModify = if(isStatic) destination.listStaticMethods() else destination.listMethods()

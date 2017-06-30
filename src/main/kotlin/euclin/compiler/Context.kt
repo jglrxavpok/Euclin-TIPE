@@ -22,8 +22,12 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
     val functionMatcher = FunctionMatcher(this)
     val constantChecker = ConstantChecker(this)
     val typeConverter = TypeConverter(this)
-    private val knownTypes = hashMapOf<String, TypeDefinition>()
-    private val importedTypes = hashMapOf<String, TypeDefinition>()
+    internal val knownTypes = hashMapOf<String, TypeDefinition>()
+    internal val importedTypes = hashMapOf<String, TypeDefinition>()
+
+    init {
+        knownTypes += "java.lang.Object" to WildcardType
+    }
 
     fun withSignature(newSignature: FunctionSignature): Context = copy().apply { currentFunction = newSignature }
 
@@ -66,5 +70,9 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
 
     fun importType(name: String, type: TypeDefinition) {
         importedTypes[name] = type
+    }
+
+    fun knowsType(name: String): Boolean {
+        return importedTypes.containsKey(name) || knownTypes.containsKey(name)
     }
 }

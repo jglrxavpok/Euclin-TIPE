@@ -17,8 +17,9 @@ functionInstructions
     ;
 
 instructions
-    : expression            #ExpressionInstruction
-    | importDeclaration     #ImportInstruction
+    : importDeclaration     #ImportInstruction
+    | methodImportDeclaration   #ImportMethodInstruction
+    | expression            #ExpressionInstruction
     | variableDeclaration   #DeclareVarInstruction
     | structureDeclaration  #DeclareStructInstruction
     | variableAssign        #AssignVarInstruction
@@ -30,7 +31,16 @@ instructions
     ;
 
 importDeclaration
-    : Import Identifier (Period Identifier)*
+    : Import Identifier (Period Identifier)* renamming?
+    ;
+
+methodImportDeclaration
+    : ImportMethod Identifier (Period Identifier)* renamming?   #BasicMethodImport
+    | ImportMethod Identifier (Period Identifier)* Period '*'   #ImportAllMethods
+    ;
+
+renamming
+    : 'as' Identifier
     ;
 
 structureDeclaration
@@ -138,6 +148,7 @@ While: 'while';
 StructStart: 'struct';
 New: 'new';
 Import: 'import';
+ImportMethod: 'import method';
 
 // Ponctuation
 LambdaVariable: '_';

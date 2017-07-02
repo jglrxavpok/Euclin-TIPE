@@ -8,7 +8,7 @@ import java.io.FileWriter
 object StdFunctionGenerator {
 
     @JvmStatic fun main(args: Array<String>) {
-        val types = mutableListOf(RealType, RealPointType, IntType, IntPointType, UnitType, StringType, BooleanType, WildcardType)
+        val types = mutableListOf(RealType, RealPointType, IntType, IntPointType, UnitType, StringType, BooleanType, WildcardType, DoubleType, ShortType, CharType, ByteType, LongType)
 
         val rootFolder = File("./src/main/euclin/lang/euclin/std/functions")
         rootFolder.mkdirs()
@@ -48,6 +48,11 @@ object StdFunctionGenerator {
             UnitType -> "UnitObject"
             BooleanType -> "Boolean"
             WildcardType -> "Object"
+            LongType -> "Long"
+            CharType -> "Char"
+            ByteType -> "Byte"
+            ShortType -> "Short"
+            DoubleType -> "Double"
             else -> type.toString().substringAfterLast(".")
         }
     }

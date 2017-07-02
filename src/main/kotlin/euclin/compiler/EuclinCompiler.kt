@@ -179,12 +179,13 @@ object EuclinCompiler {
         TypeInspector.inspect(IntPoint::class.java, IntPointType, context)
         TypeInspector.inspect(RealPoint::class.java, RealPointType, context)
         TypeInspector.inspect(UnitObject::class.java, UnitType, context)
+        TypeInspector.inspect(String::class.java, StringType, context)
         TypeInspector.inspect(Console::class.java, BasicType("euclin.std.Console"), context)
         TypeInspector.inspect(MathFunctions::class.java, BasicType("euclin.std.MathFunctions"), context)
         TypeInspector.inspect(EuclinApplication::class.java, BasicType("euclin.intrisincs.EuclinApplication"), context)
         TypeInspector.inspect(MemoizationCache::class.java, BasicType("euclin.intrisincs.MemoizationCache"), context)
 
-        val types = mutableListOf(RealType, RealPointType, IntType, IntPointType, UnitType)
+        val types = mutableListOf(RealType, RealPointType, IntType, IntPointType, UnitType, StringType, BooleanType, WildcardType)
 
         val rootFolder = File("./src/main/euclin/lang/euclin/std/functions")
         rootFolder.mkdirs()

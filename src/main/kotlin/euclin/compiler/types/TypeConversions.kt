@@ -25,6 +25,7 @@ fun basicType(type: TypeDefinition): ASMType {
         IntPointType -> IntegerPointASMType
         JVMVoid -> ASMType.VOID_TYPE
         WildcardType -> OBJECT_TYPE
+        BooleanType -> ASMType.BOOLEAN_TYPE
         is FunctionType -> generateFunctionObjectType(type)
         // TODO: Autres types?
         else -> ASMType.getObjectType(type.toString().replace(".", "/"))

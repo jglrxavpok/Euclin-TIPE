@@ -21,6 +21,7 @@ class TypeConverter(val parentContext: Context): EuclinBaseVisitor<TypeDefinitio
             "Real" -> RealType
             "Unit" -> UnitType
             "String" -> StringType
+            "Boolean", "Bool" -> BooleanType
             else -> parentContext.type(text)
         }
     }

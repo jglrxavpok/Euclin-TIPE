@@ -8,7 +8,7 @@ import java.io.FileWriter
 object StdFunctionGenerator {
 
     @JvmStatic fun main(args: Array<String>) {
-        val types = mutableListOf(RealType, RealPointType, IntType, IntPointType, UnitType)
+        val types = mutableListOf(RealType, RealPointType, IntType, IntPointType, UnitType, StringType, BooleanType, WildcardType)
 
         val rootFolder = File("./src/main/euclin/lang/euclin/std/functions")
         rootFolder.mkdirs()
@@ -31,21 +31,23 @@ object StdFunctionGenerator {
     private fun writeContents(output: File, name: String, argument: TypeDefinition, returnType: TypeDefinition) {
         val rawData = String(javaClass.getResourceAsStream("/generation/FunctionTemplate.txt").readBytes())
         FileWriter(output).use {
-            val argumentStr = typeToJavaType(argument)
-            val returnTypeStr = typeToJavaType(returnType)
+            val argumentStr = typeToKotlinType(argument)
+            val returnTypeStr = typeToKotlinType(returnType)
             val content = rawData.replace("<Args>", argumentStr).replace("<Return>", returnTypeStr).replace("<Name>", name)
             it.write(content)
             it.flush()
         }
     }
 
-    private fun typeToJavaType(type: TypeDefinition): String {
+    private fun typeToKotlinType(type: TypeDefinition): String {
         return when(type) {
             RealType -> "Float"
             IntType -> "Int"
             RealPointType -> "RealPoint"
             IntPointType -> "IntPoint"
             UnitType -> "UnitObject"
+            BooleanType -> "Boolean"
+            WildcardType -> "Object"
             else -> type.toString().substringAfterLast(".")
         }
     }

@@ -388,30 +388,6 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitTransformBlock(EuclinParser.TransformBlockContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code BoolTrueExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterBoolTrueExpr(EuclinParser.BoolTrueExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code BoolTrueExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitBoolTrueExpr(EuclinParser.BoolTrueExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code AccessExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterAccessExpr(EuclinParser.AccessExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code AccessExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitAccessExpr(EuclinParser.AccessExprContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code StringExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.
 	 * @param ctx the parse tree
@@ -460,6 +436,126 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitNewObjectExpr(EuclinParser.NewObjectExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code LambdaFunctionExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterLambdaFunctionExpr(EuclinParser.LambdaFunctionExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code LambdaFunctionExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitLambdaFunctionExpr(EuclinParser.LambdaFunctionExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code LessEqualExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterLessEqualExpr(EuclinParser.LessEqualExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code LessEqualExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitLessEqualExpr(EuclinParser.LessEqualExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code LambdaVarExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterLambdaVarExpr(EuclinParser.LambdaVarExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code LambdaVarExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitLambdaVarExpr(EuclinParser.LambdaVarExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code CastExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterCastExpr(EuclinParser.CastExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code CastExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitCastExpr(EuclinParser.CastExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code VarExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterVarExpr(EuclinParser.VarExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code VarExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitVarExpr(EuclinParser.VarExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code CallExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterCallExpr(EuclinParser.CallExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code CallExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitCallExpr(EuclinParser.CallExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code UnitExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterUnitExpr(EuclinParser.UnitExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code UnitExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitUnitExpr(EuclinParser.UnitExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Equality}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterEquality(EuclinParser.EqualityContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Equality}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitEquality(EuclinParser.EqualityContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code BoolTrueExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterBoolTrueExpr(EuclinParser.BoolTrueExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code BoolTrueExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitBoolTrueExpr(EuclinParser.BoolTrueExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code AccessExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterAccessExpr(EuclinParser.AccessExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code AccessExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitAccessExpr(EuclinParser.AccessExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code MultExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.
 	 * @param ctx the parse tree
@@ -483,18 +579,6 @@ public interface EuclinListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSubExpr(EuclinParser.SubExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code LambdaFunctionExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterLambdaFunctionExpr(EuclinParser.LambdaFunctionExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code LambdaFunctionExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitLambdaFunctionExpr(EuclinParser.LambdaFunctionExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code GreaterExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.
@@ -556,30 +640,6 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitLessExpr(EuclinParser.LessExprContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code LessEqualExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterLessEqualExpr(EuclinParser.LessEqualExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code LessEqualExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitLessEqualExpr(EuclinParser.LessEqualExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code LambdaVarExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterLambdaVarExpr(EuclinParser.LambdaVarExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code LambdaVarExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitLambdaVarExpr(EuclinParser.LambdaVarExprContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code CoupleExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.
 	 * @param ctx the parse tree
@@ -604,30 +664,6 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitDivExpr(EuclinParser.DivExprContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code VarExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterVarExpr(EuclinParser.VarExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code VarExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitVarExpr(EuclinParser.VarExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code CallExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterCallExpr(EuclinParser.CallExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code CallExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitCallExpr(EuclinParser.CallExprContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code IntExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.
 	 * @param ctx the parse tree
@@ -639,30 +675,6 @@ public interface EuclinListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitIntExpr(EuclinParser.IntExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code UnitExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterUnitExpr(EuclinParser.UnitExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code UnitExpr}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitUnitExpr(EuclinParser.UnitExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code Equality}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterEquality(EuclinParser.EqualityContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code Equality}
-	 * labeled alternative in {@link EuclinParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitEquality(EuclinParser.EqualityContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code Inequality}
 	 * labeled alternative in {@link EuclinParser#expression}.

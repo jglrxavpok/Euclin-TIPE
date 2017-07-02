@@ -108,7 +108,7 @@ object MemoizedFunctionCompiler {
     }
 
     private fun convertToObjectTypeIfNeeded(writer: MethodVisitor, type: TypeDefinition) {
-        when(type) {
+       /* when(type) {
             RealType -> {
                 writer.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false)
             }
@@ -118,11 +118,13 @@ object MemoizedFunctionCompiler {
             IntType -> {
                 writer.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false)
             }
-        }
+        }*/
+        if(type is NativeType)
+            FunctionCompiler.convertNativeTypeToBoxed(writer, type)
     }
 
     private fun convertToNativeTypeIfNeeded(writer: MethodVisitor, type: TypeDefinition) {
-        when(type) {
+       /* when(type) {
             RealType -> {
                 writer.visitTypeInsn(CHECKCAST, "java/lang/Float") // conversion en Float
                 writer.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F", false)
@@ -135,7 +137,9 @@ object MemoizedFunctionCompiler {
                 writer.visitTypeInsn(CHECKCAST, "java/lang/Boolean") // conversion en Boolean
                 writer.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false)
             }
-        }
+        } TODO */
+        if(type is NativeType)
+            FunctionCompiler.convertBoxedObjectToNativeType(writer, type)
     }
 
     // TODO: Copie de FunctionCompiler

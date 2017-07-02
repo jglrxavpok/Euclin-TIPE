@@ -5,5 +5,6 @@ import euclin.std.IntPoint
 import euclin.std.UnitObject
 
 interface Func_FF_2RealPoint {
+    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     fun invoke(input: RealPoint): RealPoint
 }

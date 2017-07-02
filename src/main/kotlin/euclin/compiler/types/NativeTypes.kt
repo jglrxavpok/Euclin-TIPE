@@ -7,19 +7,29 @@ import org.jglr.inference.types.PolymorphicType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
 
-// On précise TypeDefinition pour que le reste du code n'ait pas accès à BasicType
-val IntType: TypeDefinition = BasicType("euclin.std.Int")
-val RealType: TypeDefinition = BasicType("euclin.std.Real")
-val BooleanType: TypeDefinition = BasicType("euclin.std.Boolean")
+// Types de base de la JVM
+val IntType = NativeType("euclin.std.Int", ASMType.INT_TYPE) // TODO: Renommer en Int32
+val RealType = NativeType("euclin.std.Real", ASMType.FLOAT_TYPE) // TODO: Renommer en Real32
+val BooleanType = NativeType("euclin.std.Boolean", ASMType.BOOLEAN_TYPE)
+val ByteType = NativeType("euclin.std.Int8", ASMType.BYTE_TYPE)
+val DoubleType = NativeType("euclin.std.Double", ASMType.DOUBLE_TYPE)
+val ShortType = NativeType("euclin.std.Int16", ASMType.SHORT_TYPE)
+val LongType = NativeType("euclin.std.Long", ASMType.LONG_TYPE)
+val CharType = NativeType("euclin.std.Char", ASMType.CHAR_TYPE)
+val JVMVoid = NativeType("void", ASMType.VOID_TYPE)
+
 val UnitType: TypeDefinition = BasicType("euclin.std.UnitObject")
 val StringType: TypeDefinition = BasicType("java.lang.String")
-val JVMVoid: TypeDefinition = BasicType("void")
 val WildcardType: TypeDefinition = PolymorphicType()
 
 val IntPointType = TupleType(arrayOf(IntType, IntType)) // TODO: 'Generic' types ?
 val RealPointType = TupleType(arrayOf(RealType, RealType))
 
 val ShapeType: TypeDefinition = BasicType("euclin.std.Shape")
+
+class NativeType(name: String, val backing: ASMType): BasicType(name) {
+    fun getDescriptor() = backing.descriptor
+}
 
 class ObjectType(val name: String, val parent: TypeDefinition): TypeDefinition() {
     override fun toString(): String {
@@ -55,7 +65,7 @@ class ObjectType(val name: String, val parent: TypeDefinition): TypeDefinition()
     }
 }
 
-class BasicType(private val toString: String): TypeDefinition() {
+open class BasicType(private val toString: String): TypeDefinition() {
     override fun toString(): String {
         return toString
     }

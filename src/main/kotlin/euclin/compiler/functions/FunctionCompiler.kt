@@ -790,7 +790,137 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         writer.visitIntInsn(BIPUSH, if(value) 1 else 0) // la JVM préfère ça au 'LDC' pour les booléens
     }
 
+    override fun visitCastExpr(ctx: EuclinParser.CastExprContext) {
+        val expression = ctx.expression()
+        val currentType = translator.translate(expression).type
+        val targetType = parentContext.typeConverter.visit(ctx.type())
+        if(targetType == currentType) {
+            compileWarning("Useless cast", parentContext.currentClass, ctx)
+            return
+        }
+
+        visit(expression)
+        typeStack.pop()
+        typeStack.push(targetType)
+
+        if(targetType == StringType) { // il suffit d'appeler String.valueOf
+            val descriptor = when(currentType) {
+                is NativeType -> currentType.getDescriptor()
+                else -> "Ljava/lang/Object;"
+            }
+            writer.visitMethodInsn(INVOKESTATIC, "java/lang/String", "valueOf", "($descriptor)Ljava/lang/String;", false)
+        } else if(targetType is NativeType) {
+            val line = ctx.start?.line ?: -1
+            if(currentType is NativeType) {
+                compileNativeCast(currentType, targetType, line)
+            } else {
+                FunctionCompiler.convertBoxedObjectToNativeType(writer, targetType)
+            }
+        } else {
+            if(currentType is NativeType) {
+                convertNativeTypeToBoxed(writer, currentType)
+            }
+            writer.visitTypeInsn(CHECKCAST, basicType(targetType).internalName)
+        }
+    }
+
+    private fun compileNativeCast(current: NativeType, target: NativeType, lineInFile: Int) {
+        fun unsupportedCast() {
+            compileError("Cast impossible de $current à $target", lineInFile, parentContext.currentClass)
+        }
+
+        if(current == BooleanType || current == ShortType || current == ByteType || current == CharType) {
+            compileNativeCast(IntType, target, lineInFile) // ces types ne sont que des entiers pour la JVM
+            return
+        }
+        with(writer) {
+            when(current.backing.descriptor) {
+                "I" -> {
+                    when(target.backing.descriptor) {
+                        "F" -> visitInsn(I2F)
+                        "D" -> visitInsn(I2D)
+                        "J" -> visitInsn(I2L)
+                        "B" -> visitInsn(I2B)
+                        "S" -> visitInsn(I2S)
+                        "C" -> visitInsn(I2C)
+                        else -> unsupportedCast()
+                    }
+                }
+                "F" -> {
+                    when(target.backing.descriptor) {
+                        "I" -> visitInsn(F2I)
+                        "D" -> visitInsn(F2D)
+                        "J" -> visitInsn(F2L)
+                        "B", "S", "C" -> {
+                            visitInsn(F2I)
+                            compileNativeCast(IntType, target, lineInFile)
+                        }
+                        else -> unsupportedCast()
+                    }
+                }
+                "D" -> when(target.backing.descriptor) {
+                    "F" -> visitInsn(D2F)
+                    "I" -> visitInsn(D2I)
+                    "J" -> visitInsn(D2L)
+                    "B", "S", "C" -> {
+                        visitInsn(D2I)
+                        compileNativeCast(IntType, target, lineInFile)
+                    }
+                    else -> unsupportedCast()
+                }
+                "J" -> when(target.backing.descriptor) {
+                    "F" -> visitInsn(L2F)
+                    "D" -> visitInsn(L2D)
+                    "I" -> visitInsn(L2I)
+                    "B", "S", "C" -> {
+                        visitInsn(L2I)
+                        compileNativeCast(IntType, target, lineInFile)
+                    }
+                    else -> unsupportedCast()
+                }
+                else -> unsupportedCast()
+            }
+        }
+    }
+
     override fun visitImportInstruction(ctx: EuclinParser.ImportInstructionContext?) {
         // on ignore
+    }
+
+    companion object {
+        fun convertNativeTypeToBoxed(writer: MethodVisitor, type: NativeType) {
+            val boxedType = "java/lang/" + boxed(type)
+            writer.visitMethodInsn(INVOKESTATIC, boxedType, "valueOf", "(${type.getDescriptor()})L$boxedType;", false)
+        }
+
+        fun convertBoxedObjectToNativeType(writer: MethodVisitor, type: NativeType) {
+            val boxedType = "java/lang/" + boxed(type)
+            writer.visitTypeInsn(CHECKCAST, boxedType) // conversion en type Boxed
+            val smallName = smallName(type)
+            writer.visitMethodInsn(INVOKEVIRTUAL, boxedType, "${smallName}Value", "()${type.getDescriptor()}", false)
+        }
+
+        private fun boxed(type: NativeType): String {
+            return when(type) {
+                IntType -> "Integer"
+                RealType -> "Float"
+                DoubleType -> "Double"
+                CharType -> "Character"
+                ShortType -> "Short"
+                LongType -> "Long"
+                BooleanType -> "Boolean"
+                ByteType -> "Byte"
+                JVMVoid -> "Void"
+                else -> throw IllegalArgumentException(type.toString())
+            }
+        }
+
+        private fun smallName(type: NativeType): String {
+            return when(type) {
+                CharType -> "char"
+                IntType -> "int"
+                else -> boxed(type).toLowerCase()
+            }
+        }
     }
 }

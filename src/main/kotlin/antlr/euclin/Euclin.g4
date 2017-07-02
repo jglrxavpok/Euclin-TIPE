@@ -121,6 +121,7 @@ expression
     | False                                     #BoolFalseExpr
     | StringConstant                            #StringExpr
     | LeftBracket RightBracket                  #UnitExpr
+    | expression RightLightArrow type           #CastExpr
     ;
 
 couple
@@ -164,6 +165,7 @@ Colon: ':';
 SemiColon: ';';
 Equals: '=';
 LightArrow: '->';
+RightLightArrow: '<-';
 Bang: '!';
 Less: '<';
 LessEqual: '<=';

@@ -1,0 +1,7 @@
+var a = 45 <- Real
+var b = 45 <- String
+var c = 45 <- @
+var d = c <- String
+writeln(b+" choses.")
+writeln(d)
+writeln((((45 <- Char) <- Int8 <- Short) <- Real) <- String)

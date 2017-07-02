@@ -5,5 +5,6 @@ import euclin.std.IntPoint
 import euclin.std.UnitObject
 
 interface FuncString2IntPoint {
+    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     fun invoke(input: String): IntPoint
 }

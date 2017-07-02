@@ -210,4 +210,8 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
         }
         compileError("Aucun constructeur correspondant à $args dans $type", parentContext.currentClass, ctx)
     }
+
+    override fun visitCastExpr(ctx: EuclinParser.CastExprContext): Expression {
+        return visit(ctx.expression()) of parentContext.typeConverter.visit(ctx.type())
+    }
 }

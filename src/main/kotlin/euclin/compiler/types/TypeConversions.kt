@@ -18,14 +18,11 @@ fun methodType(arguments: List<TypedMember>, returnType: TypeDefinition): ASMTyp
 
 fun basicType(type: TypeDefinition): ASMType {
     return when(type) {
-        IntType -> ASMType.INT_TYPE
-        RealType -> ASMType.FLOAT_TYPE
         UnitType -> UnitASMType
         RealPointType -> RealPointASMType
         IntPointType -> IntegerPointASMType
-        JVMVoid -> ASMType.VOID_TYPE
         WildcardType -> OBJECT_TYPE
-        BooleanType -> ASMType.BOOLEAN_TYPE
+        is NativeType -> type.backing
         is FunctionType -> generateFunctionObjectType(type)
         // TODO: Autres types?
         else -> ASMType.getObjectType(type.toString().replace(".", "/"))

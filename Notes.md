@@ -28,4 +28,4 @@ Différence fcmpl/fcmpg
 
 A faire:
 ========
-(Compileur+Std) Ajouter des soft et hard cast (soft cast -> juste remplacer le type (CHECKCAST?); hard cast -> un 'vrai' cast au sens de la JVM (CHECKCAST + i2f eg.))
+(Compileur) Utiliser ASM-Commons et GeneratorAdaptor pour un code plus lisible/compréhensible ?

@@ -21,6 +21,11 @@ class TypeConverter(val parentContext: Context): EuclinBaseVisitor<TypeDefinitio
             "Real" -> RealType
             "Unit" -> UnitType
             "String" -> StringType
+            "Char", "Character" -> CharType
+            "Double" -> DoubleType
+            "Long" -> LongType
+            "Int16", "Short" -> ShortType
+            "Int8", "Byte" -> ByteType
             "Boolean", "Bool" -> BooleanType
             else -> parentContext.type(text)
         }

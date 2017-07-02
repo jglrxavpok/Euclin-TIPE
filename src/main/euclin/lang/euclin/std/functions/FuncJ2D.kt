@@ -1,7 +1,7 @@
 package euclin.std.functions
 
-import euclin.std.RealPoint
-import euclin.std.IntPoint
+import euclin.std.points.RealPoint
+import euclin.std.points.IntPoint
 import euclin.std.UnitObject
 
 interface FuncJ2D {

@@ -1,4 +1,4 @@
-package euclin.std;
+package euclin.std.points;
 
 public class RealPoint {
 

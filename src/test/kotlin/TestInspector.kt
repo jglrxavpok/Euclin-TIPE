@@ -1,7 +1,7 @@
 import euclin.compiler.Context
 import euclin.compiler.types.*
 import euclin.std.Console
-import euclin.std.IntPoint
+import euclin.std.points.IntPoint
 import org.objectweb.asm.ClassWriter
 
 object TestInspector {

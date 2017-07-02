@@ -483,8 +483,8 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
             RealType, IntType -> writer.visitInsn(correctOpcode(opcode, leftExpr.type))
 
             // cet appel de fonction fonctionne car l'instance de l'objet sur laquelle on agit est considérée comme 'left'
-            RealPointType -> writer.visitMethodInsn(INVOKEVIRTUAL, "euclin/std/RealPoint", functionName, "(Leuclin/std/RealPoint;)Leuclin/std/RealPoint;", false)
-            IntPointType -> writer.visitMethodInsn(INVOKEVIRTUAL, "euclin/std/IntPoint", functionName, "(Leuclin/std/IntPoint;)Leuclin/std/IntPoint;", false)
+            RealPointType -> writer.visitMethodInsn(INVOKEVIRTUAL, "euclin/std/points/RealPoint", functionName, "(Leuclin/std/points/RealPoint;)Leuclin/std/points/RealPoint;", false)
+            IntPointType -> writer.visitMethodInsn(INVOKEVIRTUAL, "euclin/std/points/IntPoint", functionName, "(Leuclin/std/points/IntPoint;)Leuclin/std/points/IntPoint;", false)
             else -> compileError("Impossible d'ajouter deux valeurs du type ${leftExpr.type}", functionSignature.ownerClass, left)
         }
 

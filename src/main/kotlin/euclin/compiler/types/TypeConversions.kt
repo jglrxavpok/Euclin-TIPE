@@ -8,8 +8,8 @@ import org.jglr.inference.types.TypeDefinition
 
 typealias ASMType = org.objectweb.asm.Type
 
-private val RealPointASMType = ASMType.getObjectType("euclin/std/RealPoint")
-private val IntegerPointASMType = ASMType.getObjectType("euclin/std/IntPoint")
+private val RealPointASMType = ASMType.getObjectType("euclin/std/points/RealPoint")
+private val IntegerPointASMType = ASMType.getObjectType("euclin/std/points/IntPoint")
 private val UnitASMType = ASMType.getObjectType("euclin/std/UnitObject")
 
 fun methodType(arguments: List<TypedMember>, returnType: TypeDefinition): ASMType {
@@ -29,27 +29,30 @@ fun basicType(type: TypeDefinition): ASMType {
     }
 }
 
+private fun shorten(name: String): String {
+    return name.substringAfterLast("/").substringBeforeLast(";") // on prend le dernier morceau et on retire le point-virgule
+}
+
 fun generateFunctionObjectType(type: FunctionType): ASMType {
 
-    fun shorten(name: String): String {
-        return name.substringAfterLast("/").substringBeforeLast(";") // on prend le dernier morceau et on retire le point-virgule
-    }
-
-    val argumentTypes: String
-    if(type.argumentType is TupleType) {
-        val tuple = type.argumentType as TupleType
-        if(tuple.elementTypes.isEmpty())
-            argumentTypes = "__"
-        else {
-            val descriptorList = tuple.elementTypes.map { shorten(basicType(it).descriptor) }
-            argumentTypes = "_" + descriptorList.reduce { acc, s -> acc + s } + "_"
-        }
-    } else {
-        argumentTypes = shorten(basicType(type.argumentType).descriptor)
-    }
+    val argumentTypes: String = generateShortName(type.argumentType)
     val returnType = shorten(basicType(type.returnType).descriptor)
 
     return ASMType.getObjectType("euclin/std/functions/Func${argumentTypes}2$returnType")
+}
+
+fun generateShortName(type: TypeDefinition): String {
+    return if(type is TupleType) {
+        val tuple = type
+        if(tuple.elementTypes.isEmpty())
+            "__"
+        else {
+            val descriptorList = tuple.elementTypes.map { shorten(basicType(it).descriptor) }
+            "_" + descriptorList.reduce { acc, s -> acc + s } + "_"
+        }
+    } else {
+        shorten(basicType(type).descriptor)
+    }
 }
 
 /**

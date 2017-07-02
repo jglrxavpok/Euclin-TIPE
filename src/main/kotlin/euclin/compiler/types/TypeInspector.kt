@@ -3,9 +3,9 @@ package euclin.compiler.types
 import euclin.compiler.Context
 import euclin.compiler.TypedMember
 import euclin.compiler.functions.FunctionSignature
-import euclin.std.IntPoint
-import euclin.std.RealPoint
 import euclin.std.UnitObject
+import euclin.std.points.IntPoint
+import euclin.std.points.RealPoint
 import org.jglr.inference.types.TypeDefinition
 import org.objectweb.asm.ClassReader
 import java.lang.reflect.Modifier

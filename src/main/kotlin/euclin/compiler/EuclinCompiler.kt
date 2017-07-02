@@ -11,6 +11,8 @@ import euclin.compiler.lambda.LambdaCompiler
 import euclin.intrisincs.EuclinApplication
 import euclin.intrisincs.MemoizationCache
 import euclin.std.*
+import euclin.std.points.IntPoint
+import euclin.std.points.RealPoint
 import org.antlr.v4.runtime.tree.TerminalNode
 import org.jglr.inference.types.TypeDefinition
 import org.objectweb.asm.Opcodes.*

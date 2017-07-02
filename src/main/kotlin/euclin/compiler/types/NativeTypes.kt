@@ -22,6 +22,8 @@ val UnitType: TypeDefinition = BasicType("euclin.std.UnitObject")
 val StringType: TypeDefinition = BasicType("java.lang.String")
 val WildcardType: TypeDefinition = PolymorphicType()
 
+val BasicTypes = listOf(IntType, RealType, BooleanType, ByteType, DoubleType, ShortType, LongType, CharType, UnitType, StringType, WildcardType)
+
 val IntPointType = TupleType(arrayOf(IntType, IntType)) // TODO: 'Generic' types ?
 val RealPointType = TupleType(arrayOf(RealType, RealType))
 

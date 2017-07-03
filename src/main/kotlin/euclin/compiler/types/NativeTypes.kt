@@ -8,13 +8,13 @@ import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
 
 // Types de base de la JVM
-val IntType = NativeType("euclin.std.Int", ASMType.INT_TYPE) // TODO: Renommer en Int32
-val RealType = NativeType("euclin.std.Real", ASMType.FLOAT_TYPE) // TODO: Renommer en Real32
+val Int32Type = NativeType("euclin.std.Int32", ASMType.INT_TYPE)
+val Real32Type = NativeType("euclin.std.Real32", ASMType.FLOAT_TYPE)
 val BooleanType = NativeType("euclin.std.Boolean", ASMType.BOOLEAN_TYPE)
-val ByteType = NativeType("euclin.std.Int8", ASMType.BYTE_TYPE)
-val DoubleType = NativeType("euclin.std.Double", ASMType.DOUBLE_TYPE)
-val ShortType = NativeType("euclin.std.Int16", ASMType.SHORT_TYPE)
-val LongType = NativeType("euclin.std.Long", ASMType.LONG_TYPE)
+val Int8Type = NativeType("euclin.std.Int8", ASMType.BYTE_TYPE)
+val Real64Type = NativeType("euclin.std.Real64", ASMType.DOUBLE_TYPE)
+val Int16Type = NativeType("euclin.std.Int16", ASMType.SHORT_TYPE)
+val Int64Type = NativeType("euclin.std.Int64", ASMType.LONG_TYPE)
 val CharType = NativeType("euclin.std.Char", ASMType.CHAR_TYPE)
 val JVMVoid = NativeType("void", ASMType.VOID_TYPE)
 
@@ -22,10 +22,12 @@ val UnitType: TypeDefinition = BasicType("euclin.std.UnitObject")
 val StringType: TypeDefinition = BasicType("java.lang.String")
 val WildcardType: TypeDefinition = PolymorphicType()
 
-val BasicTypes = listOf(IntType, RealType, BooleanType, ByteType, DoubleType, ShortType, LongType, CharType, UnitType, StringType, WildcardType)
+val BasicTypes = listOf(Int32Type, Real32Type, BooleanType, Int8Type, Real64Type, Int16Type, Int64Type, CharType, UnitType, StringType, WildcardType)
 
-val IntPointType = TupleType(arrayOf(IntType, IntType)) // TODO: 'Generic' types ?
-val RealPointType = TupleType(arrayOf(RealType, RealType))
+val Int32PointType = TupleType(arrayOf(Int32Type, Int32Type)) // TODO: 'Generic' types ?
+val Int64PointType = TupleType(arrayOf(Int64Type, Int64Type))
+val Real32PointType = TupleType(arrayOf(Real32Type, Real32Type))
+val Real64PointType = TupleType(arrayOf(Real64Type, Real64Type))
 
 val ShapeType: TypeDefinition = BasicType("euclin.std.Shape")
 

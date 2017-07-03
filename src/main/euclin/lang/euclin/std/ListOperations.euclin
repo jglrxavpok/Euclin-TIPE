@@ -16,11 +16,11 @@ nullNode.data = ()
 func create(): List {
     var list = new List
     list.length = 0
-    return list
+    list
 }
 
 func length(list: List): Int {
-    return list.length
+    list.length
 }
 
 func add(target: List, element: @): Unit {
@@ -52,11 +52,11 @@ func getNode(from: List, at: Int): Node {
         index = index-1
         node = node.next
     }
-    return node
+    node
 }
 
 func get(from: List, at: Int): @ {
-    return getNode(from, at).data
+    getNode(from, at).data
 }
 
 func clear(target: List): Unit {

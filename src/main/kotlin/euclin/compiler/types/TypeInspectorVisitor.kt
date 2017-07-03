@@ -51,9 +51,13 @@ class TypeInspectorVisitor(val destination: TypeDefinition, val context: Context
     private fun convertBaseDesc(desc: String): TypeDefinition {
         val asmType = ASMType.getType(desc)
         return when(asmType) {
-            Type.INT_TYPE -> IntType
+            Type.INT_TYPE -> Int32Type
+            Type.LONG_TYPE -> Int64Type
+            Type.FLOAT_TYPE -> Real32Type
+            Type.DOUBLE_TYPE -> Real64Type
+            Type.SHORT_TYPE -> Int16Type
+            Type.BYTE_TYPE -> Int8Type
             Type.BOOLEAN_TYPE -> BooleanType
-            Type.FLOAT_TYPE -> RealType
             Type.VOID_TYPE -> JVMVoid
 
             else ->

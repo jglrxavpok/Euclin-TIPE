@@ -1,8 +1,11 @@
 package euclin.compiler.functions
 
 import euclin.compiler.Context
+import euclin.compiler.TypedMember
 import org.jglr.inference.types.TypeDefinition
 import euclin.compiler.grammar.EuclinParser
+import euclin.compiler.name
+import euclin.compiler.type
 import euclin.compiler.types.*
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Label
@@ -37,7 +40,7 @@ object MemoizedFunctionCompiler {
             val internalClassName = ASMType.getObjectType(signature.ownerClass.replace(".", "/")).internalName
 
             val computeBranch = Label()
-            val arrayIndex = arguments.size
+            val arrayIndex = totalSize(arguments)
             val resultIndex = arrayIndex+1
             visitCode()
             visitLabel(start)
@@ -55,12 +58,16 @@ object MemoizedFunctionCompiler {
             visitTypeInsn(ANEWARRAY, "java/lang/Object")
             visitVarInsn(ASTORE, arrayIndex)
             // on charge les arguments
-            for((index, arg) in arguments.withIndex()) {
+            var localVarIndex = 0
+            var localArrayIndex = 0
+            for(arg in arguments) {
                 visitVarInsn(ALOAD, arrayIndex)
-                visitLdcInsn(index)
-                visitVarInsn(correctOpcode(ILOAD, arg.second), index)
-                convertToObjectTypeIfNeeded(writer, arg.second)
+                visitLdcInsn(localArrayIndex++)
+                visitVarInsn(correctOpcode(ILOAD, arg.type), localVarIndex)
+                convertToObjectTypeIfNeeded(writer, arg.type)
                 visitInsn(AASTORE)
+                localVarIndex += FunctionCompiler.localSizeOf(arg.type)
+                println(">> ${arg.type}, post index: $localVarIndex")
             }
 
             // on vérifie si le cache a déjà la valeur
@@ -79,8 +86,12 @@ object MemoizedFunctionCompiler {
 
             // sinon on la calcule
             visitLabel(computeBranch)
-            for((index, arg) in arguments.withIndex())
-                visitVarInsn(correctOpcode(ILOAD, arg.second), index)
+
+            localVarIndex = 0
+            for(arg in arguments) {
+                visitVarInsn(correctOpcode(ILOAD, arg.second), localVarIndex)
+                localVarIndex += FunctionCompiler.localSizeOf(arg.type)
+            }
             visitMethodInsn(INVOKESTATIC, internalClassName, "${signature.name}\$compute", methodType(signature.arguments, signature.returnType).descriptor, false)
 
             // On sauvegarde la valeur:
@@ -96,9 +107,11 @@ object MemoizedFunctionCompiler {
 
             visitLabel(end)
 
-            for ((index, arg) in arguments.withIndex()) {
-                visitParameter(arg.first, ACC_FINAL)
-                visitLocalVariable(arg.first, basicType(arg.second).descriptor, null, start, end, index)
+            localVarIndex = 0
+            for (arg in arguments) {
+                visitParameter(arg.name, ACC_FINAL)
+                visitLocalVariable(arg.name, basicType(arg.type).descriptor, null, start, end, localVarIndex)
+                localVarIndex += FunctionCompiler.localSizeOf(arg.type)
             }
             visitLocalVariable("\$argArray", "[Ljava/lang/Object;", null, start, end, arrayIndex)
             visitLocalVariable("\$result", basicType(signature.returnType).descriptor, null, start, end, resultIndex)
@@ -107,9 +120,17 @@ object MemoizedFunctionCompiler {
         }
     }
 
+    private fun totalSize(arguments: List<TypedMember>): Int {
+        if(arguments.isEmpty())
+            return 0
+        return arguments.map(TypedMember::type)
+                .map(FunctionCompiler.Companion::localSizeOf)
+                .sum()
+    }
+
     private fun convertToObjectTypeIfNeeded(writer: MethodVisitor, type: TypeDefinition) {
        /* when(type) {
-            RealType -> {
+            Real32Type -> {
                 writer.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false)
             }
             BooleanType -> {
@@ -125,7 +146,7 @@ object MemoizedFunctionCompiler {
 
     private fun convertToNativeTypeIfNeeded(writer: MethodVisitor, type: TypeDefinition) {
        /* when(type) {
-            RealType -> {
+            Real32Type -> {
                 writer.visitTypeInsn(CHECKCAST, "java/lang/Float") // conversion en Float
                 writer.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F", false)
             }

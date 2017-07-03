@@ -4,8 +4,10 @@ import euclin.compiler.Context
 import euclin.compiler.TypedMember
 import euclin.compiler.functions.FunctionSignature
 import euclin.std.UnitObject
-import euclin.std.points.IntPoint
-import euclin.std.points.RealPoint
+import euclin.std.points.Int32Point
+import euclin.std.points.Int64Point
+import euclin.std.points.Real32Point
+import euclin.std.points.Real64Point
 import org.jglr.inference.types.TypeDefinition
 import org.objectweb.asm.ClassReader
 import java.lang.reflect.Modifier
@@ -17,7 +19,9 @@ object TypeInspector {
             val name = it.name
             val type = it.type
 
-            destination.listFields() += TypedMember(name, convert(type, context))
+            val field = TypedMember(name, convert(type, context))
+            if(field !in destination.listFields())
+                destination.listFields() += field
         }
 
         target.declaredMethods.filter { Modifier.isPublic(it.modifiers) /* La fonction doit être publique */ }.forEach {
@@ -26,9 +30,14 @@ object TypeInspector {
             val returnType = it.returnType
 
             if(Modifier.isStatic(it.modifiers)) { // si c'est une fonction statique
-                destination.listStaticMethods() += FunctionSignature(name, args, convert(returnType, context), target.canonicalName, static = true)
+                val function = FunctionSignature(name, args, convert(returnType, context), target.canonicalName, static = true)
+                if(function !in destination.listStaticMethods())
+                    destination.listStaticMethods() += function
             } else {
-                destination.listMethods() += FunctionSignature(name, args, convert(returnType, context), target.canonicalName, static = false)
+                val function = FunctionSignature(name, args, convert(returnType, context), target.canonicalName, static = false)
+                if(function !in destination.listMethods()) {
+                    destination.listMethods() += function
+                }
             }
         }
 
@@ -36,7 +45,9 @@ object TypeInspector {
             val name = it.name
             val args = it.parameters.map { TypedMember(it.name, convert(it.type, context)) }
 
-            destination.listConstructors() += FunctionSignature(name, args, convert(Void.TYPE, context), target.canonicalName, static = false)
+            val constructor = FunctionSignature(name, args, convert(Void.TYPE, context), target.canonicalName, static = false)
+            if(constructor !in destination.listConstructors())
+                destination.listConstructors() += constructor
         }
     }
 
@@ -48,11 +59,17 @@ object TypeInspector {
     private fun convert(clazz: Class<*>, context: Context): TypeDefinition {
         // les '.java' sont importants, le test d'égalité échoue sinon
         return when(clazz) {
-            Integer.TYPE -> IntType
+            Integer.TYPE -> Int32Type
+            java.lang.Long.TYPE -> Int64Type
             java.lang.Boolean.TYPE -> BooleanType
-            java.lang.Float.TYPE -> RealType
-            IntPoint::class.java -> IntPointType
-            RealPoint::class.java -> RealPointType
+            java.lang.Float.TYPE -> Real32Type
+            java.lang.Double.TYPE -> Real64Type
+            java.lang.Short.TYPE -> Int16Type
+            java.lang.Byte.TYPE -> Int8Type
+            Int32Point::class.java -> Int32PointType
+            Real32Point::class.java -> Real32PointType
+            Int64Point::class.java -> Int64PointType
+            Real64Point::class.java -> Real64PointType
             UnitObject::class.java -> UnitType
             Void.TYPE -> JVMVoid
             Unit::class.java -> JVMVoid

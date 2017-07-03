@@ -11,8 +11,10 @@ import euclin.compiler.lambda.LambdaCompiler
 import euclin.intrisincs.EuclinApplication
 import euclin.intrisincs.MemoizationCache
 import euclin.std.*
-import euclin.std.points.IntPoint
-import euclin.std.points.RealPoint
+import euclin.std.points.Int32Point
+import euclin.std.points.Int64Point
+import euclin.std.points.Real32Point
+import euclin.std.points.Real64Point
 import org.antlr.v4.runtime.tree.TerminalNode
 import org.jglr.inference.types.TypeDefinition
 import org.objectweb.asm.Opcodes.*
@@ -178,8 +180,11 @@ object EuclinCompiler {
 
     private fun inspectStandardLibrary(context: Context) {
         // TODO: + de classes?
-        TypeInspector.inspect(IntPoint::class.java, IntPointType, context)
-        TypeInspector.inspect(RealPoint::class.java, RealPointType, context)
+        TypeInspector.inspect(Int32Point::class.java, Int32PointType, context)
+        TypeInspector.inspect(Real32Point::class.java, Real32PointType, context)
+        TypeInspector.inspect(Int64Point::class.java, Int64PointType, context)
+        TypeInspector.inspect(Real64Point::class.java, Real64PointType, context)
+
         TypeInspector.inspect(UnitObject::class.java, UnitType, context)
         TypeInspector.inspect(String::class.java, StringType, context)
         TypeInspector.inspect(Console::class.java, BasicType("euclin.std.Console"), context)
@@ -187,7 +192,7 @@ object EuclinCompiler {
         TypeInspector.inspect(EuclinApplication::class.java, BasicType("euclin.intrisincs.EuclinApplication"), context)
         TypeInspector.inspect(MemoizationCache::class.java, BasicType("euclin.intrisincs.MemoizationCache"), context)
 
-        val types = mutableListOf(RealType, RealPointType, IntType, IntPointType, UnitType, StringType, BooleanType, WildcardType, DoubleType, ShortType, CharType, ByteType, LongType)
+        val types = BasicTypes + Real32PointType + Int32PointType + Real64PointType + Int64PointType
 
         val rootFolder = File("./src/main/euclin/lang/euclin/std/functions")
         rootFolder.mkdirs()
@@ -204,21 +209,33 @@ object EuclinCompiler {
 
     private fun addStandardFunctions(functions: MutableMap<String, FunctionSignature>) {
         val circleFunction = FunctionSignature("circle", listOf(
-                TypedMember("center", FunctionType(RealType, RealPointType)),
-                TypedMember("radius", FunctionType(RealType, RealType))
+                TypedMember("center", FunctionType(Real64Type, Real64PointType)),
+                TypedMember("radius", FunctionType(Real64Type, Real64Type))
         ), ObjectType("Circle", ShapeType), "euclin.std.Geometry", static = true)
 
+        val sin32Function = FunctionSignature("sin32", listOf(
+                TypedMember("angle", Real32Type)
+        ), Real32Type, "euclin.std.MathFunctions", static = true)
+
+        val cos32Function = FunctionSignature("cos32", listOf(
+                TypedMember("angle", Real32Type)
+        ), Real32Type, "euclin.std.MathFunctions", static = true)
+
+        val tan32Function = FunctionSignature("tan32", listOf(
+                TypedMember("angle", Real32Type)
+        ), Real32Type, "euclin.std.MathFunctions", static = true)
+
         val sinFunction = FunctionSignature("sin", listOf(
-                TypedMember("angle", RealType)
-        ), RealType, "euclin.std.MathFunctions", static = true)
+                TypedMember("angle", Real64Type)
+        ), Real64Type, "java.lang.Math", static = true)
 
         val cosFunction = FunctionSignature("cos", listOf(
-                TypedMember("angle", RealType)
-        ), RealType, "euclin.std.MathFunctions", static = true)
+                TypedMember("angle", Real64Type)
+        ), Real64Type, "java.lang.Math", static = true)
 
         val tanFunction = FunctionSignature("tan", listOf(
-                TypedMember("angle", RealType)
-        ), RealType, "euclin.std.MathFunctions", static = true)
+                TypedMember("angle", Real64Type)
+        ), Real64Type, "java.lang.Math", static = true)
 
         val writeFunction = FunctionSignature("write", listOf(
                 TypedMember("text", StringType)
@@ -231,6 +248,9 @@ object EuclinCompiler {
         functions["sin"] = sinFunction
         functions["cos"] = cosFunction
         functions["tan"] = tanFunction
+        functions["sin32"] = sin32Function
+        functions["cos32"] = cos32Function
+        functions["tan32"] = tan32Function
         functions["circle"] = circleFunction
         functions["write"] = writeFunction
         functions["writeln"] = writelnFunction

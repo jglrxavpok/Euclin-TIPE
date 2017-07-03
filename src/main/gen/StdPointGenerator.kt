@@ -1,7 +1,5 @@
 import euclin.compiler.types.*
-import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TypeDefinition
-import euclin.compiler.types.basicType
 import java.io.File
 import java.io.FileWriter
 
@@ -10,7 +8,7 @@ object StdPointGenerator {
     // FIXME Pas encore au point
 
     @JvmStatic fun main(args: Array<String>) {
-        val types = mutableListOf(RealType, RealPointType, IntType, IntPointType, UnitType, StringType, BooleanType, WildcardType, DoubleType, ShortType, CharType, ByteType, LongType)
+        val types = mutableListOf(Real32Type, Real32PointType, Int32Type, Int32PointType, UnitType, StringType, BooleanType, WildcardType, Real64Type, Int16Type, CharType, Int8Type, Int64Type)
 
         val rootFolder = File("./src/main/euclin/lang/euclin/std/points/")
         rootFolder.mkdirs()
@@ -39,18 +37,20 @@ object StdPointGenerator {
 
     private fun typeToKotlinType(type: TypeDefinition): String {
         return when(type) {
-            RealType -> "Float"
-            IntType -> "Int"
-            RealPointType -> "RealPoint"
-            IntPointType -> "IntPoint"
+            Real32Type -> "Float"
+            Int32Type -> "Int"
+            Real32PointType -> "Real32Point"
+            Int32PointType -> "Int32Point"
+            Real64PointType -> "Real64Point"
+            Int64PointType -> "Int64Point"
             UnitType -> "UnitObject"
             BooleanType -> "Boolean"
             WildcardType -> "Object"
-            LongType -> "Long"
+            Int64Type -> "Long"
             CharType -> "Char"
-            ByteType -> "Byte"
-            ShortType -> "Short"
-            DoubleType -> "Double"
+            Int8Type -> "Byte"
+            Int16Type -> "Short"
+            Real64Type -> "Double"
             else -> type.toString().substringAfterLast(".")
         }
     }

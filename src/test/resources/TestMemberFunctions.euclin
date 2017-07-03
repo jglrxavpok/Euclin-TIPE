@@ -1,6 +1,6 @@
 func somefunc(): Unit {
     var point = (1, 1)
-    point.add((0,0))
+    point.plus((0,0))
     var x = point.x
     point.set(x, x)
     point.y = 10

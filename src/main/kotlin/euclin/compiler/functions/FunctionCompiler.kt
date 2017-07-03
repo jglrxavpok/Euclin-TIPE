@@ -60,15 +60,15 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
     }
 
     override fun visitIntExpr(ctx: EuclinParser.IntExprContext) {
-        val int = ctx.Integer().text.toInt()
+        val int = ctx.Integer().text.toLong()
         writer.visitLdcInsn(int) // on charge la valeur
-        typeStack.push(IntType)
+        typeStack.push(Int64Type)
     }
 
     override fun visitFloatExpr(ctx: EuclinParser.FloatExprContext) {
-        val float = ctx.FloatNumber().text.toFloat()
+        val float = ctx.FloatNumber().text.toDouble()
         writer.visitLdcInsn(float) // on charge la valeur
-        typeStack.push(RealType)
+        typeStack.push(Real64Type)
     }
 
     override fun visitCoupleExpr(ctx: EuclinParser.CoupleExprContext) {
@@ -85,7 +85,14 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         // TODO: autres types
         // crée un nouvel objet couple:
         val baseType = leftType
-        val type = if(baseType == IntType) IntPointType else RealPointType
+        val type = when(baseType) {
+            Real64Type -> Real64PointType
+            Real32Type -> Real32PointType
+
+            Int64Type -> Int64PointType
+            Int32Type -> Int32PointType
+            else -> compileError("Impossible de créer un couple ($leftType, $rightType)", parentContext.currentClass, ctx)
+        }
         with(writer) {
             val asmType = basicType(type)
             val descriptor = methodType(listOf(TypedMember("first", baseType), TypedMember("second", baseType)), JVMVoid).descriptor
@@ -229,7 +236,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
 
         // si l'expression n'est que '_', on change le nom
         val name = LambdaCompiler.generateLambdaName(functionExpression, parentContext) +"\$constant"
-        val lambdaSignature = FunctionSignature(name, listOf(TypedMember("_", RealType)), returnType, functionSignature.ownerClass, static = true)
+        val lambdaSignature = FunctionSignature(name, listOf(TypedMember("_", Real64Type)), returnType, functionSignature.ownerClass, static = true)
         val functionBody = LambdaCompiler.generateLambdaBody(functionExpression)
 
         val funcCompiler = FunctionCompiler(parentContext.withSignature(lambdaSignature).clearLocals())
@@ -238,8 +245,8 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
     }
 
     override fun visitLambdaVarExpr(ctx: EuclinParser.LambdaVarExprContext?) {
-        writer.visitVarInsn(correctOpcode(ILOAD, RealType), 0) // on charge le 1er argument de la fonction
-        typeStack.push(RealType)
+        writer.visitVarInsn(correctOpcode(ILOAD, Real64Type), 0) // on charge le 1er argument de la fonction
+        typeStack.push(Real64Type)
     }
 
     override fun visitVarExpr(ctx: EuclinParser.VarExprContext) {
@@ -319,7 +326,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
                             if (expected != actual || expected < actual) { // le type actuel ne peut rentrer dans le type attendu
                                 if (expected == UnitType) { // on ne s'occupe pas de la dernière valeur
                                     // on retire l'élément, on charge Unit et on le renvoit
-                                    writer.visitInsn(POP)
+                                    popValue(actual)
                                     loadUnitOnStack()
                                     writer.visitInsn(ARETURN)
                                 } else {
@@ -338,14 +345,21 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
                 } else {
                     // s'il reste des valeurs sur le stack à la fin de l'instruction, on les retire
                     while (typeStack.isNotEmpty()) {
-                        writer.visitInsn(POP)
-                        typeStack.pop()
+                        val type = typeStack.pop()
+                        popValue(type)
                     }
                 }
             }
         }
 
         compileFuncFooter()
+    }
+
+    private fun popValue(type: TypeDefinition) {
+        if(type == Real64Type || type == Int64Type)
+            writer.visitInsn(POP2)
+        else
+            writer.visitInsn(POP)
     }
 
     internal fun compileFuncFooter() {
@@ -365,12 +379,12 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
 
     internal fun compileFuncHeader() {
         with(writer) {
-            for ((index, arg) in functionSignature.arguments.withIndex()) {
+            for (arg in functionSignature.arguments) {
                 val (name, type) = arg
                 visitParameter(name, Opcodes.ACC_FINAL)
-                localVariableIDs[name] = index
+                localVariableIDs[name] = localIndex
                 localVariableTypes[name] = type
-                localIndex++
+                localIndex += localSizeOf(type)
             }
             visitCode()
             visitLabel(startLabel)
@@ -479,13 +493,20 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         compileAssert(leftExpr.type == rightExpr.type, functionSignature.ownerClass, left) { "Les valeurs doivent être du même type! ${leftExpr.type} != ${rightExpr.type}" }
         visit(left)
         visit(right)
-        when(leftExpr.type) {
-            RealType, IntType -> writer.visitInsn(correctOpcode(opcode, leftExpr.type))
+        val memberType = leftExpr.type
+        when(memberType) {
+            Real32Type, Int32Type, Real64Type, Int64Type, BooleanType, CharType, Int16Type, Int8Type -> writer.visitInsn(correctOpcode(opcode, memberType))
 
             // cet appel de fonction fonctionne car l'instance de l'objet sur laquelle on agit est considérée comme 'left'
-            RealPointType -> writer.visitMethodInsn(INVOKEVIRTUAL, "euclin/std/points/RealPoint", functionName, "(Leuclin/std/points/RealPoint;)Leuclin/std/points/RealPoint;", false)
-            IntPointType -> writer.visitMethodInsn(INVOKEVIRTUAL, "euclin/std/points/IntPoint", functionName, "(Leuclin/std/points/IntPoint;)Leuclin/std/points/IntPoint;", false)
-            else -> compileError("Impossible d'ajouter deux valeurs du type ${leftExpr.type}", functionSignature.ownerClass, left)
+            /*Real32PointType -> writer.visitMethodInsn(INVOKEVIRTUAL, "euclin/std/points/Real64Point", functionName, "(Leuclin/std/points/Real64Point;)Leuclin/std/points/Real64Point;", false)
+            Int32PointType -> writer.visitMethodInsn(INVOKEVIRTUAL, "euclin/std/points/Int64Point", functionName, "(Leuclin/std/points/Int64Point;)Leuclin/std/points/Int64Point;", false)*/
+            else -> {
+                val potentialMethods = memberType.listMethods().filter { it.name == functionName }
+                        .filter { it.arguments.size == 1 && it.arguments[0].type == memberType }
+                if(potentialMethods.size != 1)
+                    compileError("Impossible d'ajouter deux valeurs du type $memberType ${potentialMethods.size}", functionSignature.ownerClass, left)
+                writer.visitMethodInsn(INVOKEVIRTUAL, basicType(memberType).internalName, functionName, methodType(potentialMethods[0]).descriptor, false)
+            }
         }
 
         // on retire les termes
@@ -521,7 +542,8 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
             writer.visitFieldInsn(PUTSTATIC, toInternalName(parentContext.currentClass), name, basicType(value.type).descriptor)
             typeStack.pop()
         } else {
-            val varID = localIndex++
+            val varID = localIndex
+            localIndex += localSizeOf(value.type)
             localVariableIDs[name] = varID
             localVariableTypes[name] = value.type
 
@@ -610,8 +632,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
             // on vide le stack si nécessaire
             if (typeStack.isNotEmpty()) {
                 compileAssert(typeStack.size == 1, functionSignature.ownerClass, instruction) { "Il ne doit y avoir qu'une seule valeur sur le stack à la fin d'une instruction!" }
-                typeStack.pop()
-                writer.visitInsn(POP)
+                popValue(typeStack.pop())
             }
         }
     }
@@ -665,8 +686,9 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
     private fun compare(left: EuclinParser.ExpressionContext, right: EuclinParser.ExpressionContext, jumpOpcode: Int) {
         val valueType = translator.translate(left).type
 
-        compileAssert(valueType == RealType || valueType == IntType || valueType == StringType, functionSignature.ownerClass, left)
-            { "On ne peut comparer que les types String, Int et Real!" }
+        val comparisonMethod = valueType.listMethods().find { it.name == "compareTo" && it.arguments.size == 1 && it.arguments[0].type == WildcardType && it.returnType == Int32Type }
+        compileAssert(comparisonMethod != null || valueType in listOf(Int16Type, Int8Type, Int32Type, Int64Type, Real32Type, Real64Type, StringType), functionSignature.ownerClass, left) // TODO: Supporter long/double etc.
+            { "On ne peut comparer que les types ayant une méthode compareTo ou les types Int et Real!" }
 
         val trueLabel = Label()
         val endLabel = Label()
@@ -677,13 +699,27 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
             typeStack.pop()
 
             // /!\ Astuce: la comparaison va nous donner un nombre que l'on va ensuite comparer à 0
-            if(valueType == RealType) { // c'est un float
-                visitInsn(FCMPL) // on compare
-                visitIntInsn(BIPUSH, 0)
-                visitInsn(SWAP)
-            } else if(valueType == StringType) {
-                visitMethodInsn(INVOKEINTERFACE, "java/lang/String", "compareTo", "(Ljava/lang/Object;)I", true)
-                visitIntInsn(BIPUSH, 0)
+            if(valueType != Int32Type && valueType != Int16Type && valueType != Int8Type) {
+                if(valueType == Real32Type) { // c'est un float
+                    visitInsn(FCMPL) // on compare
+                    visitIntInsn(BIPUSH, 0)
+                    visitInsn(SWAP)
+                } else if(valueType == Real64Type) { // c'est un double
+                    visitInsn(DCMPL) // on compare
+                    visitIntInsn(BIPUSH, 0)
+                    visitInsn(SWAP)
+                } else if(valueType == Int64Type) { // c'est un long
+                    visitInsn(LCMP) // on compare
+                    visitIntInsn(BIPUSH, 0)
+                    visitInsn(SWAP)
+                } else if(valueType == StringType) {
+                    visitMethodInsn(INVOKEINTERFACE, "java/lang/String", "compareTo", "(Ljava/lang/Object;)I", true)
+                    visitIntInsn(BIPUSH, 0)
+                } else {
+                    // TODO ça peut planter si elle provient d'une interface
+                    visitMethodInsn(INVOKEVIRTUAL, toInternalName(valueType.toString()), "compareTo", "(Ljava/lang/Object;)I", true)
+                    visitIntInsn(BIPUSH, 0)
+                }
             }
 
             visitJumpInsn(jumpOpcode, trueLabel) // c'est une valeur > donc on charge 'true'
@@ -829,8 +865,8 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
             compileError("Cast impossible de $current à $target", lineInFile, parentContext.currentClass)
         }
 
-        if(current == BooleanType || current == ShortType || current == ByteType || current == CharType) {
-            compileNativeCast(IntType, target, lineInFile) // ces types ne sont que des entiers pour la JVM
+        if(current == BooleanType || current == Int16Type || current == Int8Type || current == CharType) {
+            compileNativeCast(Int32Type, target, lineInFile) // ces types ne sont que des entiers pour la JVM
             return
         }
         with(writer) {
@@ -853,7 +889,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
                         "J" -> visitInsn(F2L)
                         "B", "S", "C" -> {
                             visitInsn(F2I)
-                            compileNativeCast(IntType, target, lineInFile)
+                            compileNativeCast(Int32Type, target, lineInFile)
                         }
                         else -> unsupportedCast()
                     }
@@ -864,7 +900,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
                     "J" -> visitInsn(D2L)
                     "B", "S", "C" -> {
                         visitInsn(D2I)
-                        compileNativeCast(IntType, target, lineInFile)
+                        compileNativeCast(Int32Type, target, lineInFile)
                     }
                     else -> unsupportedCast()
                 }
@@ -874,7 +910,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
                     "I" -> visitInsn(L2I)
                     "B", "S", "C" -> {
                         visitInsn(L2I)
-                        compileNativeCast(IntType, target, lineInFile)
+                        compileNativeCast(Int32Type, target, lineInFile)
                     }
                     else -> unsupportedCast()
                 }
@@ -902,14 +938,14 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
 
         private fun boxed(type: NativeType): String {
             return when(type) {
-                IntType -> "Integer"
-                RealType -> "Float"
-                DoubleType -> "Double"
+                Int32Type -> "Integer"
+                Real32Type -> "Float"
+                Real64Type -> "Double"
                 CharType -> "Character"
-                ShortType -> "Short"
-                LongType -> "Long"
+                Int16Type -> "Short"
+                Int64Type -> "Long"
                 BooleanType -> "Boolean"
-                ByteType -> "Byte"
+                Int8Type -> "Byte"
                 JVMVoid -> "Void"
                 else -> throw IllegalArgumentException(type.toString())
             }
@@ -918,8 +954,15 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
         private fun smallName(type: NativeType): String {
             return when(type) {
                 CharType -> "char"
-                IntType -> "int"
+                Int32Type -> "int"
                 else -> boxed(type).toLowerCase()
+            }
+        }
+
+        fun localSizeOf(type: TypeDefinition): Int {
+            return when(type) {
+                Real64Type, Int64Type -> 2
+                else -> 1
             }
         }
     }

@@ -16,7 +16,7 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
 
     private val availableFunctions = parentContext.availableFunctions
     private val variableTypes = parentContext.localVariableTypes
-    private var lambdaVar = Variable("_") of RealType
+    private var lambdaVar = Variable("_") of Real64Type
     private val True = Literal(true, BooleanType)
     private val False = Literal(false, BooleanType)
     private val UnitValue = Literal(Unit, UnitType)
@@ -40,7 +40,7 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
 
     fun translateLambdaExpression(functionExpression: EuclinParser.ExpressionContext): Function {
         val previousVar = lambdaVar
-        lambdaVar = Variable("_") of RealType
+        lambdaVar = Variable("_") of Real64Type
         val result = Function("lambda_${System.currentTimeMillis()}", lambdaVar, translate(functionExpression))
         lambdaVar = previousVar
         inferer.infer(result)
@@ -86,7 +86,7 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
     }
 
     override fun visitFloatExpr(ctx: EuclinParser.FloatExprContext): Expression {
-        return Literal(ctx.FloatNumber().text.toFloat(), RealType)
+        return Literal(ctx.FloatNumber().text.toDouble(), Real64Type)
     }
 
     override fun visitLambdaFunctionExpr(ctx: EuclinParser.LambdaFunctionExprContext): Expression {
@@ -110,7 +110,7 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
     }
 
     override fun visitIntExpr(ctx: EuclinParser.IntExprContext): Expression {
-        return Literal(ctx.Integer().text.toInt(), IntType)
+        return Literal(ctx.Integer().text.toLong(), Int64Type)
     }
 
     override fun visitCoupleExpr(ctx: EuclinParser.CoupleExprContext): Expression {

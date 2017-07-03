@@ -8,6 +8,7 @@ import org.jglr.inference.types.TypeDefinition
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.TypeConverter
+import java.util.*
 
 class FunctionGatherer(val parentContext: Context): EuclinBaseVisitor<FunctionSignature>() {
 
@@ -43,6 +44,30 @@ class FunctionSignature(val name: String, val arguments: List<TypedMember>, val 
         if(arguments.size == 1)
             return FunctionType(arguments[0].second, returnType)
         return FunctionType(TupleType(arguments.map { it.second }.toTypedArray()), returnType)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if(other is FunctionSignature)
+            return name == other.name && areListEqual(arguments, other.arguments) && returnType == other.returnType && ownerClass == other.ownerClass && static == other.static && pure == other.pure
+        return super.equals(other)
+    }
+
+    private fun <T> areListEqual(listA: List<T>, listB: List<T>): Boolean {
+        if(listA.size != listB.size)
+            return false
+        listA.forEachIndexed { index, elem -> if(elem != listB[index]) return false }
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        for(elem in arguments)
+            result = 31 * result + elem.hashCode()
+        result = 31 * result + returnType.hashCode()
+        result = 31 * result + ownerClass.hashCode()
+        result = 31 * result + static.hashCode()
+        result = 31 * result + pure.hashCode()
+        return result
     }
 
     var pure: Boolean = false

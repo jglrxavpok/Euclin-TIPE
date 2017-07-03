@@ -2,15 +2,22 @@ package euclin.compiler.types
 
 import euclin.compiler.EuclinCompiler.OBJECT_TYPE
 import euclin.compiler.TypedMember
+import euclin.compiler.functions.FunctionSignature
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
 
 typealias ASMType = org.objectweb.asm.Type
 
-private val RealPointASMType = ASMType.getObjectType("euclin/std/points/RealPoint")
-private val IntegerPointASMType = ASMType.getObjectType("euclin/std/points/IntPoint")
+private val RealPoint64ASMType = ASMType.getObjectType("euclin/std/points/Real64Point")
+private val IntegerPoint64ASMType = ASMType.getObjectType("euclin/std/points/Int64Point")
+private val RealPoint32ASMType = ASMType.getObjectType("euclin/std/points/Real32Point")
+private val IntegerPoint32ASMType = ASMType.getObjectType("euclin/std/points/Int32Point")
 private val UnitASMType = ASMType.getObjectType("euclin/std/UnitObject")
+
+fun methodType(method: FunctionSignature): ASMType {
+    return methodType(method.arguments, method.returnType)
+}
 
 fun methodType(arguments: List<TypedMember>, returnType: TypeDefinition): ASMType {
     return ASMType.getMethodType(basicType(returnType), *(arguments.map { basicType(it.second) }.toTypedArray()))
@@ -19,8 +26,10 @@ fun methodType(arguments: List<TypedMember>, returnType: TypeDefinition): ASMTyp
 fun basicType(type: TypeDefinition): ASMType {
     return when(type) {
         UnitType -> UnitASMType
-        RealPointType -> RealPointASMType
-        IntPointType -> IntegerPointASMType
+        Real32PointType -> RealPoint32ASMType
+        Int32PointType -> IntegerPoint32ASMType
+        Real64PointType -> RealPoint64ASMType
+        Int64PointType -> IntegerPoint64ASMType
         WildcardType -> OBJECT_TYPE
         is NativeType -> type.backing
         is FunctionType -> generateFunctionObjectType(type)

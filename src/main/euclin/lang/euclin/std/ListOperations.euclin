@@ -15,7 +15,6 @@ nullNode.data = ()
 
 func create(): List {
     var list = new List
-    list.length = 0
     list
 }
 
@@ -64,3 +63,22 @@ func clear(target: List): Unit {
     target.head = nullNode
     target.last = nullNode
 }
+
+func forEach(target: List, action: (@) -> Unit): Unit {
+    var n = length(target)
+    var i = 0
+    var currentNode = target.head
+    while(i < n) {
+        action(currentNode.data)
+        currentNode = currentNode.next
+        i = i+1
+    }
+}
+
+/* TODO: Quand le compileur de lambdas pourra générer des fonctions "(@) -> @" (entre autres)
+func map(target: List, mappingFunction: (@) -> @): List {
+    var mapped = create()
+    forEach(target, {
+        add(mapped, mappingFunction(_))
+    })
+}*/

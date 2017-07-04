@@ -99,7 +99,7 @@ transformBlock
 expression
     : LambdaVariable                            #LambdaVarExpr
     | New Identifier (LeftBracket (expression (Comma expression)*)? RightBracket)? #NewObjectExpr
-    | LeftSquareBracket expression RightSquareBracket   #LambdaFunctionExpr
+    | LeftCurlyBracket expression RightCurlyBracket   #LambdaFunctionExpr
     | expression (Period Identifier)+              #AccessExpr
     | functionCall                              #CallExpr
     | Identifier                                #VarExpr

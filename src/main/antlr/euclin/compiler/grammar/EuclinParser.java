@@ -145,7 +145,7 @@ public class EuclinParser extends Parser {
 			setState(45);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << TransformBlockStart) | (1L << FunctionDefStart) | (1L << Var) | (1L << True) | (1L << False) | (1L << Pure) | (1L << Impure) | (1L << Memoized) | (1L << If) | (1L << While) | (1L << StructStart) | (1L << New) | (1L << Import) | (1L << ImportMethod) | (1L << LambdaVariable) | (1L << LeftBracket) | (1L << LeftSquareBracket) | (1L << Identifier) | (1L << Integer) | (1L << FloatNumber) | (1L << StringConstant))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << TransformBlockStart) | (1L << FunctionDefStart) | (1L << Var) | (1L << True) | (1L << False) | (1L << Pure) | (1L << Impure) | (1L << Memoized) | (1L << If) | (1L << While) | (1L << StructStart) | (1L << New) | (1L << Import) | (1L << ImportMethod) | (1L << LambdaVariable) | (1L << LeftBracket) | (1L << LeftCurlyBracket) | (1L << Identifier) | (1L << Integer) | (1L << FloatNumber) | (1L << StringConstant))) != 0)) {
 				{
 				{
 				setState(42);
@@ -215,7 +215,7 @@ public class EuclinParser extends Parser {
 				setState(51); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Return) | (1L << TransformBlockStart) | (1L << FunctionDefStart) | (1L << Var) | (1L << True) | (1L << False) | (1L << Pure) | (1L << Impure) | (1L << Memoized) | (1L << If) | (1L << While) | (1L << StructStart) | (1L << New) | (1L << Import) | (1L << ImportMethod) | (1L << LambdaVariable) | (1L << LeftBracket) | (1L << LeftSquareBracket) | (1L << Identifier) | (1L << Integer) | (1L << FloatNumber) | (1L << StringConstant))) != 0) );
+			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Return) | (1L << TransformBlockStart) | (1L << FunctionDefStart) | (1L << Var) | (1L << True) | (1L << False) | (1L << Pure) | (1L << Impure) | (1L << Memoized) | (1L << If) | (1L << While) | (1L << StructStart) | (1L << New) | (1L << Import) | (1L << ImportMethod) | (1L << LambdaVariable) | (1L << LeftBracket) | (1L << LeftCurlyBracket) | (1L << Identifier) | (1L << Integer) | (1L << FloatNumber) | (1L << StringConstant))) != 0) );
 			}
 		}
 		catch (RecognitionException re) {
@@ -303,7 +303,7 @@ public class EuclinParser extends Parser {
 			case ImportMethod:
 			case LambdaVariable:
 			case LeftBracket:
-			case LeftSquareBracket:
+			case LeftCurlyBracket:
 			case Identifier:
 			case Integer:
 			case FloatNumber:
@@ -683,7 +683,7 @@ public class EuclinParser extends Parser {
 				setState(75);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Return) | (1L << TransformBlockStart) | (1L << FunctionDefStart) | (1L << Var) | (1L << True) | (1L << False) | (1L << Pure) | (1L << Impure) | (1L << Memoized) | (1L << If) | (1L << While) | (1L << StructStart) | (1L << New) | (1L << Import) | (1L << ImportMethod) | (1L << LambdaVariable) | (1L << LeftBracket) | (1L << LeftSquareBracket) | (1L << Identifier) | (1L << Integer) | (1L << FloatNumber) | (1L << StringConstant))) != 0)) {
+				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Return) | (1L << TransformBlockStart) | (1L << FunctionDefStart) | (1L << Var) | (1L << True) | (1L << False) | (1L << Pure) | (1L << Impure) | (1L << Memoized) | (1L << If) | (1L << While) | (1L << StructStart) | (1L << New) | (1L << Import) | (1L << ImportMethod) | (1L << LambdaVariable) | (1L << LeftBracket) | (1L << LeftCurlyBracket) | (1L << Identifier) | (1L << Integer) | (1L << FloatNumber) | (1L << StringConstant))) != 0)) {
 					{
 					{
 					setState(72);
@@ -725,7 +725,7 @@ public class EuclinParser extends Parser {
 				setState(90);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Return) | (1L << TransformBlockStart) | (1L << FunctionDefStart) | (1L << Var) | (1L << True) | (1L << False) | (1L << Pure) | (1L << Impure) | (1L << Memoized) | (1L << If) | (1L << While) | (1L << StructStart) | (1L << New) | (1L << Import) | (1L << ImportMethod) | (1L << LambdaVariable) | (1L << LeftBracket) | (1L << LeftSquareBracket) | (1L << Identifier) | (1L << Integer) | (1L << FloatNumber) | (1L << StringConstant))) != 0)) {
+				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Return) | (1L << TransformBlockStart) | (1L << FunctionDefStart) | (1L << Var) | (1L << True) | (1L << False) | (1L << Pure) | (1L << Impure) | (1L << Memoized) | (1L << If) | (1L << While) | (1L << StructStart) | (1L << New) | (1L << Import) | (1L << ImportMethod) | (1L << LambdaVariable) | (1L << LeftBracket) | (1L << LeftCurlyBracket) | (1L << Identifier) | (1L << Integer) | (1L << FloatNumber) | (1L << StringConstant))) != 0)) {
 					{
 					{
 					setState(87);
@@ -1150,7 +1150,7 @@ public class EuclinParser extends Parser {
 			setState(153);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Return) | (1L << TransformBlockStart) | (1L << FunctionDefStart) | (1L << Var) | (1L << True) | (1L << False) | (1L << Pure) | (1L << Impure) | (1L << Memoized) | (1L << If) | (1L << While) | (1L << StructStart) | (1L << New) | (1L << Import) | (1L << ImportMethod) | (1L << LambdaVariable) | (1L << LeftBracket) | (1L << LeftSquareBracket) | (1L << Identifier) | (1L << Integer) | (1L << FloatNumber) | (1L << StringConstant))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Return) | (1L << TransformBlockStart) | (1L << FunctionDefStart) | (1L << Var) | (1L << True) | (1L << False) | (1L << Pure) | (1L << Impure) | (1L << Memoized) | (1L << If) | (1L << While) | (1L << StructStart) | (1L << New) | (1L << Import) | (1L << ImportMethod) | (1L << LambdaVariable) | (1L << LeftBracket) | (1L << LeftCurlyBracket) | (1L << Identifier) | (1L << Integer) | (1L << FloatNumber) | (1L << StringConstant))) != 0)) {
 				{
 				{
 				setState(150);
@@ -1681,7 +1681,7 @@ public class EuclinParser extends Parser {
 			setState(228);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << True) | (1L << False) | (1L << New) | (1L << LambdaVariable) | (1L << LeftBracket) | (1L << LeftSquareBracket) | (1L << Identifier) | (1L << Integer) | (1L << FloatNumber) | (1L << StringConstant))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << True) | (1L << False) | (1L << New) | (1L << LambdaVariable) | (1L << LeftBracket) | (1L << LeftCurlyBracket) | (1L << Identifier) | (1L << Integer) | (1L << FloatNumber) | (1L << StringConstant))) != 0)) {
 				{
 				setState(220);
 				expression(0);
@@ -2045,11 +2045,11 @@ public class EuclinParser extends Parser {
 		}
 	}
 	public static class LambdaFunctionExprContext extends ExpressionContext {
-		public TerminalNode LeftSquareBracket() { return getToken(EuclinParser.LeftSquareBracket, 0); }
+		public TerminalNode LeftCurlyBracket() { return getToken(EuclinParser.LeftCurlyBracket, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
-		public TerminalNode RightSquareBracket() { return getToken(EuclinParser.RightSquareBracket, 0); }
+		public TerminalNode RightCurlyBracket() { return getToken(EuclinParser.RightCurlyBracket, 0); }
 		public LambdaFunctionExprContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -2543,7 +2543,7 @@ public class EuclinParser extends Parser {
 					setState(269);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
-					if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << True) | (1L << False) | (1L << New) | (1L << LambdaVariable) | (1L << LeftBracket) | (1L << LeftSquareBracket) | (1L << Identifier) | (1L << Integer) | (1L << FloatNumber) | (1L << StringConstant))) != 0)) {
+					if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << True) | (1L << False) | (1L << New) | (1L << LambdaVariable) | (1L << LeftBracket) | (1L << LeftCurlyBracket) | (1L << Identifier) | (1L << Integer) | (1L << FloatNumber) | (1L << StringConstant))) != 0)) {
 						{
 						setState(261);
 						expression(0);
@@ -2579,11 +2579,11 @@ public class EuclinParser extends Parser {
 				_ctx = _localctx;
 				_prevctx = _localctx;
 				setState(274);
-				match(LeftSquareBracket);
+				match(LeftCurlyBracket);
 				setState(275);
 				expression(0);
 				setState(276);
-				match(RightSquareBracket);
+				match(RightCurlyBracket);
 				}
 				break;
 			case 4:
@@ -3179,8 +3179,8 @@ public class EuclinParser extends Parser {
 		"\u010e\3\2\2\2\u010c\u010a\3\2\2\2\u010c\u010d\3\2\2\2\u010d\u0110\3\2"+
 		"\2\2\u010e\u010c\3\2\2\2\u010f\u0107\3\2\2\2\u010f\u0110\3\2\2\2\u0110"+
 		"\u0111\3\2\2\2\u0111\u0113\7\26\2\2\u0112\u0106\3\2\2\2\u0112\u0113\3"+
-		"\2\2\2\u0113\u0127\3\2\2\2\u0114\u0115\7\31\2\2\u0115\u0116\5&\24\2\u0116"+
-		"\u0117\7\32\2\2\u0117\u0127\3\2\2\2\u0118\u0127\5\34\17\2\u0119\u0127"+
+		"\2\2\2\u0113\u0127\3\2\2\2\u0114\u0115\7\27\2\2\u0115\u0116\5&\24\2\u0116"+
+		"\u0117\7\30\2\2\u0117\u0127\3\2\2\2\u0118\u0127\5\34\17\2\u0119\u0127"+
 		"\7(\2\2\u011a\u0127\5(\25\2\u011b\u0127\7)\2\2\u011c\u0127\7*\2\2\u011d"+
 		"\u011e\7\25\2\2\u011e\u011f\5&\24\2\u011f\u0120\7\26\2\2\u0120\u0127\3"+
 		"\2\2\2\u0121\u0127\7\b\2\2\u0122\u0127\7\t\2\2\u0123\u0127\7/\2\2\u0124"+

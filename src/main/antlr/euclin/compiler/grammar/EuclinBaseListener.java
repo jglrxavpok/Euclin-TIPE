@@ -436,6 +436,18 @@ public class EuclinBaseListener implements EuclinListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterLoadAndRetypeExpr(EuclinParser.LoadAndRetypeExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLoadAndRetypeExpr(EuclinParser.LoadAndRetypeExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterFloatExpr(EuclinParser.FloatExprContext ctx) { }
 	/**
 	 * {@inheritDoc}

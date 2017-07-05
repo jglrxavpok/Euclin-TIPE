@@ -33,6 +33,14 @@ val ShapeType: TypeDefinition = BasicType("euclin.std.Shape")
 
 class NativeType(name: String, val backing: ASMType): BasicType(name) {
     fun getDescriptor() = backing.descriptor
+
+    override fun equals(other: Any?): Boolean {
+        if(super.equals(other))
+            return true
+        if(other is NativeType)
+            return other.backing == backing
+        return false
+    }
 }
 
 class ObjectType(val name: String, val parent: TypeDefinition): TypeDefinition() {
@@ -41,6 +49,8 @@ class ObjectType(val name: String, val parent: TypeDefinition): TypeDefinition()
     }
 
     override fun equals(other: Any?): Boolean {
+        if(super.equals(other))
+            return true
         if (other is ObjectType) {
             return other.name == name && other.parent == parent
         }
@@ -75,6 +85,8 @@ open class BasicType(private val toString: String): TypeDefinition() {
     }
 
     override fun equals(other: Any?): Boolean {
+        if(super.equals(other))
+            return true
         return toString() == other.toString()
     }
 

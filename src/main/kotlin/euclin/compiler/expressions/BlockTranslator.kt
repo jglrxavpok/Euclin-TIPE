@@ -44,14 +44,18 @@ class BlockTranslator(val context: Context): ExpressionTranslator(context) {
     }
 
     private fun translateSub(instructions: MutableList<EuclinParser.FunctionInstructionsContext>) {
-        instructions.forEach { visit(it) }
+        val inferer = parentContext.translator.inferer
+        instructions.forEach {
+            val result = visit(it)
+            inferer.infer(result)
+        }
         if(finalReturnType == null) {
             val last = instructions.last()
             // TODO
             //  ?: compileError("Aucune expression valide pour un retour", context.currentClass, last)
             finalReturnType = visit(last).type
-            println("blockTranslator:finalReturnType>> $finalReturnType / ${visit(last)}")
         }
+        updateLambdaParam()
     }
 
     override fun visitDeclareStructInstruction(ctx: EuclinParser.DeclareStructInstructionContext): Expression {
@@ -135,6 +139,13 @@ class BlockTranslator(val context: Context): ExpressionTranslator(context) {
             translateSub(ctx.elseBlock().functionInstructions())
         }
         return lambdaVar // FIXME: expression spéciale à créer
+    }
+
+    override fun visitLoadAndRetypeExpr(ctx: EuclinParser.LoadAndRetypeExprContext): Expression {
+        val type = parentContext.typeConverter.visit(ctx.type())
+        val expr = visit(ctx.expression())
+        println("retype $expr to $type")
+        return expr of type
     }
 
     override fun visitCallExpr(ctx: EuclinParser.CallExprContext): Expression {

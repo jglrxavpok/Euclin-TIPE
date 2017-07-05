@@ -5,6 +5,6 @@ transform {
 
 func f(x: Int): Int {
     circle({(sin(_), 0.)}, sin)
-    circle({(sin(45.), _)}, {_})
+    circle({(sin(45.), _: Real)}, {_})
     return x
 }

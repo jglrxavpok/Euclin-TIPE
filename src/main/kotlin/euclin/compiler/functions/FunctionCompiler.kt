@@ -254,6 +254,10 @@ open class FunctionCompiler(private val parentContext: Context, synthetic: Boole
 
     override fun visitVarExpr(ctx: EuclinParser.VarExprContext) {
         val name = ctx.Identifier().text
+        loadName(name, ctx)
+    }
+
+    private fun loadName(name: String, ctx: ParserRuleContext) {
         if(localVariableIDs.containsKey(name)) { // c'est bien une variable
             val varType = localVariableTypes[name]!!
             val id = localVariableIDs[name]!!
@@ -345,7 +349,7 @@ open class FunctionCompiler(private val parentContext: Context, synthetic: Boole
                                     loadUnitOnStack()
                                     writer.visitInsn(ARETURN)
                                 } else {
-                                    compileError("Incompatibilité de types lors de l'insertion automatique de 'return' $expected != $actual (${functionSignature.name})", functionSignature.ownerClass, it)
+                                    compileError("Incompatibilité de types lors de l'insertion automatique de 'return' $expected (${expected.hashCode()}) != $actual (${actual.hashCode()}) (${functionSignature.name})", functionSignature.ownerClass, it)
                                 }
                             } else { // tout va bien
                                 writer.visitInsn(correctOpcode(IRETURN, functionSignature.returnType))
@@ -937,6 +941,13 @@ open class FunctionCompiler(private val parentContext: Context, synthetic: Boole
 
     override fun visitImportInstruction(ctx: EuclinParser.ImportInstructionContext?) {
         // on ignore
+    }
+
+    /**
+     * Le compileur s'en fiche du retypage, c'est à TypeInferer de gérer
+     */
+    override fun visitLoadAndRetypeExpr(ctx: EuclinParser.LoadAndRetypeExprContext) {
+        visit(ctx.expression())
     }
 
     companion object {

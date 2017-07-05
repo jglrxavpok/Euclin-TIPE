@@ -50,7 +50,12 @@ open class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<
         val previousVar = lambdaVar
         lambdaVar = Variable("_")
         val block = parentContext.blockTranslator.translate(functionExpression)
-        val result = Function("lambda_${System.currentTimeMillis()}", Tuple(), block)
+        val resultArg = if(block.arguments.size == 1) {
+            OpaqueExpression(block.arguments[0].name) of block.arguments[0].type
+        } else {
+            Tuple(*block.arguments.map { OpaqueExpression(it.name) of it.type }.toTypedArray())
+        }
+        val result = Function("lambda_${System.currentTimeMillis()}", resultArg, block)
         lambdaVar = previousVar
         inferer.infer(result)
         return result
@@ -108,6 +113,10 @@ open class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<
 
     override fun visitVarExpr(ctx: EuclinParser.VarExprContext): Expression {
         val name = ctx.Identifier().text
+        return visitName(name, ctx)
+    }
+
+    private fun visitName(name: String, ctx: ParserRuleContext): Expression {
         if(variableTypes.containsKey(name)) // est-ce une variable locale ?
             return Variable(name) of (variableTypes[name] ?: compileError("Pas de variable trouvée avec le nom $name", parentContext.currentClass, ctx))
         else if(availableFunctions.containsKey(name)) // est-ce une fonction ?
@@ -226,5 +235,13 @@ open class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<
 
     override fun visitCastExpr(ctx: EuclinParser.CastExprContext): Expression {
         return CastExpression(visit(ctx.expression()), parentContext.typeConverter.visit(ctx.type()))
+    }
+
+    /**
+     * Retypes the expression, only useful for lambdas right now
+     */
+    override fun visitLoadAndRetypeExpr(ctx: EuclinParser.LoadAndRetypeExprContext): Expression {
+        val type = parentContext.typeConverter.visit(ctx.type())
+        return visit(ctx.expression()) of type
     }
 }

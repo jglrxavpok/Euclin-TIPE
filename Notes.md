@@ -30,5 +30,6 @@ A faire:
 ========
 (Compileur) Utiliser ASM-Commons et GeneratorAdaptor pour un code plus lisible/compréhensible ?
 (Compileur-Lambda) Mieux inférer le type de l'argument et le type de retour
+(Compileur) Permettre le partage de context
 (Compileur+Grammaire) Ajouter un moyen de lier des fonctions à une structure de données
 (Compileur+Grammaire) Ajouter un type tableau et des méthodes liées

@@ -99,6 +99,7 @@ transformBlock
 // définies par ordre de précédence
 expression
     : LambdaVariable                            #LambdaVarExpr
+    | expression Colon type                     #LoadAndRetypeExpr
     | New Identifier (LeftBracket (expression (Comma expression)*)? RightBracket)? #NewObjectExpr
     | LeftCurlyBracket functionInstructions+ RightCurlyBracket   #LambdaFunctionExpr
     | expression (Period Identifier)+              #AccessExpr

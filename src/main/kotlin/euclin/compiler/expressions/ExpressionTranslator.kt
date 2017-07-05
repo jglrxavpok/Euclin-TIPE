@@ -10,13 +10,15 @@ import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
 import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.tree.ParseTree
+import org.antlr.v4.runtime.tree.TerminalNode
 import org.jglr.inference.ImpossibleUnificationExpression
 
-class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expression>() {
+open class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expression>() {
 
+    var lambdaVar = Variable("_")
     private val availableFunctions = parentContext.availableFunctions
     private val variableTypes = parentContext.localVariableTypes
-    private var lambdaVar = Variable("_") of Real64Type
     private val True = Literal(true, BooleanType)
     private val False = Literal(false, BooleanType)
     private val UnitValue = Literal(Unit, UnitType)
@@ -38,10 +40,17 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
         }
     }
 
-    fun translateLambdaExpression(functionExpression: EuclinParser.ExpressionContext): Function {
+    override fun visit(tree: ParseTree): Expression {
+        if(tree is EuclinParser.ExpressionContext)
+            return translate(tree)
+        return super.visit(tree)
+    }
+
+    fun translateLambdaExpression(functionExpression: MutableList<EuclinParser.FunctionInstructionsContext>): Function {
         val previousVar = lambdaVar
-        lambdaVar = Variable("_") of Real64Type
-        val result = Function("lambda_${System.currentTimeMillis()}", lambdaVar, translate(functionExpression))
+        lambdaVar = Variable("_")
+        val block = parentContext.blockTranslator.translate(functionExpression)
+        val result = Function("lambda_${System.currentTimeMillis()}", Tuple(), block)
         lambdaVar = previousVar
         inferer.infer(result)
         return result
@@ -50,7 +59,7 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
     fun translate(ctx: EuclinParser.ExpressionContext): Expression {
         if(alreadyTranslated.containsKey(ctx)) // on évite de recalculer les résultats
             return alreadyTranslated[ctx]!!
-        val result = visit(ctx)
+        val result = super.visit(ctx)
         inferer.infer(result)
         return result
     }
@@ -58,6 +67,10 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
     override fun visitAccessExpr(ctx: EuclinParser.AccessExprContext): Expression {
         val chain = ctx.Identifier()
         val first = translate(ctx.expression())
+        return subAccessExpr(first, chain, ctx)
+    }
+
+    internal fun subAccessExpr(first: Expression, chain: MutableList<TerminalNode>, parentContext: ParserRuleContext): Expression {
         var deepest = first
         for(id in chain) { // on regarde les identifiants qui sont nécessairement des membres
             val name = id.text
@@ -65,13 +78,13 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
             val parent = deepest
             val field = fields.find { it.name == name }
             deepest = AccessExpression(parent, field?.name
-                    ?: compileError("Aucun membre du nom de $name dans ${deepest.type}", parentContext.currentClass, ctx))
+                    ?: compileError("Aucun membre du nom de $name dans ${deepest.type}", this.parentContext.currentClass, parentContext))
             deepest of field.type
         }
         return deepest
     }
 
-    override fun visitLambdaVarExpr(ctx: EuclinParser.LambdaVarExprContext?): Expression {
+    override fun visitLambdaVarExpr(ctx: EuclinParser.LambdaVarExprContext): Expression {
         return lambdaVar
     }
 
@@ -90,7 +103,7 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
     }
 
     override fun visitLambdaFunctionExpr(ctx: EuclinParser.LambdaFunctionExprContext): Expression {
-        return translateLambdaExpression(ctx.expression())
+        return translateLambdaExpression(ctx.functionInstructions())
     }
 
     override fun visitVarExpr(ctx: EuclinParser.VarExprContext): Expression {
@@ -145,7 +158,7 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
         return visit(ctx.expression(0)) + visit(ctx.expression(1)) // Gauche + droite
     }
 
-    private fun function(signature: FunctionSignature): Function {
+    internal fun function(signature: FunctionSignature): Function {
         // on ne convertit pas à un tuple si on a qu'un seul argument!
         if(signature.arguments.size == 1) {
             val arg = signature.arguments[0]
@@ -212,6 +225,6 @@ class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<Expre
     }
 
     override fun visitCastExpr(ctx: EuclinParser.CastExprContext): Expression {
-        return visit(ctx.expression()) of parentContext.typeConverter.visit(ctx.type())
+        return CastExpression(visit(ctx.expression()), parentContext.typeConverter.visit(ctx.type()))
     }
 }

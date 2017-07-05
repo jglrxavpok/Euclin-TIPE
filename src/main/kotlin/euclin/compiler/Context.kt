@@ -1,8 +1,10 @@
 package euclin.compiler
 
+import euclin.compiler.expressions.BlockTranslator
 import euclin.compiler.expressions.ExpressionTranslator
 import euclin.compiler.functions.FunctionMatcher
 import euclin.compiler.functions.FunctionSignature
+import euclin.compiler.lambda.LambdaCompiler
 import euclin.compiler.types.BasicType
 import euclin.compiler.types.ObjectType
 import euclin.compiler.types.TypeConverter
@@ -18,12 +20,13 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
     val localVariableTypes = hashMapOf<String, TypeDefinition>()
     val localVariableIDs = hashMapOf<String, Int>()
     val fields = mutableListOf<TypedMember>()
-    val lambdaExpressions = hashMapOf<String, FunctionSignature>()
 
-    val translator: ExpressionTranslator = ExpressionTranslator(this)
+    val translator = ExpressionTranslator(this)
+    val blockTranslator = BlockTranslator(this)
     val functionMatcher = FunctionMatcher(this)
     val constantChecker = ConstantChecker(this)
     val typeConverter = TypeConverter(this)
+    val lambdaCompiler = LambdaCompiler(this)
     internal val knownTypes = hashMapOf<String, TypeDefinition>()
     internal val importedTypes = hashMapOf<String, TypeDefinition>()
     val staticInit = mutableListOf<MethodVisitor.() -> Unit>()
@@ -32,14 +35,13 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
         knownTypes += "java.lang.Object" to WildcardType
     }
 
-    fun withSignature(newSignature: FunctionSignature): Context = copy().apply { currentFunction = newSignature }
+    fun withSignature(newSignature: FunctionSignature): Context = copy().apply { this.currentFunction = newSignature }
 
     fun copy(): Context {
         val copy = Context(currentClass, classWriter, availableFunctions)
         copy.currentFunction = currentFunction
         copy.localVariableTypes.putAll(localVariableTypes)
         copy.localVariableIDs.putAll(localVariableIDs)
-        copy.lambdaExpressions.putAll(lambdaExpressions)
         copy.fields.addAll(fields)
         copy.importedTypes.putAll(importedTypes)
         copy.knownTypes.putAll(knownTypes)

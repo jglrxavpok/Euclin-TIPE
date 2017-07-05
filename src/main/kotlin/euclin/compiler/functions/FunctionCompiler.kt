@@ -17,12 +17,11 @@ import java.lang.invoke.CallSite
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodType
 
-open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisitor<Unit>() {
+open class FunctionCompiler(private val parentContext: Context, synthetic: Boolean = false, accessRestriction: Int = ACC_PUBLIC): EuclinBaseVisitor<Unit>() {
 
     val classWriter = parentContext.classWriter
     val functionSignature = parentContext.currentFunction
     val availableFunctions = parentContext.availableFunctions
-    val lambdaExpressions = parentContext.lambdaExpressions
     private val translator = parentContext.translator
     private val constantChecker = parentContext.constantChecker
     private val localVariableIDs: HashMap<String, Int>
@@ -40,9 +39,11 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
     protected open val isMainFunction = false
 
     init {
-        var access = ACC_FINAL or ACC_PUBLIC
+        var access = /*ACC_FINAL or */accessRestriction
         if(functionSignature.static)
             access = access or ACC_STATIC
+        if(synthetic)
+            access = access or ACC_SYNTHETIC
         val methodType = methodType(functionSignature.arguments, functionSignature.returnType)
         val description = methodType.descriptor
         writer = classWriter.visitMethod(access, functionSignature.name, description, null, emptyArray())
@@ -227,26 +228,28 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
 
     private fun createConstantFunction(constantExpr: EuclinParser.ExpressionContext): FunctionSignature {
         constantChecker.assertConstant(constantExpr)
-        return compileLambda(constantExpr)
+
+        val returnInstructionWrapper = EuclinParser.ReturnFuncInstructionContext(EuclinParser.FunctionInstructionsContext())
+        returnInstructionWrapper.addChild(constantExpr)
+
+        val lambdaExpr = EuclinParser.LambdaFunctionExprContext(EuclinParser.ExpressionContext())
+        lambdaExpr.addChild(returnInstructionWrapper)
+
+        val lambda = parentContext.lambdaCompiler.visitLambdaFunctionExpr(lambdaExpr)
+        return lambda.first
     }
 
-    private fun compileLambda(functionExpression: EuclinParser.ExpressionContext): FunctionSignature {
-        val function = translator.translateLambdaExpression(functionExpression)
-        val returnType = function.expression.type
-
-        // si l'expression n'est que '_', on change le nom
-        val name = LambdaCompiler.generateLambdaName(functionExpression, parentContext) +"\$constant"
-        val lambdaSignature = FunctionSignature(name, listOf(TypedMember("_", Real64Type)), returnType, functionSignature.ownerClass, static = true)
-        val functionBody = LambdaCompiler.generateLambdaBody(functionExpression)
-
-        val funcCompiler = FunctionCompiler(parentContext.withSignature(lambdaSignature).clearLocals())
-        funcCompiler.visitFunctionCodeBlock(functionBody)
-        return lambdaSignature
-    }
-
-    override fun visitLambdaVarExpr(ctx: EuclinParser.LambdaVarExprContext?) {
-        writer.visitVarInsn(correctOpcode(ILOAD, Real64Type), 0) // on charge le 1er argument de la fonction
-        typeStack.push(Real64Type)
+    override fun visitLambdaVarExpr(ctx: EuclinParser.LambdaVarExprContext) {
+    // FIXME    writer.visitVarInsn(correctOpcode(ILOAD, Real64Type), 0) // on charge le 1er argument de la fonction
+    //    typeStack.push(Real64Type)
+        val index = functionSignature.arguments.indexOfFirst { it.name == "_" }
+        var actualIndex = 0
+        for(arg in 0 until index) {
+            actualIndex += FunctionCompiler.localSizeOf(functionSignature.arguments[arg].type)
+        }
+        val type = functionSignature.arguments[index].type
+        writer.visitVarInsn(correctOpcode(ILOAD, type), index)
+        typeStack.push(type)
     }
 
     override fun visitVarExpr(ctx: EuclinParser.VarExprContext) {
@@ -277,29 +280,41 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
     /**
      * Compiles une référence vers une méthode à l'aide de 'invokedynamic'. Permet de transformer des méthodes en objects Function utilisables par le reste du code
      */
-    private fun compileMethodReference(signature: FunctionSignature) {
+    private fun compileMethodReference(signature: FunctionSignature, localVarUsed: List<String> = emptyList(), lambdaImplementationSignature: FunctionSignature = signature) {
+        for(name in localVarUsed) { // on charge les potentielles variables locales à utiliser
+            val type = localVariableTypes[name]!!
+            val id = localVariableIDs[name]!!
+            writer.visitVarInsn(correctOpcode(ILOAD, type), id)
+        }
+
         // sorte de pointeur vers la méthode
-        val methodHandle = toHandle(signature)
+        val methodHandle = toHandle(lambdaImplementationSignature)
         val mt = MethodType.methodType(CallSite::class.java,
                 MethodHandles.Lookup::class.java, String::class.java, MethodType::class.java, MethodType::class.java, MethodHandle::class.java, MethodType::class.java)
         val bootstrapHandle = Handle(H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory", mt.toMethodDescriptorString())
 
         // /!\ signatureType et funcType ne sont pas du même type! (l'un TypeDefinition et l'autre ASMType)
-        val signatureType = signature.toType()
+        val returnType = signature.toType()
         val funcType = methodType(signature.arguments, signature.returnType)
-        writer.visitInvokeDynamicInsn("invoke", methodType(emptyList(), signatureType).descriptor, bootstrapHandle, funcType, methodHandle, funcType)
+        writer.visitInvokeDynamicInsn("invoke", methodType(returnType, localVarUsed.map { localVariableTypes[it]!! }).descriptor, bootstrapHandle, funcType, methodHandle, funcType)
         typeStack.push(signature.toType()) // on crée le type correspondant à notre signature de fonction
     }
 
     override fun visitLambdaFunctionExpr(ctx: EuclinParser.LambdaFunctionExprContext) {
-        compileMethodReference(lambdaExpressions[ctx.expression().text]!!)
+        val lambdaCompiler = parentContext.lambdaCompiler
+        val lambda = lambdaCompiler.visitLambdaFunctionExpr(ctx)
+        compileMethodReference(lambda.first, lambda.second, lambda.third)
     }
 
     override fun visitReturnFuncInstruction(ctx: EuclinParser.ReturnFuncInstructionContext) {
         visit(ctx.expression()) // compile l'expression
         val inferredType = typeStack.pop()
-        if(inferredType > functionSignature.returnType)
-            compileError("La valeur de retour n'est pas compatible avec celui de la signature de la fonction ($inferredType > ${functionSignature.returnType})", functionSignature.ownerClass, ctx)
+        try {
+            if(inferredType > functionSignature.returnType)
+                compileError("La valeur de retour n'est pas compatible avec celui de la signature de la fonction ($inferredType > ${functionSignature.returnType})", functionSignature.ownerClass, ctx)
+        } catch (e: IllegalArgumentException) {
+            compileError("La valeur de retour n'est pas compatible avec celui de la signature de la fonction ($inferredType != ${functionSignature.returnType})", functionSignature.ownerClass, ctx)
+        }
         writer.visitInsn(correctOpcode(IRETURN, functionSignature.returnType))
         compileAssert(typeStack.isEmpty(), functionSignature.ownerClass, ctx) { "La pile n'était pas vide au retour, il reste au moins: ${typeStack.peek()}" }
     }
@@ -385,6 +400,7 @@ open class FunctionCompiler(private val parentContext: Context): EuclinBaseVisit
                 localVariableIDs[name] = localIndex
                 localVariableTypes[name] = type
                 localIndex += localSizeOf(type)
+
             }
             visitCode()
             visitLabel(startLabel)

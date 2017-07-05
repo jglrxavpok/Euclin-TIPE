@@ -17,8 +17,6 @@ object MemoizedFunctionCompiler {
 
         val classWriter = context.classWriter
         val signature: FunctionSignature = context.currentFunction
-        val availableFunctions = context.availableFunctions
-        val lambdaExpressions = context.lambdaExpressions
         val fieldName = "${signature.name}\$cache"
         createCacheField(fieldName, classWriter)
         createCacheInitialization(fieldName, signature, context)
@@ -145,20 +143,6 @@ object MemoizedFunctionCompiler {
     }
 
     private fun convertToNativeTypeIfNeeded(writer: MethodVisitor, type: TypeDefinition) {
-       /* when(type) {
-            Real32Type -> {
-                writer.visitTypeInsn(CHECKCAST, "java/lang/Float") // conversion en Float
-                writer.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F", false)
-            }
-            IntType -> {
-                writer.visitTypeInsn(CHECKCAST, "java/lang/Integer") // conversion en Integer
-                writer.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I", false)
-            }
-            BooleanType -> {
-                writer.visitTypeInsn(CHECKCAST, "java/lang/Boolean") // conversion en Boolean
-                writer.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false)
-            }
-        } TODO */
         if(type is NativeType)
             FunctionCompiler.convertBoxedObjectToNativeType(writer, type)
     }

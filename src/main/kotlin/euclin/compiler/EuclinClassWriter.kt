@@ -15,4 +15,6 @@ class EuclinClassWriter(): ClassWriter(ClassWriter.COMPUTE_FRAMES) {
         return basicType(result).internalName
     }
 
+
+
 }

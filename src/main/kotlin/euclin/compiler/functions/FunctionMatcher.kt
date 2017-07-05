@@ -19,7 +19,7 @@ class FunctionMatcher(val parentContext: Context): EuclinBaseVisitor<FunctionSig
         val name = ctx.Identifier().text
         if(localVariableTypes.containsKey(name)) {
             val localType = localVariableTypes[name]!!
-            if(localType.listMethods().any{ it.name == "invoke" }) {
+            if(localType.listMethods().any { it.name == "invoke" }) {
                 val method = localType.listMethods().find { it.name == "invoke" }!!
                 return FunctionSignature("invoke", method.arguments, method.returnType, method.ownerClass, static = false)
             }
@@ -57,7 +57,6 @@ class FunctionMatcher(val parentContext: Context): EuclinBaseVisitor<FunctionSig
     private fun typeOf(identifier: TerminalNode, parent: TypeDefinition?): TypeDefinition {
         val name = identifier.text
         if(parent == null) {
-            // TODO: Autoriser les noms de classe (eg. 'Console.writeln' devrait être valide)
             if(localVariableTypes.containsKey(name)) {
                 val type = localVariableTypes[name]!!
                 return type

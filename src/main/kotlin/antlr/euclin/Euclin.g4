@@ -16,6 +16,7 @@ functionInstructions
     | Return expression     #ReturnFuncInstruction
     ;
 
+// TODO: Bouger les imports dans 'codeBlock'
 instructions
     : importDeclaration     #ImportInstruction
     | methodImportDeclaration   #ImportMethodInstruction
@@ -99,7 +100,7 @@ transformBlock
 expression
     : LambdaVariable                            #LambdaVarExpr
     | New Identifier (LeftBracket (expression (Comma expression)*)? RightBracket)? #NewObjectExpr
-    | LeftCurlyBracket expression RightCurlyBracket   #LambdaFunctionExpr
+    | LeftCurlyBracket functionInstructions+ RightCurlyBracket   #LambdaFunctionExpr
     | expression (Period Identifier)+              #AccessExpr
     | functionCall                              #CallExpr
     | Identifier                                #VarExpr

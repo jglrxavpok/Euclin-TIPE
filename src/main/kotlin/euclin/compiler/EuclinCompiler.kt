@@ -60,9 +60,6 @@ object EuclinCompiler {
 
         // on génére le code des lambda-fonctions
 
-        val lambdaExpressions = compileLambdas(code, context)
-        context.lambdaExpressions.putAll(lambdaExpressions)
-
         // on génére la fonction principale
         val mainFunctionName = if(isApplication) "_main" else "_init"
         val mainSignature = FunctionSignature(mainFunctionName, emptyList(), JVMVoid, className, static = ! isApplication)
@@ -254,11 +251,6 @@ object EuclinCompiler {
         functions["circle"] = circleFunction
         functions["write"] = writeFunction
         functions["writeln"] = writelnFunction
-    }
-
-    private fun compileLambdas(code: EuclinParser.CodeBlockContext, context: Context): Map<String, FunctionSignature> {
-        val lambdaCompiler = LambdaCompiler(context)
-        return lambdaCompiler.compileLambdas(code)
     }
 
     private fun compileFunctions(code: EuclinParser.CodeBlockContext, context: Context) {

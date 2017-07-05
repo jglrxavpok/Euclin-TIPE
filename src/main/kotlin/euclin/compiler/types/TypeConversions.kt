@@ -3,6 +3,7 @@ package euclin.compiler.types
 import euclin.compiler.EuclinCompiler.OBJECT_TYPE
 import euclin.compiler.TypedMember
 import euclin.compiler.functions.FunctionSignature
+import euclin.compiler.type
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
@@ -20,7 +21,11 @@ fun methodType(method: FunctionSignature): ASMType {
 }
 
 fun methodType(arguments: List<TypedMember>, returnType: TypeDefinition): ASMType {
-    return ASMType.getMethodType(basicType(returnType), *(arguments.map { basicType(it.second) }.toTypedArray()))
+    return methodType(returnType, arguments.map { it.type })
+}
+
+fun methodType(returnType: TypeDefinition, arguments: List<TypeDefinition>): ASMType {
+    return ASMType.getMethodType(basicType(returnType), *(arguments.map { basicType(it) }.toTypedArray()))
 }
 
 fun basicType(type: TypeDefinition): ASMType {

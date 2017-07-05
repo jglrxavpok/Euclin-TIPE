@@ -75,10 +75,20 @@ func forEach(target: List, action: (@) -> Unit): Unit {
     }
 }
 
-/* TODO: Quand le compileur de lambdas pourra générer des fonctions "(@) -> @" (entre autres)
 func map(target: List, mappingFunction: (@) -> @): List {
     var mapped = create()
     forEach(target, {
         add(mapped, mappingFunction(_))
     })
-}*/
+    return mapped
+}
+
+func filter(target: List, predicate: (@) -> Boolean): List {
+    var filtered = create()
+    forEach(target, {
+        if(predicate(_)) {
+            add(filtered, _)
+        }
+    })
+    return filtered
+}

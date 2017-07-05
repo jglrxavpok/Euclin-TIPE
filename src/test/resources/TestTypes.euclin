@@ -1,5 +1,8 @@
 func funcReturningFunc(a: Int, b: Real): (Real) -> Real {
-    return {0.}
+    return {
+        _: Real // TODO: replace by a inferer-specific instruction
+        0.
+    }
 }
 
 func funcTakingFuncs(f: (Int, Int) -> (Int, Int)): Int {

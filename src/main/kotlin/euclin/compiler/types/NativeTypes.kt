@@ -3,6 +3,7 @@ package euclin.compiler.types
 import euclin.compiler.TypedMember
 import euclin.compiler.functions.FunctionSignature
 import euclin.compiler.type
+import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.PolymorphicType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
@@ -126,11 +127,64 @@ fun TypeDefinition.listConstructors(): MutableList<FunctionSignature> {
 }
 
 fun TypeDefinition.listMethods(): MutableList<FunctionSignature> {
+    if(this is FunctionType) {
+        val arguments = if(this.argumentType is TupleType) {
+            val tuple = this.argumentType as TupleType
+            if(tuple.elementTypes.isEmpty()) {
+                emptyList<TypeDefinition>()
+            } else {
+                tuple.elementTypes.toList()
+            }
+        } else {
+            listOf(argumentType)
+        }
+        val methodName = interfaceFunctionName(this)
+        return mutableListOf(FunctionSignature(methodName, arguments.mapIndexed { index, type -> TypedMember("arg$index", type) },
+                this.returnType, javaTypeName(this), static = false))
+    }
     if(this in typeMethods)
         return typeMethods[this]!!
     val list = mutableListOf<FunctionSignature>()
     typeMethods[this] = list
     return list
+}
+
+/**
+ * Renvoit le nom de la seule méthode disponible dans ce type (dépend des arguments et du type de retour)
+ */
+fun interfaceFunctionName(functionType: FunctionType): String {
+    val javaName = javaTypeName(functionType)
+    return if(javaName.endsWith("Supplier")) {
+        "get"
+    } else if(javaName.endsWith("Predicate")) {
+        "test"
+    } else if(javaName.endsWith("Function")) {
+        "apply"
+    } else {
+        "accept"
+    }
+}
+
+fun javaTypeName(type: FunctionType): String {
+    return if(type.argumentType is TupleType) {
+        val tuple = type.argumentType as TupleType
+        if(tuple.elementTypes.isEmpty()) {
+            "java.util.function.Supplier"
+        } else {
+            val baseName = when(type.returnType) {
+                JVMVoid -> "Consumer"
+                BooleanType -> "Predicate"
+                else -> "Function"
+            }
+            when(tuple.elementTypes.size) {
+                1 -> "java.util.function.$baseName"
+                2 -> "java.util.function.Bi$baseName"
+                else -> TODO("Lambdas with more than 2 arguments are not supported yet")
+            }
+        }
+    } else {
+        javaTypeName(FunctionType(TupleType(arrayOf(type.argumentType)), type.returnType))
+    }
 }
 
 fun TypeDefinition.listStaticMethods(): MutableList<FunctionSignature> {

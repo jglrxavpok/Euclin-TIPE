@@ -12,6 +12,7 @@ import org.antlr.v4.runtime.tree.ParseTree
 import org.jglr.inference.expressions.Expression
 import org.jglr.inference.expressions.Tuple
 import org.jglr.inference.expressions.Variable
+import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
 
@@ -159,7 +160,7 @@ class BlockTranslator(val context: Context): ExpressionTranslator(context) {
             val variableTypes = context.localVariableTypes
             if (variableTypes.containsKey(name)) {
                 val varType = variableTypes[name]!!
-                if(varType.listMethods().none { it.name == "invoke" }) {
+                if(varType !is FunctionType && varType.listMethods().none { it.name == "invoke" }) {
                     compileError("Le type $varType n'a pas de méthode 'invoke'!", parentContext.currentClass, ctx)
                 }
                 if (name !in usedLocals) {
@@ -177,12 +178,17 @@ class BlockTranslator(val context: Context): ExpressionTranslator(context) {
             return super.visitCallExpr(ctx)
         } else {
             val varType = lambdaLocalVars[name]!!
-            if(varType.listMethods().none { it.name == "invoke" }) {
-                compileError("Le type $varType n'a pas de méthode 'invoke'!", parentContext.currentClass, ctx)
-            }
             val arguments = call.expression().map { visit(it) }
-            val method = varType.listMethods().find { it.name == "invoke" }!!
-            val signature = FunctionSignature("invoke", method.arguments, method.returnType, method.ownerClass, static = false)
+            val signature = if(varType is FunctionType) {
+                varType.listMethods()[0]
+            } else {
+                if(varType.listMethods().none { it.name == "invoke" }) {
+                    compileError("Le type $varType n'a pas de méthode 'invoke'!", parentContext.currentClass, ctx)
+                }
+                val method = varType.listMethods().find { it.name == "invoke" }!!
+                FunctionSignature("invoke", method.arguments, method.returnType, method.ownerClass, static = false)
+            }
+
             val f = function(signature)
             if(arguments.size == 1)
                 return f(arguments[0])

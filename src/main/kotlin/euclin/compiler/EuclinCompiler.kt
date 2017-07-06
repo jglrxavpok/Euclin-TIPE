@@ -188,20 +188,6 @@ object EuclinCompiler {
         TypeInspector.inspect(MathFunctions::class.java, BasicType("euclin.std.MathFunctions"), context)
         TypeInspector.inspect(EuclinApplication::class.java, BasicType("euclin.intrisincs.EuclinApplication"), context)
         TypeInspector.inspect(MemoizationCache::class.java, BasicType("euclin.intrisincs.MemoizationCache"), context)
-
-        val types = BasicTypes + Real32PointType + Int32PointType + Real64PointType + Int64PointType
-
-        val rootFolder = File("./src/main/euclin/lang/euclin/std/functions")
-        rootFolder.mkdirs()
-        for(argument in types) {
-            for (returnType in types) {
-                val funcType = FunctionType(argument, returnType)
-                val correspondingType = basicType(FunctionType(argument, returnType)).internalName
-                val name = correspondingType.substringAfterLast("/")
-                val clazz = Class.forName("euclin.std.functions.$name")
-                TypeInspector.inspect(clazz, funcType, context)
-            }
-        }
     }
 
     private fun addStandardFunctions(functions: MutableMap<String, FunctionSignature>) {

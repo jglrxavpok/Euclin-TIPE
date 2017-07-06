@@ -7,6 +7,7 @@ import euclin.compiler.types.listFields
 import euclin.compiler.types.listMethods
 import euclin.compiler.types.listStaticMethods
 import org.antlr.v4.runtime.tree.TerminalNode
+import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TypeDefinition
 import java.util.*
 
@@ -19,6 +20,8 @@ class FunctionMatcher(val parentContext: Context): EuclinBaseVisitor<FunctionSig
         val name = ctx.Identifier().text
         if(localVariableTypes.containsKey(name)) {
             val localType = localVariableTypes[name]!!
+            if(localType is FunctionType)
+                return localType.listMethods()[0]
             if(localType.listMethods().any { it.name == "invoke" }) {
                 val method = localType.listMethods().find { it.name == "invoke" }!!
                 return FunctionSignature("invoke", method.arguments, method.returnType, method.ownerClass, static = false)
@@ -32,6 +35,8 @@ class FunctionMatcher(val parentContext: Context): EuclinBaseVisitor<FunctionSig
 
         val field = parentContext.field(name)
         if(field != null) {
+            if(field.type is FunctionType)
+                return field.type.listMethods()[0]
             if(field.type.listMethods().any{ it.name == "invoke" }) {
                 val method = field.type.listMethods().find { it.name == "invoke" }!!
                 return FunctionSignature("invoke", method.arguments, method.returnType, method.ownerClass, static = false)

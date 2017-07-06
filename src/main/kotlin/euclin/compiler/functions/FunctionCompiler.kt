@@ -7,7 +7,6 @@ import org.jglr.inference.types.TypeDefinition
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
-import euclin.compiler.lambda.LambdaCompiler
 import org.antlr.v4.runtime.ParserRuleContext
 import org.objectweb.asm.*
 import org.objectweb.asm.Opcodes.*
@@ -298,10 +297,11 @@ open class FunctionCompiler(private val parentContext: Context, synthetic: Boole
         val bootstrapHandle = Handle(H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory", mt.toMethodDescriptorString())
 
         // /!\ signatureType et funcType ne sont pas du même type! (l'un TypeDefinition et l'autre ASMType)
-        val returnType = signature.toType()
+        val signatureType = signature.toType()
+        val returnType = BasicType(javaTypeName(signatureType as FunctionType))
         val funcType = methodType(signature.arguments, signature.returnType)
-        writer.visitInvokeDynamicInsn("invoke", methodType(returnType, localVarUsed.map { localVariableTypes[it]!! }).descriptor, bootstrapHandle, funcType, methodHandle, funcType)
-        typeStack.push(signature.toType()) // on crée le type correspondant à notre signature de fonction
+        writer.visitInvokeDynamicInsn(interfaceFunctionName(signatureType), methodType(returnType, localVarUsed.map { localVariableTypes[it]!! }).descriptor, bootstrapHandle, funcType, methodHandle, funcType)
+        typeStack.push(signatureType) // on crée le type correspondant à notre signature de fonction
     }
 
     override fun visitLambdaFunctionExpr(ctx: EuclinParser.LambdaFunctionExprContext) {

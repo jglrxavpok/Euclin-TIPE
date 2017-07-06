@@ -7,8 +7,6 @@ import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
-import euclin.compiler.types.TypeConverter
-import java.util.*
 
 class FunctionGatherer(val parentContext: Context): EuclinBaseVisitor<FunctionSignature>() {
 

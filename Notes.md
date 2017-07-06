@@ -33,3 +33,4 @@ A faire:
 (Compileur) Permettre le partage de context
 (Compileur+Grammaire) Ajouter un moyen de lier des fonctions à une structure de données
 (Compileur+Grammaire) Ajouter un type tableau et des méthodes liées
+(Compileur) Ajouter les signatures de type génériques

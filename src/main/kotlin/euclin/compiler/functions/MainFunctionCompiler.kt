@@ -25,7 +25,8 @@ class MainFunctionCompiler(val parentContext: Context): FunctionCompiler(parentC
         compileFuncFooter()
 
         for(field in parentContext.fields) {
-            classWriter.visitField(ACC_STATIC or ACC_PRIVATE, field.name, basicType(field.type).descriptor, null, null)
+            val type = field.type
+            classWriter.visitField(ACC_STATIC or ACC_PRIVATE, field.name, basicType(type).descriptor, null, null)
         }
     }
 }

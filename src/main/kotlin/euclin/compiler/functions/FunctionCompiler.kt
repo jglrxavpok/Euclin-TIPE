@@ -110,13 +110,13 @@ open class FunctionCompiler(parentContext: Context, synthetic: Boolean = false, 
         lambdaExpr.addChild(returnInstructionWrapper)
 
         val lambda = parentContext.lambdaCompiler.visitLambdaFunctionExpr(lambdaExpr)
-        return lambda.first
+        return lambda.apiSignature
     }
 
     override fun visitLambdaFunctionExpr(ctx: EuclinParser.LambdaFunctionExprContext) {
         val lambdaCompiler = parentContext.lambdaCompiler
         val lambda = lambdaCompiler.visitLambdaFunctionExpr(ctx)
-        compileMethodReference(lambda.first, lambda.second, lambda.third)
+        compileMethodReference(lambda.apiSignature, lambda.usedLocals, lambda.implementationSignature)
     }
 
     override fun visitReturnFuncInstruction(ctx: EuclinParser.ReturnFuncInstructionContext) {

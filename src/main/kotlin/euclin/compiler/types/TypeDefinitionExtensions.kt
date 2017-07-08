@@ -15,28 +15,24 @@ private val typeMethods = hashMapOf<TypeDefinition, MutableList<FunctionSignatur
 private val typeConstructors = hashMapOf<TypeDefinition, MutableList<FunctionSignature>>()
 private val typeStaticMethods = hashMapOf<TypeDefinition, MutableList<FunctionSignature>>()
 
-fun TypeDefinition.listStaticFields(): MutableList<TypedMember> {
-    if(this in typeStaticFields)
-        return typeStaticFields[this]!!
-    val list = mutableListOf<TypedMember>()
-    typeStaticFields[this] = list
+private fun <T> TypeDefinition.listMembers(map: MutableMap<TypeDefinition, MutableList<T>>): MutableList<T> {
+    if(this in map)
+        return map[this]!!
+    val list = mutableListOf<T>()
+    map[this] = list
     return list
+}
+
+fun TypeDefinition.listStaticFields(): MutableList<TypedMember> {
+    return listMembers(typeStaticFields)
 }
 
 fun TypeDefinition.listFields(): MutableList<TypedMember> {
-    if(this in typeFields)
-        return typeFields[this]!!
-    val list = mutableListOf<TypedMember>()
-    typeFields[this] = list
-    return list
+    return listMembers(typeFields)
 }
 
 fun TypeDefinition.listConstructors(): MutableList<FunctionSignature> {
-    if(this in typeConstructors)
-        return typeConstructors[this]!!
-    val list = mutableListOf<FunctionSignature>()
-    typeConstructors[this] = list
-    return list
+    return listMembers(typeConstructors)
 }
 
 fun TypeDefinition.listMethods(): MutableList<FunctionSignature> {
@@ -55,19 +51,11 @@ fun TypeDefinition.listMethods(): MutableList<FunctionSignature> {
         return mutableListOf(FunctionSignature(methodName, arguments.mapIndexed { index, type -> TypedMember("arg$index", type) },
                 this.returnType, javaTypeName(this), static = false))
     }
-    if(this in typeMethods)
-        return typeMethods[this]!!
-    val list = mutableListOf<FunctionSignature>()
-    typeMethods[this] = list
-    return list
+    return listMembers(typeMethods)
 }
 
 fun TypeDefinition.listStaticMethods(): MutableList<FunctionSignature> {
-    if(this in typeStaticMethods)
-        return typeStaticMethods[this]!!
-    val list = mutableListOf<FunctionSignature>()
-    typeStaticMethods[this] = list
-    return list
+    return listMembers(typeStaticMethods)
 }
 
 fun TypeDefinition.constructor(arguments: List<TypeDefinition>): FunctionSignature? {
@@ -128,7 +116,7 @@ fun TypeDefinition.generateShortName(): String =
                 "_" + descriptorList.reduce { acc, s -> acc + s } + "_"
             }
         } else {
-            this.toASM().descriptor.shortenType()
+            toASM().descriptor.shortenType()
         }
 
 /**
@@ -144,4 +132,4 @@ val TypeDefinition.localSize: Int
 /**
  * Corrige l'instruction donnée pour coller au type
  */
-fun TypeDefinition.correctOpcode(baseOpcode: Int) = this.toASM().getOpcode(baseOpcode)
+fun TypeDefinition.correctOpcode(baseOpcode: Int) = toASM().getOpcode(baseOpcode)

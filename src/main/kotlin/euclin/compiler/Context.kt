@@ -58,7 +58,7 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
         return fields.find { it.name == name }
     }
 
-    fun type(text: String): TypeDefinition {
+    fun getTypeOrCreate(text: String): TypeDefinition {
         if(importedTypes.containsKey(text))
             return importedTypes[text]!!
         if(knownTypes.containsKey(text))
@@ -67,6 +67,15 @@ data class Context(val currentClass: String, val classWriter: ClassWriter, val a
         val value = ObjectType(text, WildcardType)
         knownTypes[text] = value
         return value
+    }
+
+    fun type(text: String): TypeDefinition {
+        if(importedTypes.containsKey(text))
+            return importedTypes[text]!!
+        if(knownTypes.containsKey(text))
+            return knownTypes[text]!!
+
+        throw IllegalAccessException("No type $text found.")
     }
 
     fun registerType(name: String, type: TypeDefinition) {

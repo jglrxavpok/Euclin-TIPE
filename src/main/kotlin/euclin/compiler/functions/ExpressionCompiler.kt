@@ -180,7 +180,7 @@ abstract class ExpressionCompiler(val parentContext: Context): EuclinBaseVisitor
         }
 
         // sorte de pointeur vers la méthode
-        val methodHandle = toHandle(lambdaImplementationSignature)
+        val methodHandle = lambdaImplementationSignature.toHandle()
         val mt = MethodType.methodType(CallSite::class.java,
                 MethodHandles.Lookup::class.java, String::class.java, MethodType::class.java, MethodType::class.java, MethodHandle::class.java, MethodType::class.java)
         val bootstrapHandle = Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory", mt.toMethodDescriptorString())
@@ -191,10 +191,6 @@ abstract class ExpressionCompiler(val parentContext: Context): EuclinBaseVisitor
         val funcType = methodType(signature.arguments, signature.returnType)
         writer.visitInvokeDynamicInsn(interfaceFunctionName(signatureType), methodType(returnType, localVarUsed.map { localVariableTypes[it]!! }).descriptor, bootstrapHandle, funcType, methodHandle, funcType)
         typeStack.push(signatureType) // on crée le type correspondant à notre signature de fonction
-    }
-
-    private fun toHandle(func: FunctionSignature): Handle {
-        return Handle(if(func.static) Opcodes.H_INVOKESTATIC else Opcodes.H_INVOKEVIRTUAL, func.ownerClass.toInternalName(), func.name, methodType(func.arguments, func.returnType).descriptor)
     }
 
     override fun visitBoolTrueExpr(ctx: EuclinParser.BoolTrueExprContext?) {
@@ -254,7 +250,6 @@ abstract class ExpressionCompiler(val parentContext: Context): EuclinBaseVisitor
     override fun visitArrayExpr(ctx: EuclinParser.ArrayExprContext) {
         val elements = ctx.expression()
         val type = translator.translate(ctx).type as ArrayType
-        println("array>>$type")
         val length = elements.size
         val elementType = type.elementType
         with(writer) {

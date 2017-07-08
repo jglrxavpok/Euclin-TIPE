@@ -63,7 +63,6 @@ object MemoizedFunctionCompiler {
                 convertToObjectTypeIfNeeded(writer, arg.type)
                 visitInsn(AASTORE)
                 localVarIndex += arg.type.localSize
-                println(">> ${arg.type}, post index: $localVarIndex")
             }
 
             // on vérifie si le cache a déjà la valeur

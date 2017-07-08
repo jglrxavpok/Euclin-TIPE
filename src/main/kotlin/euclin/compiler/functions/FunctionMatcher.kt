@@ -9,7 +9,6 @@ import euclin.compiler.types.listStaticMethods
 import org.antlr.v4.runtime.tree.TerminalNode
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TypeDefinition
-import java.util.*
 
 class FunctionMatcher(val parentContext: Context): EuclinBaseVisitor<FunctionSignature>() {
 
@@ -71,12 +70,6 @@ class FunctionMatcher(val parentContext: Context): EuclinBaseVisitor<FunctionSig
                     return field.type
                 if(parentContext.knowsType(name)) {
                     return parentContext.type(name)
-                }
-                parentContext.knownTypes.forEach { t, u ->
-                    println("known: $t = $u")
-                }
-                parentContext.importedTypes.forEach { t, u ->
-                    println("imported: $t = $u")
                 }
                 compileError("Aucune variable du nom $name", identifier.symbol.line, parentContext.currentClass)
             }

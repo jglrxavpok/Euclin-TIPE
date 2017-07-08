@@ -28,7 +28,7 @@ class TypeConverter(val parentContext: Context): EuclinBaseVisitor<TypeDefinitio
             "Int16", "Short" -> Int16Type
             "Int8", "Byte" -> Int8Type
             "Boolean", "Bool" -> BooleanType
-            else -> parentContext.type(text)
+            else -> parentContext.getTypeOrCreate(text)
         }
     }
 

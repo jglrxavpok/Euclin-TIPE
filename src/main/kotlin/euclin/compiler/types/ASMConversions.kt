@@ -3,7 +3,6 @@ package euclin.compiler.types
 import euclin.compiler.EuclinCompiler.OBJECT_TYPE
 import euclin.compiler.TypedMember
 import euclin.compiler.functions.FunctionSignature
-import euclin.compiler.shortenType
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TypeDefinition
 
@@ -25,14 +24,6 @@ fun methodType(arguments: List<TypedMember>, returnType: TypeDefinition): ASMTyp
 
 fun methodType(returnType: TypeDefinition, arguments: List<TypeDefinition>): ASMType {
     return ASMType.getMethodType(returnType.toASM(), *(arguments.map { it.toASM() }.toTypedArray()))
-}
-
-fun generateFunctionObjectType(type: FunctionType): ASMType {
-
-    val argumentTypes: String = type.argumentType.generateShortName()
-    val returnType = type.returnType.toASM().descriptor.shortenType()
-
-    return ASMType.getObjectType("euclin/std/functions/Func${argumentTypes}2$returnType")
 }
 
 fun TypeDefinition.toASM(): ASMType {

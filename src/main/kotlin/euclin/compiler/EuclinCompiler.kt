@@ -149,7 +149,6 @@ object EuclinCompiler {
         for(c in classpath) {
             val candidate = File(c, importedName.replace(".", File.separator)+".class")
             if(candidate.exists()) {
-                println(">> Found candidate for $importedName: ${candidate.absolutePath}")
                 found = true
                 val data = FileInputStream(candidate).buffered().use { it.readBytes() }
                 TypeInspector.inspect(data, destination, context)

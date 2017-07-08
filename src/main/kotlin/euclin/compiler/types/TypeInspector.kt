@@ -20,8 +20,9 @@ object TypeInspector {
             val type = it.type
 
             val field = TypedMember(name, convert(type, context))
-            if(field !in destination.listFields())
-                destination.listFields() += field
+            val destinationList = if(Modifier.isStatic(it.modifiers)) destination.listStaticFields() else destination.listFields()
+            if(field !in destinationList)
+                destinationList += field
         }
 
         target.declaredMethods.filter { Modifier.isPublic(it.modifiers) /* La fonction doit être publique */ }.forEach {

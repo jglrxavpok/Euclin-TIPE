@@ -6,6 +6,7 @@ EuclinCompiler -> reçoit un fichier source et renvoit le bytecode correspondant
 "import org.objectweb.asm.Opcodes.*" -> expliquer
 TypeConversions -> Expliquer le *<...>.toTypedArray()
 ; Expliquer ASM "Label" + ASM "Type" (pas forcément en même temps)
+; Expliquer les extensions (super pratique pour TypeDefinition)
 https://en.wikipedia.org/wiki/Java_bytecode_instruction_listings
 
 javap -p -c -v -constants TestEuclin.class

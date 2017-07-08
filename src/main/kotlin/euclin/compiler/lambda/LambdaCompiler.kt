@@ -17,7 +17,7 @@ class LambdaCompiler(val parentContext: Context) {
     private val translator = parentContext.translator
     private val alreadyCompiled = hashMapOf<String, FunctionSignature>()
 
-    fun visitLambdaFunctionExpr(ctx: EuclinParser.LambdaFunctionExprContext): Triple<FunctionSignature, List<String>, FunctionSignature> {
+    fun visitLambdaFunctionExpr(ctx: EuclinParser.LambdaFunctionExprContext): LambdaMetadata {
         val functionInstructions = ctx.functionInstructions()
 
         // on ne compile pas deux fois la même fonction!
@@ -28,15 +28,10 @@ class LambdaCompiler(val parentContext: Context) {
         val block = function.expression as BlockExpression
         val returnType = block.type
 
-        println(">>> ${block.usedLocals}")
-        println(">>> ${block.arguments}")
         val name = generateLambdaName(parentContext)
         val lambdaImplementationSignature = FunctionSignature(name, block.usedLocals.map {
-            println("local>> $it")
             TypedMember(it, parentContext.localVariableTypes[it]!!)
         }.drop(0) + block.arguments, returnType, ownerClass, static = true)
-        println("ARGUMENTS-----")
-        lambdaImplementationSignature.arguments.forEach{println(it)}
         val functionBody = generateLambdaBody(functionInstructions, ctx)
 
         // TODO: alreadyCompiled[functionInstructions.text] = lambdaImplementationSignature
@@ -44,7 +39,7 @@ class LambdaCompiler(val parentContext: Context) {
         val funcCompiler = FunctionCompiler(parentContext.withSignature(lambdaImplementationSignature).clearLocals(), synthetic = true, accessRestriction = Opcodes.ACC_PRIVATE)
         funcCompiler.visitFunctionCodeBlock(functionBody)
         val lambdaSignature = FunctionSignature(name, block.arguments, returnType, ownerClass, static = true)
-        return Triple(lambdaSignature, block.usedLocals, lambdaImplementationSignature)
+        return LambdaMetadata(lambdaSignature, block.usedLocals, lambdaImplementationSignature)
     }
 
     companion object {

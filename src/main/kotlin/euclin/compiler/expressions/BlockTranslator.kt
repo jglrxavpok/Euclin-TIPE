@@ -134,7 +134,6 @@ class BlockTranslator(val context: Context): ExpressionTranslator(context) {
 
     override fun visitIfBranchingInstruction(ctx: EuclinParser.IfBranchingInstructionContext): Expression {
         visit(ctx.expression())
-        println(">> ${ctx.expression().text}")
         val result = translateSub(ctx.functionInstructions())
         if(ctx.elseBlock() != null) {
             translateSub(ctx.elseBlock().functionInstructions())
@@ -145,7 +144,6 @@ class BlockTranslator(val context: Context): ExpressionTranslator(context) {
     override fun visitLoadAndRetypeExpr(ctx: EuclinParser.LoadAndRetypeExprContext): Expression {
         val type = parentContext.typeConverter.visit(ctx.type())
         val expr = visit(ctx.expression())
-        println("retype $expr to $type")
         return expr of type
     }
 
@@ -171,7 +169,6 @@ class BlockTranslator(val context: Context): ExpressionTranslator(context) {
                         else -> TupleType(arrayOf(lambdaArgument, varType))
                     }
                     usedLocals[name] = varType
-                    println("added: ($name : $varType)")
                     updateLambdaParam()
                 }
             }

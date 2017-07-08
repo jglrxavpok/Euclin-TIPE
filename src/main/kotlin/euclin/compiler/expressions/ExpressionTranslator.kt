@@ -23,6 +23,7 @@ open class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<
     private val False = Literal(false, BooleanType)
     private val UnitValue = Literal(Unit, UnitType)
     internal val inferer = TypeInferer()
+    private val EmptyArray = { OpaqueExpression("[]") of ArrayType(WildcardType) }
     private val alreadyTranslated = hashMapOf<ParserRuleContext, Expression>()
     private val funcMatcher: FunctionMatcher
         get() = parentContext.functionMatcher
@@ -243,5 +244,31 @@ open class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<
     override fun visitLoadAndRetypeExpr(ctx: EuclinParser.LoadAndRetypeExprContext): Expression {
         val type = parentContext.typeConverter.visit(ctx.type())
         return visit(ctx.expression()) of type
+    }
+
+    override fun visitArrayExpr(ctx: EuclinParser.ArrayExprContext): Expression {
+        if(ctx.expression().isEmpty()) {
+            if (ctx.parent != null && ctx.parent is EuclinParser.LoadAndRetypeExprContext) { // permet de créer des tableaux vides avec un type choisi
+                val parent = ctx.parent as EuclinParser.LoadAndRetypeExprContext
+                val type = parentContext.typeConverter.visit(parent.type())
+                return EmptyArray() of type
+            } else {
+                return EmptyArray()
+            }
+        }
+        val elements = ctx.expression()
+                .map(this::translate)
+                .map(Expression::type)
+                .toTypedArray()
+        val arrayType = ArrayType(elements.max()!!) // <- On prend le type qui peut contenir tous les autres
+        return OpaqueExpression(ctx.text) of arrayType
+    }
+
+    override fun visitAccessArrayExpr(ctx: EuclinParser.AccessArrayExprContext): Expression {
+        val array = translate(ctx.expression(0))
+        val index = translate(ctx.expression(1))
+        compileAssert(array.type is ArrayType, parentContext.currentClass, ctx) { "L'expression doit être un tableau!" }
+        compileAssert(index.type.isIntType(), parentContext.currentClass, ctx) { "L'indice doit être un entier!" }
+        return AccessExpression(array, index.toString())
     }
 }

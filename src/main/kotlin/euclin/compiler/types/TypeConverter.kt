@@ -32,6 +32,10 @@ class TypeConverter(val parentContext: Context): EuclinBaseVisitor<TypeDefinitio
         }
     }
 
+    override fun visitArrayType(ctx: EuclinParser.ArrayTypeContext): TypeDefinition {
+        return ArrayType(visit(ctx.type()))
+    }
+
     override fun visitWildcardType(ctx: EuclinParser.WildcardTypeContext?): TypeDefinition {
         return WildcardType
     }

@@ -34,3 +34,4 @@ A faire:
 (Compileur+Grammaire) Ajouter un moyen de lier des fonctions à une structure de données
 (Compileur+Grammaire) Ajouter un type tableau et des méthodes liées
 (Compileur) Ajouter les signatures de type génériques
+(Refactoring) Réduire la taille de FunctionCompiler, quitte à rajouter des éléments dans le contexte

@@ -187,6 +187,13 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitWildcardType(EuclinParser.WildcardTypeContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code ArrayType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayType(EuclinParser.ArrayTypeContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link EuclinParser#parameter}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -396,12 +403,26 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCoupleExpr(EuclinParser.CoupleExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code ArrayExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayExpr(EuclinParser.ArrayExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code DivExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitDivExpr(EuclinParser.DivExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code AccessArrayExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAccessArrayExpr(EuclinParser.AccessArrayExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code IntExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.

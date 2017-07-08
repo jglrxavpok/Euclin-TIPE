@@ -36,6 +36,7 @@ fun basicType(type: TypeDefinition): ASMType {
         Real64PointType -> RealPoint64ASMType
         Int64PointType -> IntegerPoint64ASMType
         WildcardType -> OBJECT_TYPE
+        is ArrayType -> ASMType.getType("["+(basicType(type.elementType).descriptor))
         is NativeType -> type.backing
         is FunctionType -> ASMType.getObjectType(javaTypeName(type).replace(".", "/"))//generateFunctionObjectType(type)
         // TODO: Autres types?

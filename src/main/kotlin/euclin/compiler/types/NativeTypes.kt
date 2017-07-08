@@ -19,9 +19,9 @@ val Int64Type = NativeType("euclin.std.Int64", ASMType.LONG_TYPE)
 val CharType = NativeType("euclin.std.Char", ASMType.CHAR_TYPE)
 val JVMVoid = NativeType("void", ASMType.VOID_TYPE)
 
-val UnitType: TypeDefinition = BasicType("euclin.std.UnitObject")
-val StringType: TypeDefinition = BasicType("java.lang.String")
 val WildcardType: TypeDefinition = PolymorphicType()
+val UnitType: TypeDefinition = BasicType("euclin.std.UnitObject")
+val StringType: TypeDefinition = ObjectType("java.lang.String", WildcardType)
 
 val BasicTypes = listOf(Int32Type, Real32Type, BooleanType, Int8Type, Real64Type, Int16Type, Int64Type, CharType, UnitType, StringType, WildcardType)
 
@@ -61,6 +61,8 @@ class ObjectType(val name: String, val parent: TypeDefinition): TypeDefinition()
     override fun compare(other: TypeDefinition, firstCall: Boolean): Int {
         if(this == other)
             return 0
+        if(parent == other)
+            return -1
         if(other is BasicType) {
             if(parent >= other)
                 return 1
@@ -219,4 +221,26 @@ fun TypeDefinition.constructor(arguments: List<TypeDefinition>): FunctionSignatu
             return cons
     }
     return null
+}
+
+fun TypeDefinition.isFloatType(maxBitSize: Int = 64): Boolean {
+    val toCheck = mutableListOf<NativeType>()
+    if(maxBitSize >= 32)
+        toCheck += Real32Type
+    if(maxBitSize >= 64)
+        toCheck += Real64Type
+    return this in toCheck
+}
+
+fun TypeDefinition.isIntType(maxBitSize: Int = 64): Boolean {
+    val toCheck = mutableListOf<NativeType>()
+    if(maxBitSize >= 8)
+        toCheck += Int8Type
+    if(maxBitSize >= 16)
+        toCheck += Int16Type
+    if(maxBitSize >= 32)
+        toCheck += Int32Type
+    if(maxBitSize >= 64)
+        toCheck += Int64Type
+    return this in toCheck
 }

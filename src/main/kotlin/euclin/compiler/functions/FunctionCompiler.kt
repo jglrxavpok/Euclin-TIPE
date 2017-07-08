@@ -8,6 +8,7 @@ import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
 import org.antlr.v4.runtime.ParserRuleContext
+import org.jglr.inference.expressions.Expression
 import org.objectweb.asm.*
 import org.objectweb.asm.Opcodes.*
 import java.util.*
@@ -552,22 +553,20 @@ open class FunctionCompiler(private val parentContext: Context, synthetic: Boole
             compileWarning("La variable $name obscure le champ du même nom", parentContext.currentClass, ctx)
 
         val expression = ctx.expression()
-        val value = translator.translate(expression)
-
+        visit(expression)
+        val type = typeStack.pop()
         if(isMainFunction) {
-            val declaredField = TypedMember(name, value.type)
+            val declaredField = TypedMember(name, type)
             parentContext.fields += declaredField
 
-            visit(expression)
-            writer.visitFieldInsn(PUTSTATIC, toInternalName(parentContext.currentClass), name, basicType(value.type).descriptor)
-            typeStack.pop()
+            writer.visitFieldInsn(PUTSTATIC, toInternalName(parentContext.currentClass), name, basicType(type).descriptor)
         } else {
             val varID = localIndex
-            localIndex += localSizeOf(value.type)
+            localIndex += localSizeOf(type)
             localVariableIDs[name] = varID
-            localVariableTypes[name] = value.type
+            localVariableTypes[name] = type
 
-            storeValue(expression, value.type, varID)
+            storeValue(expression, type, varID)
         }
     }
 
@@ -948,6 +947,62 @@ open class FunctionCompiler(private val parentContext: Context, synthetic: Boole
      */
     override fun visitLoadAndRetypeExpr(ctx: EuclinParser.LoadAndRetypeExprContext) {
         visit(ctx.expression())
+    }
+
+    override fun visitArrayExpr(ctx: EuclinParser.ArrayExprContext) {
+        val elements = ctx.expression()
+        val type = translator.translate(ctx).type as ArrayType
+        println("array>>$type")
+        val length = elements.size
+        val elementType = type.elementType
+        with(writer) {
+            visitIntInsn(SIPUSH, length)
+            if(elementType is NativeType) {
+                val arrayType = when(elementType) {
+                    Int8Type -> T_BYTE
+                    BooleanType -> T_BOOLEAN
+                    Int16Type -> T_SHORT
+                    Int32Type -> T_INT
+                    Int64Type -> T_LONG
+                    Real32Type -> T_FLOAT
+                    Real64Type -> T_DOUBLE
+                    CharType -> T_CHAR
+                    else -> TODO()
+                }
+                visitIntInsn(NEWARRAY, arrayType)
+            } else {
+                visitTypeInsn(ANEWARRAY, "java/lang/Object")
+            }
+
+            visitInsn(DUP)
+
+            for((index, elem) in elements.withIndex()) {
+                visitIntInsn(SIPUSH, index)
+                visit(elem)
+                typeStack.pop()
+                visitInsn(correctOpcode(IASTORE, elementType))
+                visitInsn(DUP)
+            }
+        }
+        typeStack.push(type)
+    }
+
+    override fun visitAccessArrayExpr(ctx: EuclinParser.AccessArrayExprContext) {
+        visit(ctx.expression(0))
+        val arrayType = typeStack.pop()
+        compileAssert(arrayType is ArrayType, parentContext.currentClass, ctx) { "L'accès doit se faire avec un tableau" }
+        visit(ctx.expression(1))
+        val indexType = typeStack.pop()
+        if(indexType == Int64Type) {
+            compileWarning("L'indice va être implicitement converti en Int32", parentContext.currentClass, ctx)
+            compileNativeCast(Int64Type, Int32Type, ctx.start?.line ?: -1)
+            typeStack.push(Int32Type)
+        } else {
+            compileAssert(arrayType.isIntType(maxBitSize = 32), parentContext.currentClass, ctx) { "L'indice doit être un entier!" }
+        }
+        val elementType = (arrayType as ArrayType).elementType
+        writer.visitInsn(correctOpcode(IALOAD, elementType))
+        typeStack.push(elementType)
     }
 
     companion object {

@@ -60,6 +60,7 @@ type
     | LeftBracket type RightBracket                                     #WrappedType
     | Identifier                                                        #BasicType
     | Star                                                              #WildcardType
+    | LeftSquareBracket type RightSquareBracket                         #ArrayType
     ;
 
 parameter
@@ -99,10 +100,12 @@ transformBlock
 // définies par ordre de précédence
 expression
     : LambdaVariable                            #LambdaVarExpr
-    | expression Colon type                     #LoadAndRetypeExpr
+    | expression LeftSquareBracket expression RightSquareBracket                #AccessArrayExpr
+    | LeftSquareBracket (expression (Comma expression)*)? RightSquareBracket    #ArrayExpr
+    | expression Colon type                                                     #LoadAndRetypeExpr
     | New Identifier (LeftBracket (expression (Comma expression)*)? RightBracket)? #NewObjectExpr
-    | LeftCurlyBracket functionInstructions+ RightCurlyBracket   #LambdaFunctionExpr
-    | expression (Period Identifier)+              #AccessExpr
+    | LeftCurlyBracket functionInstructions+ RightCurlyBracket                  #LambdaFunctionExpr
+    | expression (Period Identifier)+           #AccessExpr
     | functionCall                              #CallExpr
     | Identifier                                #VarExpr
     | couple                                    #CoupleExpr

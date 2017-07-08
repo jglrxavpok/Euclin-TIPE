@@ -308,6 +308,18 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitWildcardType(EuclinParser.WildcardTypeContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code ArrayType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayType(EuclinParser.ArrayTypeContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ArrayType}
+	 * labeled alternative in {@link EuclinParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayType(EuclinParser.ArrayTypeContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link EuclinParser#parameter}.
 	 * @param ctx the parse tree
 	 */
@@ -664,6 +676,18 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitCoupleExpr(EuclinParser.CoupleExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code ArrayExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayExpr(EuclinParser.ArrayExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ArrayExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayExpr(EuclinParser.ArrayExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code DivExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.
 	 * @param ctx the parse tree
@@ -675,6 +699,18 @@ public interface EuclinListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDivExpr(EuclinParser.DivExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code AccessArrayExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterAccessArrayExpr(EuclinParser.AccessArrayExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code AccessArrayExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitAccessArrayExpr(EuclinParser.AccessArrayExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code IntExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.

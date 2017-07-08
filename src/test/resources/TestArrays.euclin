@@ -6,4 +6,5 @@ var myNum = array[0]
 
 func main(args: [String]): Unit {
     writeln("Hi!")
+    args[0] = "Hello world!"
 }

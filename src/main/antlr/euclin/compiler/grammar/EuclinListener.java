@@ -160,6 +160,18 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitDeclareFuncInstruction(EuclinParser.DeclareFuncInstructionContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code ArrayStoreInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayStoreInstruction(EuclinParser.ArrayStoreInstructionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ArrayStoreInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayStoreInstruction(EuclinParser.ArrayStoreInstructionContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code IfBranchingInstruction}
 	 * labeled alternative in {@link EuclinParser#instructions}.
 	 * @param ctx the parse tree

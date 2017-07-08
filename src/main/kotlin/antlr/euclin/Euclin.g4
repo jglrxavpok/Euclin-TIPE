@@ -27,6 +27,7 @@ instructions
     | memberAssign          #AssignMemberInstruction
     | transformBlock        #TransformBlockInstruction
     | functionDeclaration   #DeclareFuncInstruction
+    | expression LeftSquareBracket expression RightSquareBracket Equals expression                                  #ArrayStoreInstruction
     | If LeftBracket expression RightBracket LeftCurlyBracket functionInstructions* RightCurlyBracket elseBlock?    #IfBranchingInstruction
     | While LeftBracket expression RightBracket LeftCurlyBracket functionInstructions* RightCurlyBracket            #WhileLoopInstruction
     ;

@@ -996,13 +996,33 @@ open class FunctionCompiler(private val parentContext: Context, synthetic: Boole
         if(indexType == Int64Type) {
             compileWarning("L'indice va être implicitement converti en Int32", parentContext.currentClass, ctx)
             compileNativeCast(Int64Type, Int32Type, ctx.start?.line ?: -1)
-            typeStack.push(Int32Type)
+            //typeStack.push(Int32Type)
         } else {
             compileAssert(arrayType.isIntType(maxBitSize = 32), parentContext.currentClass, ctx) { "L'indice doit être un entier!" }
         }
         val elementType = (arrayType as ArrayType).elementType
         writer.visitInsn(correctOpcode(IALOAD, elementType))
         typeStack.push(elementType)
+    }
+
+    override fun visitArrayStoreInstruction(ctx: EuclinParser.ArrayStoreInstructionContext) {
+        visit(ctx.expression(0))
+        val arrayType = typeStack.pop()
+        compileAssert(arrayType is ArrayType, parentContext.currentClass, ctx) { "L'accès doit se faire avec un tableau" }
+        visit(ctx.expression(1))
+        val indexType = typeStack.pop()
+        if(indexType == Int64Type) {
+            compileWarning("L'indice va être implicitement converti en Int32", parentContext.currentClass, ctx)
+            compileNativeCast(Int64Type, Int32Type, ctx.start?.line ?: -1)
+            //typeStack.push(Int32Type)
+        } else {
+            compileAssert(arrayType.isIntType(maxBitSize = 32), parentContext.currentClass, ctx) { "L'indice doit être un entier!" }
+        }
+        val elementType = (arrayType as ArrayType).elementType
+        visit(ctx.expression(2))
+        val valueType = typeStack.pop()
+        compileAssert(elementType >= valueType, parentContext.currentClass, ctx) { "La valeur ($valueType) donnée ne rentre pas dans le tableau d'éléments du type $elementType" }
+        writer.visitInsn(correctOpcode(IASTORE, elementType))
     }
 
     companion object {

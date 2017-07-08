@@ -172,6 +172,18 @@ public class EuclinBaseListener implements EuclinListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterArrayStoreInstruction(EuclinParser.ArrayStoreInstructionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArrayStoreInstruction(EuclinParser.ArrayStoreInstructionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterIfBranchingInstruction(EuclinParser.IfBranchingInstructionContext ctx) { }
 	/**
 	 * {@inheritDoc}

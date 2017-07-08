@@ -100,6 +100,13 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDeclareFuncInstruction(EuclinParser.DeclareFuncInstructionContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code ArrayStoreInstruction}
+	 * labeled alternative in {@link EuclinParser#instructions}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayStoreInstruction(EuclinParser.ArrayStoreInstructionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code IfBranchingInstruction}
 	 * labeled alternative in {@link EuclinParser#instructions}.
 	 * @param ctx the parse tree

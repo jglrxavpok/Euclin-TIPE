@@ -14,7 +14,7 @@ object StdPointGenerator {
         rootFolder.mkdirs()
         for(argument in types) {
             for(returnType in types) {
-                val name = generateShortName(argument)+"Point"
+                val name = argument.generateShortName() +"Point"
                 val output = File(rootFolder, name+".kt")
                 println("> ${output.path}")
                 output.createNewFile()

@@ -28,7 +28,7 @@ class StructureCompiler(val parentContext: Context) {
         for(p in ctx.parameter()) {
             val name = p.Identifier().text
             val type = parentContext.typeConverter.visit(p.type())
-            writer.visitField(ACC_PUBLIC, name, basicType(type).descriptor, null, null)
+            writer.visitField(ACC_PUBLIC, name, type.toASM().descriptor, null, null)
 
             correspondingType.listFields() += TypedMember(name, type)
         }

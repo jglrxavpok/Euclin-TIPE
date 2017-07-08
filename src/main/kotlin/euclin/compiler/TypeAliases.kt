@@ -6,10 +6,6 @@ import org.jglr.inference.types.TypeDefinition
 /**
  * Un argument est un nom (String) + un type (String)
  */
-typealias TypedMember = Pair<String, TypeDefinition>
-val TypedMember.name
-    get() = this.first
-val TypedMember.type
-    get() = this.second
+data class TypedMember(val name: String, val type: TypeDefinition)
 
 internal typealias FunctionList = HashMap<String, FunctionSignature>

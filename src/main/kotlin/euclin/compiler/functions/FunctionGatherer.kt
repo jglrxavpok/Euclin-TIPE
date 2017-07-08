@@ -40,8 +40,8 @@ class FunctionSignature(val name: String, val arguments: List<TypedMember>, val 
 
     fun toType(): TypeDefinition {
         if(arguments.size == 1)
-            return FunctionType(arguments[0].second, returnType)
-        return FunctionType(TupleType(arguments.map { it.second }.toTypedArray()), returnType)
+            return FunctionType(arguments[0].type, returnType)
+        return FunctionType(TupleType(arguments.map { it.type }.toTypedArray()), returnType)
     }
 
     override fun equals(other: Any?): Boolean {

@@ -7,7 +7,6 @@ import org.jglr.inference.types.FunctionType
 import euclin.compiler.grammar.EuclinLexer
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
-import euclin.compiler.lambda.LambdaCompiler
 import euclin.intrisincs.EuclinApplication
 import euclin.intrisincs.MemoizationCache
 import euclin.std.*
@@ -86,7 +85,7 @@ object EuclinCompiler {
 
         if(!isApplication) {
             context.staticInit += {
-                visitMethodInsn(INVOKESTATIC, toInternalName(className), "_init", "()V", false)
+                visitMethodInsn(INVOKESTATIC, className.toInternalName(), "_init", "()V", false)
             }
         }
         context.createStaticBlock()

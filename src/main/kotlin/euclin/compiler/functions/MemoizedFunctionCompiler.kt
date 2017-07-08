@@ -4,8 +4,6 @@ import euclin.compiler.Context
 import euclin.compiler.TypedMember
 import org.jglr.inference.types.TypeDefinition
 import euclin.compiler.grammar.EuclinParser
-import euclin.compiler.name
-import euclin.compiler.type
 import euclin.compiler.types.*
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Label
@@ -61,10 +59,10 @@ object MemoizedFunctionCompiler {
             for(arg in arguments) {
                 visitVarInsn(ALOAD, arrayIndex)
                 visitLdcInsn(localArrayIndex++)
-                visitVarInsn(correctOpcode(ILOAD, arg.type), localVarIndex)
+                visitVarInsn(arg.type.correctOpcode(ILOAD), localVarIndex)
                 convertToObjectTypeIfNeeded(writer, arg.type)
                 visitInsn(AASTORE)
-                localVarIndex += FunctionCompiler.localSizeOf(arg.type)
+                localVarIndex += arg.type.localSize
                 println(">> ${arg.type}, post index: $localVarIndex")
             }
 
@@ -80,39 +78,39 @@ object MemoizedFunctionCompiler {
             visitMethodInsn(INVOKEVIRTUAL, "euclin/intrisincs/MemoizationCache", "get", "([Ljava/lang/Object;)Ljava/lang/Object;", false)
             //visitJumpInsn(GOTO, end)
             convertToNativeTypeIfNeeded(writer, signature.returnType)
-            visitInsn(correctOpcode(IRETURN, signature.returnType))
+            visitInsn(signature.returnType.correctOpcode(IRETURN))
 
             // sinon on la calcule
             visitLabel(computeBranch)
 
             localVarIndex = 0
             for(arg in arguments) {
-                visitVarInsn(correctOpcode(ILOAD, arg.second), localVarIndex)
-                localVarIndex += FunctionCompiler.localSizeOf(arg.type)
+                visitVarInsn(arg.type.correctOpcode(ILOAD), localVarIndex)
+                localVarIndex += arg.type.localSize
             }
             visitMethodInsn(INVOKESTATIC, internalClassName, "${signature.name}\$compute", methodType(signature.arguments, signature.returnType).descriptor, false)
 
             // On sauvegarde la valeur:
-            visitVarInsn(correctOpcode(ISTORE, signature.returnType), resultIndex)
+            visitVarInsn(signature.returnType.correctOpcode(ISTORE), resultIndex)
             visitFieldInsn(GETSTATIC, internalClassName, fieldName, "Leuclin/intrisincs/MemoizationCache;")
             visitVarInsn(ALOAD, arrayIndex)
-            visitVarInsn(correctOpcode(ILOAD, signature.returnType), resultIndex)
+            visitVarInsn(signature.returnType.correctOpcode(ILOAD), resultIndex)
             convertToObjectTypeIfNeeded(writer, signature.returnType)
             visitMethodInsn(INVOKEVIRTUAL, "euclin/intrisincs/MemoizationCache", "set", "([Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false)
 
-            visitVarInsn(correctOpcode(ILOAD, signature.returnType), resultIndex)
-            visitInsn(correctOpcode(IRETURN, signature.returnType))
+            visitVarInsn(signature.returnType.correctOpcode(ILOAD), resultIndex)
+            visitInsn(signature.returnType.correctOpcode(IRETURN))
 
             visitLabel(end)
 
             localVarIndex = 0
             for (arg in arguments) {
                 visitParameter(arg.name, ACC_FINAL)
-                visitLocalVariable(arg.name, basicType(arg.type).descriptor, null, start, end, localVarIndex)
-                localVarIndex += FunctionCompiler.localSizeOf(arg.type)
+                visitLocalVariable(arg.name, arg.type.toASM().descriptor, null, start, end, localVarIndex)
+                localVarIndex += arg.type.localSize
             }
             visitLocalVariable("\$argArray", "[Ljava/lang/Object;", null, start, end, arrayIndex)
-            visitLocalVariable("\$result", basicType(signature.returnType).descriptor, null, start, end, resultIndex)
+            visitLocalVariable("\$result", signature.returnType.toASM().descriptor, null, start, end, resultIndex)
             visitMaxs(0, 0)
             visitEnd()
         }
@@ -122,22 +120,11 @@ object MemoizedFunctionCompiler {
         if(arguments.isEmpty())
             return 0
         return arguments.map(TypedMember::type)
-                .map(FunctionCompiler.Companion::localSizeOf)
+                .map(TypeDefinition::localSize)
                 .sum()
     }
 
     private fun convertToObjectTypeIfNeeded(writer: MethodVisitor, type: TypeDefinition) {
-       /* when(type) {
-            Real32Type -> {
-                writer.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false)
-            }
-            BooleanType -> {
-                writer.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false)
-            }
-            IntType -> {
-                writer.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false)
-            }
-        }*/
         if(type is NativeType)
             FunctionCompiler.convertNativeTypeToBoxed(writer, type)
     }
@@ -145,11 +132,6 @@ object MemoizedFunctionCompiler {
     private fun convertToNativeTypeIfNeeded(writer: MethodVisitor, type: TypeDefinition) {
         if(type is NativeType)
             FunctionCompiler.convertBoxedObjectToNativeType(writer, type)
-    }
-
-    // TODO: Copie de FunctionCompiler
-    fun correctOpcode(baseOpcode: Int, type: TypeDefinition): Int {
-        return basicType(type).getOpcode(baseOpcode)
     }
 
     private fun createCacheInitialization(fieldName: String, signature: FunctionSignature, context: Context) {

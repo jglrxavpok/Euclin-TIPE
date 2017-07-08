@@ -172,9 +172,9 @@ open class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<
         // on ne convertit pas à un tuple si on a qu'un seul argument!
         if(signature.arguments.size == 1) {
             val arg = signature.arguments[0]
-            return Function(signature.name, Variable(arg.first) of arg.second, OpaqueExpression("${signature.name}(*)") of signature.returnType)
+            return Function(signature.name, Variable(arg.name) of arg.type, OpaqueExpression("${signature.name}(*)") of signature.returnType)
         }
-        val arguments = signature.arguments.map { Variable(it.first) of it.second }
+        val arguments = signature.arguments.map { Variable(it.name) of it.type }
         return Function(signature.name, Tuple(*arguments.toTypedArray()), OpaqueExpression("${signature.name}(*)") of signature.returnType)
     }
 

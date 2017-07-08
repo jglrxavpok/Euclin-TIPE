@@ -2,12 +2,10 @@ package euclin.compiler.functions
 
 import euclin.compiler.Context
 import euclin.compiler.grammar.EuclinParser
-import euclin.compiler.name
-import euclin.compiler.type
-import euclin.compiler.types.basicType
+import euclin.compiler.types.toASM
 import org.objectweb.asm.Opcodes.*
 
-class MainFunctionCompiler(val parentContext: Context): FunctionCompiler(parentContext) {
+class MainFunctionCompiler(parentContext: Context): FunctionCompiler(parentContext) {
 
     override val isMainFunction: Boolean = true
 
@@ -26,7 +24,7 @@ class MainFunctionCompiler(val parentContext: Context): FunctionCompiler(parentC
 
         for(field in parentContext.fields) {
             val type = field.type
-            classWriter.visitField(ACC_STATIC or ACC_PRIVATE, field.name, basicType(type).descriptor, null, null)
+            classWriter.visitField(ACC_STATIC or ACC_PRIVATE, field.name, type.toASM().descriptor, null, null)
         }
     }
 }

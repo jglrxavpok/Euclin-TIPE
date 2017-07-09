@@ -2,7 +2,8 @@ var someField = "Hi"
 
 func f(a: Int): () -> @ {
     return {
-        writeln(someField)
+        var something = "!"
+        writeln(someField + something)
         a <- @
     }
 }

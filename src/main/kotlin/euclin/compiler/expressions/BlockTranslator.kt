@@ -5,9 +5,7 @@ import euclin.compiler.functions.FunctionSignature
 import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.grammar.EuclinVisitor
-import euclin.compiler.types.UnitType
-import euclin.compiler.types.WildcardType
-import euclin.compiler.types.listMethods
+import euclin.compiler.types.*
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.ParseTree
 import org.jglr.inference.expressions.Expression
@@ -16,6 +14,7 @@ import org.jglr.inference.expressions.Variable
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TupleType
 import org.jglr.inference.types.TypeDefinition
+import org.objectweb.asm.Opcodes
 
 class BlockTranslator(val context: Context): ExpressionTranslator(context) {
 
@@ -129,12 +128,28 @@ class BlockTranslator(val context: Context): ExpressionTranslator(context) {
         return translate(ctx.expression())
     }
 
-    override fun visitDeclareVarInstruction(ctx: EuclinParser.DeclareVarInstructionContext?): Expression {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun visitDeclareVarInstruction(ctx: EuclinParser.DeclareVarInstructionContext): Expression {
+        val name = ctx.variableDeclaration().Identifier().text
+        if(lambdaLocalVars.containsKey(name))
+            compileError("Il y a déjà une variable appelée $name!", parentContext.currentClass, ctx)
+        if(parentContext.field(name) != null)
+            compileWarning("La variable $name obscure le champ du même nom", parentContext.currentClass, ctx)
+
+        val expression = ctx.variableDeclaration().expression()
+        val type = translate(expression).type
+        lambdaLocalVars[name] = type
+        return Variable(name) of type
     }
 
-    override fun visitAssignVarInstruction(ctx: EuclinParser.AssignVarInstructionContext?): Expression {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun visitAssignVarInstruction(ctx: EuclinParser.AssignVarInstructionContext): Expression {
+        val name = ctx.variableAssign().Identifier().text
+
+        if(lambdaLocalVars.containsKey(name)) {
+            return Variable(name) of lambdaLocalVars[name]!!
+        } else {
+            val field = parentContext.field(name) ?: compileError("Aucune variable du nom de $name", parentContext.currentClass, ctx)
+            return Variable(name) of field.type
+        }
     }
 
     override fun visitIfBranchingInstruction(ctx: EuclinParser.IfBranchingInstructionContext): Expression {

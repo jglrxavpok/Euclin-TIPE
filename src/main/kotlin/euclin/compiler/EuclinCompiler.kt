@@ -88,7 +88,8 @@ object EuclinCompiler {
                 visitMethodInsn(INVOKESTATIC, className.toInternalName(), "_init", "()V", false)
             }
         }
-        context.createStaticBlock()
+        if(context.staticInit.isNotEmpty())
+            context.createStaticBlock()
 
         classWriter.visitEnd()
         val endTime = System.nanoTime()
@@ -183,7 +184,6 @@ object EuclinCompiler {
         TypeInspector.inspect(UnitObject::class.java, UnitType, context)
         TypeInspector.inspect(String::class.java, StringType, context)
         TypeInspector.inspect(Console::class.java, BasicType("euclin.std.Console"), context)
-        TypeInspector.inspect(MathFunctions::class.java, BasicType("euclin.std.MathFunctions"), context)
         TypeInspector.inspect(EuclinApplication::class.java, BasicType("euclin.intrisincs.EuclinApplication"), context)
         TypeInspector.inspect(MemoizationCache::class.java, BasicType("euclin.intrisincs.MemoizationCache"), context)
     }

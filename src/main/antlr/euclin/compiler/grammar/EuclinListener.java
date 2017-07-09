@@ -250,6 +250,16 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitStructureDeclaration(EuclinParser.StructureDeclarationContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link EuclinParser#linkage}.
+	 * @param ctx the parse tree
+	 */
+	void enterLinkage(EuclinParser.LinkageContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EuclinParser#linkage}.
+	 * @param ctx the parse tree
+	 */
+	void exitLinkage(EuclinParser.LinkageContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link EuclinParser#elseBlock}.
 	 * @param ctx the parse tree
 	 */

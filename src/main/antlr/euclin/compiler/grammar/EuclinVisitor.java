@@ -153,6 +153,12 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStructureDeclaration(EuclinParser.StructureDeclarationContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link EuclinParser#linkage}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLinkage(EuclinParser.LinkageContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link EuclinParser#elseBlock}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

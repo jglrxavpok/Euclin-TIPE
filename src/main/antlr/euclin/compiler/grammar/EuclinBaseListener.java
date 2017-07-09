@@ -268,6 +268,18 @@ public class EuclinBaseListener implements EuclinListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterLinkage(EuclinParser.LinkageContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLinkage(EuclinParser.LinkageContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterElseBlock(EuclinParser.ElseBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}

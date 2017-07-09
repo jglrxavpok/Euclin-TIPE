@@ -21,9 +21,9 @@ class TypeInspectorVisitor(val destination: TypeDefinition, val context: Context
 
     override fun visitField(access: Int, name: String, desc: String, signature: String?, value: Any?): FieldVisitor? {
         if(access and ACC_STATIC != 0)
-            destination.listFields() += TypedMember(name, convertBaseDesc(desc))
-        else
             destination.listStaticFields() += TypedMember(name, convertBaseDesc(desc))
+        else
+            destination.listFields() += TypedMember(name, convertBaseDesc(desc))
         return super.visitField(access, name, desc, signature, value)
     }
 

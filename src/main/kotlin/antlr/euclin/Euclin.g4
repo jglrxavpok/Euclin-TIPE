@@ -48,7 +48,12 @@ renamming
 structureDeclaration
     : StructStart Identifier LeftCurlyBracket
         (parameter)* // ce sont les membres de cette structure
+        (linkage)*
     RightCurlyBracket
+    ;
+
+linkage
+    : LinkStart Identifier LeftBracket (type (Comma type)*)? RightBracket Colon type
     ;
 
 elseBlock
@@ -156,6 +161,7 @@ StructStart: 'struct';
 New: 'new';
 Import: 'import';
 ImportMethod: 'import method';
+LinkStart: 'link';
 
 // Ponctuation
 LambdaVariable: '_';

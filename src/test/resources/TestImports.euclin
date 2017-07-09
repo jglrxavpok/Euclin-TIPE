@@ -1,9 +1,13 @@
-import method euclin.std.ListOperations.create as createList
 import euclin.std.ListOperations as LOps
+import euclin.std.List
 import method LOps.@
 import method euclin.std.Console.writeln as println
 
-var myList = createList()
-LOps.add(myList, "cvb")
-var l = length(myList)
+import java.lang.System
+
+var myList = new List
+myList.add("cvb")
+myList.add(45 <- @)
+var l = myList.length
 println("Hi!")
+println(System.out <- String)

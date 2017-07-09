@@ -72,6 +72,14 @@ open class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<
 
     override fun visitAccessExpr(ctx: EuclinParser.AccessExprContext): Expression {
         val chain = ctx.Identifier()
+        if(ctx.expression() is EuclinParser.VarExprContext) {
+            val varContext = ctx.expression() as EuclinParser.VarExprContext
+            val name = varContext.Identifier().text
+            if(parentContext.knowsType(name)) {
+                val type = parentContext.type(name)
+                return subAccessExpr(OpaqueExpression("static instance") of type, chain, ctx)
+            }
+        }
         val first = translate(ctx.expression())
         return subAccessExpr(first, chain, ctx)
     }
@@ -80,7 +88,7 @@ open class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<
         var deepest = first
         for(id in chain) { // on regarde les identifiants qui sont nécessairement des membres
             val name = id.text
-            val fields = deepest.type.listFields()
+            val fields = deepest.type.listFields() + deepest.type.listStaticFields()
             val parent = deepest
             val field = fields.find { it.name == name }
             deepest = AccessExpression(parent, field?.name

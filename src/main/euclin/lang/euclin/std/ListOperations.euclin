@@ -8,19 +8,17 @@ struct List {
     head: Node
     last: Node
     length: Int
+
+    link add(List, @): Unit
+    link get(List, Int): @
+    link clear(List): Unit
+    link forEach(List, (@) -> Unit): Unit
+    link map(List, (@) -> @): List
+    link filter(List, (@) -> Boolean): List
 }
 
 var nullNode = new Node
 nullNode.data = ()
-
-func create(): List {
-    var list = new List
-    list
-}
-
-func length(list: List): Int {
-    list.length
-}
 
 func add(target: List, element: @): Unit {
     var node = new Node
@@ -42,7 +40,7 @@ func getNode(from: List, at: Int): Node {
     if(at < 0) {
         return nullNode
     }
-    if(at >= length(from)) {
+    if(at >= from.length) {
         return nullNode
     }
     var index = at
@@ -65,7 +63,7 @@ func clear(target: List): Unit {
 }
 
 func forEach(target: List, action: (@) -> Unit): Unit {
-    var n = length(target)
+    var n = target.length
     var i = 0
     var currentNode = target.head
     while(i < n) {
@@ -76,19 +74,19 @@ func forEach(target: List, action: (@) -> Unit): Unit {
 }
 
 func map(target: List, mappingFunction: (@) -> @): List {
-    var mapped = create()
+    var mapped = new List
     forEach(target, {
-        add(mapped, mappingFunction(_))
+        mapped.add(mappingFunction(_))
     })
-    return mapped
+    mapped
 }
 
 func filter(target: List, predicate: (@) -> Boolean): List {
-    var filtered = create()
+    var filtered = new List
     forEach(target, {
         if(predicate(_)) {
-            add(filtered, _)
+            filtered.add(_)
         }
     })
-    return filtered
+    filtered
 }

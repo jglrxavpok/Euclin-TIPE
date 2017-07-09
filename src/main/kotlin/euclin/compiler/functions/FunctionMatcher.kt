@@ -5,6 +5,7 @@ import euclin.compiler.grammar.EuclinBaseVisitor
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.listFields
 import euclin.compiler.types.listMethods
+import euclin.compiler.types.listStaticFields
 import euclin.compiler.types.listStaticMethods
 import org.antlr.v4.runtime.tree.TerminalNode
 import org.jglr.inference.types.FunctionType
@@ -76,6 +77,8 @@ class FunctionMatcher(val parentContext: Context): EuclinBaseVisitor<FunctionSig
         } else {
             if(parent.listFields().any { it.name == name }) { // si un des champs a le bon nom
                 return parent.listFields().find { it.name == name }!!.type
+            } else if(parent.listStaticFields().any { it.name == name }) { // si un des champs *statiques* a le bon nom
+                return parent.listStaticFields().find { it.name == name }!!.type
             } else {
                 compileError("Aucun membre du nom de $name dans le type $parent", identifier.symbol.line, parentContext.currentClass)
             }

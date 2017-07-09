@@ -6,6 +6,7 @@ import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.TerminalNode
+import org.jglr.inference.expressions.OpaqueExpression
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TypeDefinition
 import org.objectweb.asm.Handle
@@ -38,6 +39,13 @@ abstract class ExpressionCompiler(val parentContext: Context): EuclinBaseVisitor
     protected open val isMainFunction = false
 
     internal lateinit var writer: MethodVisitor
+
+    protected fun TypeDefinition.popFromStack() {
+        if(this == Real64Type || this == Int64Type)
+            writer.visitInsn(Opcodes.POP2)
+        else
+            writer.visitInsn(Opcodes.POP)
+    }
 
     override fun visitIntExpr(ctx: EuclinParser.IntExprContext) {
         val int = ctx.Integer().text.toLong()
@@ -117,23 +125,38 @@ abstract class ExpressionCompiler(val parentContext: Context): EuclinBaseVisitor
         for(id in chain) { // on regarde les identifiants qui sont nécessairement des membres
             val deepest = typeStack.pop()
             val name = id.text
-            val fields = deepest.listFields()
-            val parent = deepest
-            val child = fields.find { it.name == name }?.type ?: compileError("Aucun membre du nom de $name dans $deepest", lineNumber, functionSignature.ownerClass)
-            writer.visitFieldInsn(Opcodes.GETFIELD, parent.toASM().internalName, name, child.toASM().descriptor)
-            typeStack.push(child)
+            if(deepest.listStaticFields().any { it.name == name }) {
+                deepest.popFromStack()
+                val child = deepest.listStaticFields().find { it.name == name }!!.type
+                writer.visitFieldInsn(Opcodes.GETSTATIC, deepest.toASM().internalName, name, child.toASM().descriptor)
+                typeStack.push(child)
+            } else {
+                val fields = deepest.listFields()
+                val child = fields.find { it.name == name }?.type ?: compileError("Aucun membre du nom de $name dans $deepest", lineNumber, functionSignature.ownerClass)
+                writer.visitFieldInsn(Opcodes.GETFIELD, deepest.toASM().internalName, name, child.toASM().descriptor)
+                typeStack.push(child)
+            }
         }
     }
 
     override fun visitAccessExpr(ctx: EuclinParser.AccessExprContext) {
+        if(ctx.expression() is EuclinParser.VarExprContext) {
+            val varContext = ctx.expression() as EuclinParser.VarExprContext
+            val name = varContext.Identifier().text
+            if(parentContext.knowsType(name)) {
+                val type = parentContext.type(name)
+                typeStack.push(type)
+                val chain = ctx.Identifier()
+                compileSubAccessChain(chain)
+                return
+            }
+        }
         visit(ctx.expression())
         val chain = ctx.Identifier()
         compileSubAccessChain(chain)
     }
 
     override fun visitLambdaVarExpr(ctx: EuclinParser.LambdaVarExprContext) {
-        // FIXME    writer.visitVarInsn(correctOpcode(ILOAD, Real64Type), 0) // on charge le 1er argument de la fonction
-        //    typeStack.push(Real64Type)
         val index = functionSignature.arguments.indexOfFirst { it.name == "_" }
         var actualIndex = 0
         for(arg in 0 until index) {

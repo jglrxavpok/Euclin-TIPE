@@ -8,6 +8,7 @@ import euclin.compiler.grammar.EuclinVisitor
 import euclin.compiler.types.UnitType
 import euclin.compiler.types.WildcardType
 import euclin.compiler.types.listMethods
+import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.ParseTree
 import org.jglr.inference.expressions.Expression
 import org.jglr.inference.expressions.Tuple
@@ -69,6 +70,10 @@ class BlockTranslator(val context: Context): ExpressionTranslator(context) {
 
     override fun visitVarExpr(ctx: EuclinParser.VarExprContext): Expression {
         val name = ctx.Identifier().text
+        return loadName(name, ctx)
+    }
+
+    private fun loadName(name: String, ctx: ParserRuleContext): Expression {
         if( ! lambdaLocalVars.containsKey(name)) { // on va gérer la closure, ie rajouter des arguments à la fonction si besoin
             val variableTypes = context.localVariableTypes
             val availableFunctions = context.availableFunctions
@@ -151,6 +156,7 @@ class BlockTranslator(val context: Context): ExpressionTranslator(context) {
         val call = ctx.functionCall()
         val id = call.functionIdentifier()
         if(id !is EuclinParser.DirectFunctionIdentifierContext) {
+            visit(id)
             return super.visitCallExpr(ctx)
         }
         val name = id.text
@@ -191,6 +197,11 @@ class BlockTranslator(val context: Context): ExpressionTranslator(context) {
                 return f(arguments[0])
             return f(Tuple(*arguments.toTypedArray()))
         }
+    }
+
+    override fun visitMemberFunctionIdentifier(ctx: EuclinParser.MemberFunctionIdentifierContext): Expression {
+        loadName(ctx.Identifier()[0].text, ctx)
+        return lambdaVar
     }
 
     private fun updateLambdaParam() {

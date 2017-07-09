@@ -183,13 +183,6 @@ open class FunctionCompiler(parentContext: Context, synthetic: Boolean = false, 
         compileFuncFooter()
     }
 
-    private fun TypeDefinition.popFromStack() {
-        if(this == Real64Type || this == Int64Type)
-            writer.visitInsn(POP2)
-        else
-            writer.visitInsn(POP)
-    }
-
     internal fun compileFuncFooter() {
         with(writer) {
             visitLabel(endLabel)
@@ -236,14 +229,15 @@ open class FunctionCompiler(parentContext: Context, synthetic: Boolean = false, 
             compileWarning("La variable $name obscure le champ du même nom", parentContext.currentClass, ctx)
 
         val expression = ctx.expression()
-        visit(expression)
-        val type = typeStack.pop()
         if(isMainFunction) {
+            visit(expression)
+            val type = typeStack.pop()
             val declaredField = TypedMember(name, type)
             parentContext.fields += declaredField
 
             writer.visitFieldInsn(PUTSTATIC, parentContext.currentClass.toInternalName(), name, type.toASM().descriptor)
         } else {
+            val type = translator.translate(expression).type
             val varID = localIndex
             localIndex += type.localSize
             localVariableIDs[name] = varID

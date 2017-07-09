@@ -17,12 +17,12 @@ class StructureCompiler(val parentContext: Context) {
 
     private fun compile(ctx: EuclinParser.StructureDeclarationContext, result: HashMap<String, ByteArray>, inputFolder: String) {
         val smallName = ctx.Identifier().text
-        val name = (inputFolder+File.separator+smallName).replace(File.separator, ".")
+        val className = (inputFolder+File.separator+smallName).replace(File.separator, ".")
         val writer = ClassWriter(ClassWriter.COMPUTE_FRAMES)
-        writer.visit(V1_8, ACC_PUBLIC, name.replace(".", "/"), null, "java/lang/Object", emptyArray())
+        writer.visit(V1_8, ACC_PUBLIC, className.replace(".", "/"), null, "java/lang/Object", emptyArray())
 
-        val correspondingType = ObjectType(name, WildcardType)
-        parentContext.registerType(name, correspondingType)
+        val correspondingType = ObjectType(className, WildcardType)
+        parentContext.registerType(className, correspondingType)
         parentContext.importType(smallName, correspondingType)
 
         for(p in ctx.parameter()) {
@@ -31,11 +31,38 @@ class StructureCompiler(val parentContext: Context) {
             writer.visitField(ACC_PUBLIC, name, type.toASM().descriptor, null, null)
 
             correspondingType.listFields() += TypedMember(name, type)
+            println("struct>> $name : $type")
         }
 
-        val cons = writer.visitMethod(ACC_PUBLIC, "<init>", "()V", null, emptyArray())
-        with(cons) {
-            cons.visitCode()
+        for(link in ctx.linkage()) {
+            // TODO: vérifier que le premier argument est valide
+            val methodName = link.Identifier().text
+            val arguments = link.type().dropLast(1).map { parentContext.typeConverter.visit(it) }
+            val returnType = parentContext.typeConverter.visit(link.type().last())
+
+            val argumentMembers = arguments.drop(1).mapIndexed { index, definition -> TypedMember("arg$index", definition) }
+            val signature = FunctionSignature(methodName, argumentMembers, returnType, className, static = false)
+            with(writer.visitMethod(ACC_PUBLIC, methodName, methodType(signature).descriptor, null, emptyArray())) {
+                visitCode()
+                var localIndex = 0
+                for(arg in arguments) { // charge les arguments. Faire ainsi va aussi charger la structure ciblée avec 'ALOAD 0' ('this')
+                    visitVarInsn(arg.correctOpcode(ILOAD), localIndex)
+                    localIndex += arg.localSize
+                }
+                visitMethodInsn(INVOKESTATIC, parentContext.currentClass.toInternalName(), methodName, methodType(returnType, arguments).descriptor, false)
+                if(returnType == JVMVoid)
+                    visitInsn(RETURN)
+                else
+                    visitInsn(returnType.correctOpcode(IRETURN))
+                visitMaxs(0, 0)
+                visitEnd()
+            }
+
+            correspondingType.listMethods() += signature
+        }
+
+        with(writer.visitMethod(ACC_PUBLIC, "<init>", "()V", null, emptyArray())) {
+            visitCode()
             visitVarInsn(ALOAD, 0)
             visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false)
             visitInsn(RETURN)
@@ -43,10 +70,10 @@ class StructureCompiler(val parentContext: Context) {
             visitEnd()
         }
 
-        correspondingType.listConstructors() += FunctionSignature("<init>", emptyList(), JVMVoid, name, static = false)
+        correspondingType.listConstructors() += FunctionSignature("<init>", emptyList(), JVMVoid, className, static = false)
 
         writer.visitEnd()
 
-        result[name] = writer.toByteArray()
+        result[className] = writer.toByteArray()
     }
 }

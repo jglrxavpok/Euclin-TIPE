@@ -6,8 +6,11 @@ import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TypeDefinition
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
+import org.jglr.inference.types.TupleType
 import org.objectweb.asm.*
 import org.objectweb.asm.Opcodes.*
+import org.objectweb.asm.signature.SignatureVisitor
+import org.objectweb.asm.signature.SignatureWriter
 
 open class FunctionCompiler(parentContext: Context, synthetic: Boolean = false, accessRestriction: Int = ACC_PUBLIC): OperationsCompiler(parentContext) {
 
@@ -19,7 +22,7 @@ open class FunctionCompiler(parentContext: Context, synthetic: Boolean = false, 
             access = access or ACC_SYNTHETIC
         val methodType = methodType(functionSignature.arguments, functionSignature.returnType)
         val description = methodType.descriptor
-        writer = classWriter.visitMethod(access, functionSignature.name, description, null, emptyArray())
+        writer = classWriter.visitMethod(access, functionSignature.name, description, generateGenericSignature(functionSignature), emptyArray())
     }
 
     override fun visitTerminal(node: TerminalNode) {
@@ -411,18 +414,18 @@ open class FunctionCompiler(parentContext: Context, synthetic: Boolean = false, 
 
     companion object {
         fun convertNativeTypeToBoxed(writer: MethodVisitor, type: NativeType) {
-            val boxedType = "java/lang/" + boxed(type)
+            val boxedType = "java/lang/" + boxedName(type)
             writer.visitMethodInsn(INVOKESTATIC, boxedType, "valueOf", "(${type.getDescriptor()})L$boxedType;", false)
         }
 
         fun convertBoxedObjectToNativeType(writer: MethodVisitor, type: NativeType) {
-            val boxedType = "java/lang/" + boxed(type)
+            val boxedType = "java/lang/" + boxedName(type)
             writer.visitTypeInsn(CHECKCAST, boxedType) // conversion en type Boxed
             val smallName = smallName(type)
             writer.visitMethodInsn(INVOKEVIRTUAL, boxedType, "${smallName}Value", "()${type.getDescriptor()}", false)
         }
 
-        private fun boxed(type: NativeType): String {
+        private fun boxedName(type: NativeType): String {
             return when(type) {
                 Int32Type -> "Integer"
                 Real32Type -> "Float"
@@ -441,9 +444,61 @@ open class FunctionCompiler(parentContext: Context, synthetic: Boolean = false, 
             return when(type) {
                 CharType -> "char"
                 Int32Type -> "int"
-                else -> boxed(type).toLowerCase()
+                else -> boxedName(type).toLowerCase()
             }
         }
 
+        fun generateGenericSignature(functionSignature: FunctionSignature): String {
+            with(SignatureWriter()) {
+                for((_, type) in functionSignature.arguments) {
+                    val param = visitParameterType()
+                    signatureVisitType(type, param)
+                }
+
+                signatureVisitType(functionSignature.returnType, visitReturnType())
+                val result = toString()
+                return result
+            }
+        }
+
+        private fun signatureVisitType(type: TypeDefinition, visitor: SignatureVisitor, isTypeArgument: Boolean = false) {
+            if (type is NativeType) {
+                if(isTypeArgument) {
+                    val boxedName = FunctionCompiler.boxedName(type)
+                    visitor.visitClassType("java/lang/"+boxedName.replace(".", "/"))
+                    visitor.visitEnd()
+                } else {
+                    visitor.visitBaseType(type.backing.descriptor[0])
+                }
+            } else {
+                if(type is FunctionType) {
+                    val javaName = javaTypeName(type)
+                    visitor.visitClassType(javaName.replace(".", "/"))
+                    val typeArgument = visitor.visitTypeArgument('=')
+                    when {
+                        javaName.endsWith("Function") || javaName.endsWith("Consumer") || javaName.endsWith("Predicate") -> {
+                            if(javaName.contains("Bi")) {
+                                val argTuple = type.argumentType as TupleType
+                                signatureVisitType(argTuple.elementTypes[0], typeArgument, isTypeArgument = true)
+                                signatureVisitType(argTuple.elementTypes[1], typeArgument, isTypeArgument = true)
+                            } else {
+                                signatureVisitType(type.argumentType, typeArgument, isTypeArgument = true)
+                            }
+                        }
+                    }
+                    if( ! javaName.endsWith("Predicate") && ! javaName.endsWith("Consumer")) {
+                        signatureVisitType(type.returnType, typeArgument, isTypeArgument = true)
+                    }
+                    typeArgument.visitEnd()
+                } else if (type is ArrayType) {
+                    visitor.visitArrayType()
+                    visitor.visitClassType(type.elementType.toASM().internalName)
+                    visitor.visitEnd()
+                } else {
+                    visitor.visitClassType(type.toASM().internalName)
+                    visitor.visitEnd()
+                }
+            }
+        }
     }
 }

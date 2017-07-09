@@ -1,5 +1,6 @@
 package euclin.compiler
 
+import euclin.compiler.functions.FunctionCompiler
 import euclin.compiler.functions.FunctionSignature
 import euclin.compiler.grammar.EuclinParser
 import euclin.compiler.types.*
@@ -31,18 +32,17 @@ class StructureCompiler(val parentContext: Context) {
             writer.visitField(ACC_PUBLIC, name, type.toASM().descriptor, null, null)
 
             correspondingType.listFields() += TypedMember(name, type)
-            println("struct>> $name : $type")
         }
 
         for(link in ctx.linkage()) {
-            // TODO: vérifier que le premier argument est valide
             val methodName = link.Identifier().text
             val arguments = link.type().dropLast(1).map { parentContext.typeConverter.visit(it) }
+            compileAssert(arguments.isNotEmpty() && arguments[0] == correspondingType, parentContext.currentClass, ctx) { "Le premier argument doit être du même type que la structure!" }
             val returnType = parentContext.typeConverter.visit(link.type().last())
 
             val argumentMembers = arguments.drop(1).mapIndexed { index, definition -> TypedMember("arg$index", definition) }
             val signature = FunctionSignature(methodName, argumentMembers, returnType, className, static = false)
-            with(writer.visitMethod(ACC_PUBLIC, methodName, methodType(signature).descriptor, null, emptyArray())) {
+            with(writer.visitMethod(ACC_PUBLIC, methodName, methodType(signature).descriptor, FunctionCompiler.generateGenericSignature(signature), emptyArray())) {
                 visitCode()
                 var localIndex = 0
                 for(arg in arguments) { // charge les arguments. Faire ainsi va aussi charger la structure ciblée avec 'ALOAD 0' ('this')

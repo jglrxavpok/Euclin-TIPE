@@ -28,6 +28,8 @@ fun TypeDefinition.listStaticFields(): MutableList<TypedMember> {
 }
 
 fun TypeDefinition.listFields(): MutableList<TypedMember> {
+    if(this is ArrayType)
+        return mutableListOf(TypedMember("length", Int32Type))
     return listMembers(typeFields)
 }
 

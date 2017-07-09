@@ -125,7 +125,10 @@ abstract class ExpressionCompiler(val parentContext: Context): EuclinBaseVisitor
         for(id in chain) { // on regarde les identifiants qui sont nécessairement des membres
             val deepest = typeStack.pop()
             val name = id.text
-            if(deepest.listStaticFields().any { it.name == name }) {
+            if(deepest is ArrayType && name == "length") {
+                writer.visitInsn(Opcodes.ARRAYLENGTH)
+                typeStack.push(Int32Type)
+            } else if(deepest.listStaticFields().any { it.name == name }) {
                 deepest.popFromStack()
                 val child = deepest.listStaticFields().find { it.name == name }!!.type
                 writer.visitFieldInsn(Opcodes.GETSTATIC, deepest.toASM().internalName, name, child.toASM().descriptor)

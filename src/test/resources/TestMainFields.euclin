@@ -1,0 +1,8 @@
+var myField = "Something"
+var someOtherField = 45
+
+func aFunction(): Unit {
+    var myLocalVar = 42
+    writeln(myField)
+    someOtherField = myLocalVar-someOtherField
+}

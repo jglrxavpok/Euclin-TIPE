@@ -1,0 +1,29 @@
+package euclin.std.points
+
+import euclin.std.UnitObject
+
+data class <Name>(var x: <Type>, var y: <Type>) {
+
+    // Toutes ces opérations sont des opérations membres-à-membres
+    fun add(other: <Name>): <Name> {
+        return <Name>(x + other.x, y + other.y)
+    }
+
+    fun sub(other: <Name>): <Name> {
+        return <Name>(x - other.x, y - other.y)
+    }
+
+    operator fun times(other: <Name>): <Name> {
+        return <Name>(x * other.x, y * other.y)
+    }
+
+    operator fun div(other: <Name>): <Name> {
+        return <Name>(x / other.x, y / other.y)
+    }
+
+    operator fun set(x: <Type>, y: <Type>): <Name> {
+        this.x = x
+        this.y = y
+        return this
+    }
+}

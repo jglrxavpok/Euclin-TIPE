@@ -1,0 +1,4 @@
+import java.lang.StringBuffer
+
+var buffer = new StringBuffer()
+var otherBuffer = new StringBuffer("My string")

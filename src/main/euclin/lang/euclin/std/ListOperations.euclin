@@ -1,0 +1,92 @@
+struct Node {
+    data: @
+    next: Node
+    prev: Node
+}
+
+struct List {
+    head: Node
+    last: Node
+    length: Int
+
+    link add(List, @): Unit
+    link get(List, Int): @
+    link clear(List): Unit
+    link forEach(List, (@) -> Unit): Unit
+    link map(List, (@) -> @): List
+    link filter(List, (@) -> Boolean): List
+}
+
+var nullNode = new Node
+nullNode.data = ()
+
+func add(target: List, element: @): Unit {
+    var node = new Node
+    node.data = element
+    if(target.length == 0) {
+        target.head = node
+        target.last = node
+        target.length = 1
+    } else {
+        var prev = target.last
+        target.last = node
+        node.prev = prev
+        prev.next = node
+        target.length = target.length+1
+    }
+}
+
+func getNode(from: List, at: Int): Node {
+    if(at < 0) {
+        return nullNode
+    }
+    if(at >= from.length) {
+        return nullNode
+    }
+    var index = at
+    var node = from.head
+    while(index > 0) {
+        index = index-1
+        node = node.next
+    }
+    node
+}
+
+func get(from: List, at: Int): @ {
+    getNode(from, at).data
+}
+
+func clear(target: List): Unit {
+    target.length = 0
+    target.head = nullNode
+    target.last = nullNode
+}
+
+func forEach(target: List, action: (@) -> Unit): Unit {
+    var n = target.length
+    var i = 0
+    var currentNode = target.head
+    while(i < n) {
+        action(currentNode.data)
+        currentNode = currentNode.next
+        i = i+1
+    }
+}
+
+func map(target: List, mappingFunction: (@) -> @): List {
+    var mapped = new List
+    forEach(target, {
+        mapped.add(mappingFunction(_))
+    })
+    mapped
+}
+
+func filter(target: List, predicate: (@) -> Boolean): List {
+    var filtered = new List
+    forEach(target, {
+        if(predicate(_)) {
+            filtered.add(_)
+        }
+    })
+    filtered
+}

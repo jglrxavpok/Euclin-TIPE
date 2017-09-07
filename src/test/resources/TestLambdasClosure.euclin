@@ -1,0 +1,9 @@
+var someField = "Hi"
+
+func f(a: Int): () -> @ {
+    return {
+        var something = "!"
+        writeln(someField + something)
+        a <- @
+    }
+}

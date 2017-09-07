@@ -11,25 +11,30 @@ import java.io.StringWriter
 object TestBase {
     fun compileAndCheck(name: String) {
         val sourceCode = javaClass.getResourceAsStream("/$name.euclin").bufferedReader().use { it.readText() } // ferme le flux après
-        val data = EuclinCompiler.compile(sourceCode, "$name.euclin")
+        val results = EuclinCompiler.compile(sourceCode, "$name.euclin")
 
-        FileOutputStream(File("runtime/tests", "$name.class")).use {
-            it.write(data)
-            it.flush()
-            it.close()
+        for((filename, data) in results) {
+            val file = File("runtime/tests", "$filename.class")
+            if( ! file.parentFile.exists())
+                file.parentFile.mkdirs()
+            FileOutputStream(file).use {
+                it.write(data)
+                it.flush()
+                it.close()
+            }
+
+            val reader = ClassReader(data)
+            val cw = ClassWriter(reader, ClassWriter.COMPUTE_MAXS)
+            val cv = CheckClassAdapter(cw)
+            reader.accept(cv, 0)
+
+            // Permet de vérifier que le code généré est valide
+            val sw = StringWriter()
+            val pw = PrintWriter(sw)
+            CheckClassAdapter.verify(ClassReader(cw.toByteArray()), true, pw)
+            println(sw.toString())
+            reader.accept(TraceClassVisitor(PrintWriter(System.out)), 0)
         }
-
-        val reader = ClassReader(data)
-        val cw = ClassWriter(reader, ClassWriter.COMPUTE_MAXS)
-        val cv = CheckClassAdapter(cw)
-        reader.accept(cv, 0)
-
-        // Permet de vérifier que le code généré est valide
-        val sw = StringWriter()
-        val pw = PrintWriter(sw)
-        CheckClassAdapter.verify(ClassReader(cw.toByteArray()), true, pw)
-        println(sw.toString())
-        reader.accept(TraceClassVisitor(PrintWriter(System.out)), 0)
     }
 
 }

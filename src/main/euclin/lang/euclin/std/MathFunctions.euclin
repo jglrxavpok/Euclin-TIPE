@@ -1,0 +1,13 @@
+import java.lang.Math
+
+func sin32(angle: Real32): Real32 {
+    Math.sin(angle <- Real64) <- Real32
+}
+
+func cos32(angle: Real32): Real32 {
+    Math.cos(angle <- Real64) <- Real32
+}
+
+func tan32(angle: Real32): Real32 {
+    Math.tan(angle <- Real64) <- Real32
+}

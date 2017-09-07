@@ -6,6 +6,7 @@ EuclinCompiler -> reçoit un fichier source et renvoit le bytecode correspondant
 "import org.objectweb.asm.Opcodes.*" -> expliquer
 TypeConversions -> Expliquer le *<...>.toTypedArray()
 ; Expliquer ASM "Label" + ASM "Type" (pas forcément en même temps)
+; Expliquer les extensions (super pratique pour TypeDefinition)
 https://en.wikipedia.org/wiki/Java_bytecode_instruction_listings
 
 javap -p -c -v -constants TestEuclin.class
@@ -28,4 +29,7 @@ Différence fcmpl/fcmpg
 
 A faire:
 ========
-(Compileur) Remplacer les 'assert' et 'error' de Kotlin par un système d'exceptions permettant d'indiquer la position de l'erreur
+(Compileur) Utiliser ASM-Commons et GeneratorAdaptor pour un code plus lisible/compréhensible ?
+(Compileur-Lambda) Mieux inférer le type de l'argument et le type de retour
+(Compileur) Permettre le partage de context
+(Compileur) Ajouter les signatures de type génériques

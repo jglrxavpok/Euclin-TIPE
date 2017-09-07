@@ -16,19 +16,48 @@ functionInstructions
     | Return expression     #ReturnFuncInstruction
     ;
 
+// TODO: Bouger les imports dans 'codeBlock'
 instructions
-    : expression            #ExpressionInstruction
+    : importDeclaration     #ImportInstruction
+    | methodImportDeclaration   #ImportMethodInstruction
+    | expression            #ExpressionInstruction
     | variableDeclaration   #DeclareVarInstruction
+    | structureDeclaration  #DeclareStructInstruction
     | variableAssign        #AssignVarInstruction
     | memberAssign          #AssignMemberInstruction
     | transformBlock        #TransformBlockInstruction
     | functionDeclaration   #DeclareFuncInstruction
-    | If LeftBracket expression RightBracket LeftCurlyBracket instructions* RightCurlyBracket elseBlock?    #IfBranchingInstruction
-    | While LeftBracket expression RightBracket LeftCurlyBracket instructions* RightCurlyBracket            #WhileLoopInstruction
+    | expression LeftSquareBracket expression RightSquareBracket Equals expression                                  #ArrayStoreInstruction
+    | If LeftBracket expression RightBracket LeftCurlyBracket functionInstructions* RightCurlyBracket elseBlock?    #IfBranchingInstruction
+    | While LeftBracket expression RightBracket LeftCurlyBracket functionInstructions* RightCurlyBracket            #WhileLoopInstruction
+    ;
+
+importDeclaration
+    : Import Identifier (Period Identifier)* renamming?
+    ;
+
+methodImportDeclaration
+    : ImportMethod Identifier (Period Identifier)* renamming?   #BasicMethodImport
+    | ImportMethod Identifier (Period Identifier)* Period Star   #ImportAllMethods
+    ;
+
+renamming
+    : 'as' Identifier
+    ;
+
+structureDeclaration
+    : StructStart Identifier LeftCurlyBracket
+        (parameter)* // ce sont les membres de cette structure
+        (linkage)*
+    RightCurlyBracket
+    ;
+
+linkage
+    : LinkStart Identifier LeftBracket (type (Comma type)*)? RightBracket Colon type
     ;
 
 elseBlock
-    : Else LeftCurlyBracket instructions* RightCurlyBracket
+    : Else LeftCurlyBracket functionInstructions* RightCurlyBracket
     ;
 
 type
@@ -36,6 +65,8 @@ type
     | LeftBracket type Comma type RightBracket                          #CoupleType
     | LeftBracket type RightBracket                                     #WrappedType
     | Identifier                                                        #BasicType
+    | Star                                                              #WildcardType
+    | LeftSquareBracket type RightSquareBracket                         #ArrayType
     ;
 
 parameter
@@ -53,7 +84,7 @@ modifiers
     | Memoized;
 
 functionCall
-    : Identifier LeftBracket (expression (Comma expression)*)? RightBracket
+    : functionIdentifier LeftBracket (expression (Comma expression)*)? RightBracket
     ;
 
 variableDeclaration
@@ -75,8 +106,12 @@ transformBlock
 // définies par ordre de précédence
 expression
     : LambdaVariable                            #LambdaVarExpr
-    | LeftSquareBracket expression RightSquareBracket   #LambdaFunctionExpr
-    | expression (Period Identifier)+              #AccessExpr
+    | expression LeftSquareBracket expression RightSquareBracket                #AccessArrayExpr
+    | LeftSquareBracket (expression (Comma expression)*)? RightSquareBracket    #ArrayExpr
+    | expression Colon type                                                     #LoadAndRetypeExpr
+    | New Identifier (LeftBracket (expression (Comma expression)*)? RightBracket)? #NewObjectExpr
+    | LeftCurlyBracket functionInstructions+ RightCurlyBracket                  #LambdaFunctionExpr
+    | expression (Period Identifier)+           #AccessExpr
     | functionCall                              #CallExpr
     | Identifier                                #VarExpr
     | couple                                    #CoupleExpr
@@ -97,10 +132,16 @@ expression
     | False                                     #BoolFalseExpr
     | StringConstant                            #StringExpr
     | LeftBracket RightBracket                  #UnitExpr
+    | expression RightLightArrow type           #CastExpr
     ;
 
 couple
     : LeftBracket expression Comma expression RightBracket
+    ;
+
+functionIdentifier
+    : Identifier                                #DirectFunctionIdentifier
+    | Identifier (Period Identifier)+           #MemberFunctionIdentifier
     ;
 
 // Mots clés
@@ -116,6 +157,11 @@ Memoized: 'memoized';
 Else: 'else';
 If: 'if';
 While: 'while';
+StructStart: 'struct';
+New: 'new';
+Import: 'import';
+ImportMethod: 'import method';
+LinkStart: 'link';
 
 // Ponctuation
 LambdaVariable: '_';
@@ -131,11 +177,13 @@ Colon: ':';
 SemiColon: ';';
 Equals: '=';
 LightArrow: '->';
+RightLightArrow: '<-';
 Bang: '!';
 Less: '<';
 LessEqual: '<=';
 Greater: '>';
 GreaterEqual: '>=';
+Star: '@';
 
 Identifier: IdentifierStart IdentifierPart*;
 Integer: Digits;
@@ -181,7 +229,7 @@ fragment Digit
     ;
 
 fragment BinaryOperatorSuffix
-    : ('.')?
+    : '.'?
     ;
 
 // Commentaires et blancs

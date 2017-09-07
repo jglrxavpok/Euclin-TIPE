@@ -7,7 +7,8 @@ import java.io.PrintWriter
 object BytecodeOutputter {
 
     @JvmStatic fun main(args: Array<String>) {
-        val data = FileInputStream(File(".",  "build/classes/test/TestBytecode.class")).use { it.readBytes() }
+        val filepath = "runtime/std/euclin/std/ListOperations.class"//"build/classes/test/TestBytecode.class"
+        val data = FileInputStream(File(".",  filepath)).use { it.readBytes() }
         val reader = ClassReader(data)
         reader.accept(TraceClassVisitor(PrintWriter(System.out)), 0)
     }

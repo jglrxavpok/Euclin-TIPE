@@ -7,6 +7,6 @@ transform {
 }
 
 func f(x: Int): Int {
-    circle((sin(45.), [_]), [_])
+    circle([(sin(45.), _)], [_])
     return x
 }

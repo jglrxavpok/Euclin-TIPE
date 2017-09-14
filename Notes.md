@@ -27,6 +27,9 @@ Compilation des fonctions lambda: http://blog.takipi.com/compiling-lambda-expres
 Différence fcmpl/fcmpg
 + http://www.javaworld.com/article/2077625/core-java/control-flow.html (traitement de NaN et comparaisons)
 
+Réfèrence officielle pour les opcodes:
++ http://docs.oracle.com/javase/specs/jvms/se8/html/index.html
+
 A faire:
 ========
 (Compileur) Utiliser ASM-Commons et GeneratorAdaptor pour un code plus lisible/compréhensible ?

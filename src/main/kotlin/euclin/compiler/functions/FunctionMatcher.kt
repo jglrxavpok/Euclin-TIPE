@@ -11,6 +11,9 @@ import org.antlr.v4.runtime.tree.TerminalNode
 import org.jglr.inference.types.FunctionType
 import org.jglr.inference.types.TypeDefinition
 
+/**
+ * Permet de trouver à quoi (quelle fonction plus exactement) correspond l'identifiant 'f' dans 'f(arguments)'
+ */
 class FunctionMatcher(val parentContext: Context): EuclinBaseVisitor<FunctionSignature>() {
 
     val availableFunctions = parentContext.availableFunctions

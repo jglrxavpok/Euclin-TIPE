@@ -5,6 +5,8 @@ import euclin.compiler.grammar.EuclinParser
 
 /**
  * Vérifies si une expression donnée est constante (ie tous les appels de fonctions sont faits vers des fonctions *pures* et les arguments sont constants)
+ *
+ * -> Parcours en profondeur de l'arbre de parsing
  */
 class ConstantChecker(val parentContext: Context): EuclinBaseVisitor<Boolean>() {
 

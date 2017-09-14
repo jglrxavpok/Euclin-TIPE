@@ -1,0 +1,45 @@
+import method euclin.std.MathFunctions.maxi
+
+struct BinaryTree {
+    root: @
+    left: BinaryTree
+    right: BinaryTree
+
+    link depth(BinaryTree): Int
+    link size(BinaryTree): Int
+    link isEmpty(BinaryTree): Bool
+    link isLeaf(BinaryTree): Bool
+}
+
+var EmptyTree = new BinaryTree
+EmptyTree.root = ()
+EmptyTree.left = EmptyTree
+EmptyTree.right = EmptyTree
+
+func isEmpty(tree: BinaryTree): Bool {
+    tree == EmptyTree
+}
+
+func isLeaf(tree: BinaryTree): Bool {
+    if(tree.left != EmptyTree) {
+        return false
+    }
+    tree.right == EmptyTree
+}
+
+func size(tree: BinaryTree): Int {
+    if(tree.isEmpty()) {
+        return 0-1
+    }
+    1 + tree.left.size() + tree.right.size()
+}
+
+func depth(tree: BinaryTree): Int {
+    if(tree.isEmpty()) {
+        return 0
+    }
+    if(tree.isLeaf()) {
+        return 0
+    }
+    1 + maxi(tree.left.depth(), tree.right.depth())
+}

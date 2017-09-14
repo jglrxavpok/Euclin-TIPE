@@ -31,5 +31,5 @@ A faire:
 ========
 (Compileur) Utiliser ASM-Commons et GeneratorAdaptor pour un code plus lisible/compréhensible ?
 (Compileur-Lambda) Mieux inférer le type de l'argument et le type de retour
-(Compileur) Permettre le partage de context
-(Compileur) Ajouter les signatures de type génériques
+(Compileur) Optimisations pour la récursivité terminale
+(Compileur) Pattern matching (pour le futur lointain, post concours)

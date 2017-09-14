@@ -11,3 +11,31 @@ func cos32(angle: Real32): Real32 {
 func tan32(angle: Real32): Real32 {
     Math.tan(angle <- Real64) <- Real32
 }
+
+func maxi(a: Int, b: Int): Int {
+    if(a < b) {
+        return b
+    }
+    a
+}
+
+func maxr(a: Real, b: Real): Real {
+    if(a < b) {
+        return b
+    }
+    a
+}
+
+func mini(a: Int, b: Int): Int {
+    if(a > b) {
+        return b
+    }
+    a
+}
+
+func mini(a: Real, b: Real): Real {
+    if(a > b) {
+        return b
+    }
+    a
+}

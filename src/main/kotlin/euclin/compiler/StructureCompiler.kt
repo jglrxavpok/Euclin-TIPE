@@ -34,32 +34,7 @@ class StructureCompiler(val parentContext: Context) {
             correspondingType.listFields() += TypedMember(name, type)
         }
 
-        for(link in ctx.linkage()) {
-            val methodName = link.Identifier().text
-            val arguments = link.type().dropLast(1).map { parentContext.typeConverter.visit(it) }
-            compileAssert(arguments.isNotEmpty() && arguments[0] == correspondingType, parentContext.currentClass, ctx) { "Le premier argument doit être du même type que la structure!" }
-            val returnType = parentContext.typeConverter.visit(link.type().last())
-
-            val argumentMembers = arguments.drop(1).mapIndexed { index, definition -> TypedMember("arg$index", definition) }
-            val signature = FunctionSignature(methodName, argumentMembers, returnType, className, static = false)
-            with(writer.visitMethod(ACC_PUBLIC, methodName, methodType(signature).descriptor, FunctionCompiler.generateGenericSignature(signature), emptyArray())) {
-                visitCode()
-                var localIndex = 0
-                for(arg in arguments) { // charge les arguments. Faire ainsi va aussi charger la structure ciblée avec 'ALOAD 0' ('this')
-                    visitVarInsn(arg.correctOpcode(ILOAD), localIndex)
-                    localIndex += arg.localSize
-                }
-                visitMethodInsn(INVOKESTATIC, parentContext.currentClass.toInternalName(), methodName, methodType(returnType, arguments).descriptor, false)
-                if(returnType == JVMVoid)
-                    visitInsn(RETURN)
-                else
-                    visitInsn(returnType.correctOpcode(IRETURN))
-                visitMaxs(0, 0)
-                visitEnd()
-            }
-
-            correspondingType.listMethods() += signature
-        }
+        createLinks(ctx.linkage(), correspondingType, className, writer) // on crée les liens avec les méthodes référencées
 
         with(writer.visitMethod(ACC_PUBLIC, "<init>", "()V", null, emptyArray())) {
             visitCode()
@@ -75,5 +50,34 @@ class StructureCompiler(val parentContext: Context) {
         writer.visitEnd()
 
         result[className] = writer.toByteArray()
+    }
+
+    private fun createLinks(links: List<EuclinParser.LinkageContext>, correspondingType: ObjectType, className: String, writer: ClassWriter) {
+        for(link in links) {
+            val methodName = link.Identifier().text
+            val arguments = link.type().dropLast(1).map { parentContext.typeConverter.visit(it) }
+            compileAssert(arguments.isNotEmpty() && arguments[0] == correspondingType, parentContext.currentClass, link) { "Le premier argument doit être du même type que la structure!" }
+            val returnType = parentContext.typeConverter.visit(link.type().last())
+
+            val argumentMembers = arguments.drop(1).mapIndexed { index, definition -> TypedMember("arg$index", definition) }
+            val signature = FunctionSignature(methodName, argumentMembers, returnType, className, static = false)
+            with(writer.visitMethod(ACC_PUBLIC, methodName, methodType(signature).descriptor, FunctionCompiler.generateGenericSignature(signature), emptyArray())) {
+                visitCode()
+                var localIndex = 0
+                for(arg in arguments) { // charge les arguments. Faire ainsi va aussi charger la structure ciblée avec 'ALOAD 0' ('this')
+                    visitVarInsn(arg.correctOpcode(org.objectweb.asm.Opcodes.ILOAD), localIndex)
+                    localIndex += arg.localSize
+                }
+                visitMethodInsn(org.objectweb.asm.Opcodes.INVOKESTATIC, parentContext.currentClass.toInternalName(), methodName, euclin.compiler.types.methodType(returnType, arguments).descriptor, false)
+                if(returnType == euclin.compiler.types.JVMVoid)
+                    visitInsn(org.objectweb.asm.Opcodes.RETURN)
+                else
+                    visitInsn(returnType.correctOpcode(org.objectweb.asm.Opcodes.IRETURN))
+                visitMaxs(0, 0)
+                visitEnd()
+            }
+
+            correspondingType.listMethods() += signature
+        }
     }
 }

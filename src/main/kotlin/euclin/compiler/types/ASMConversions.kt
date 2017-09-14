@@ -36,7 +36,7 @@ fun TypeDefinition.toASM(): ASMType {
         WildcardType -> OBJECT_TYPE
         is ArrayType -> ASMType.getType("["+(elementType.toASM().descriptor))
         is NativeType -> backing
-        is FunctionType -> ASMType.getObjectType(javaTypeName(this).replace(".", "/"))//generateFunctionObjectType(type)
+        is FunctionType -> ASMType.getObjectType(javaTypeName(this).replace(".", "/"))
     // TODO: Autres types?
         else -> ASMType.getObjectType(toString().replace(".", "/"))
     }

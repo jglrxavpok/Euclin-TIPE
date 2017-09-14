@@ -59,11 +59,10 @@ class TypeConverter(val parentContext: Context): EuclinBaseVisitor<TypeDefinitio
 
     override fun visitFunctionType(ctx: EuclinParser.FunctionTypeContext): TypeDefinition {
         val argCount = ctx.type().size-1
-        val argument: TypeDefinition
-        if(argCount == 1) {
-            argument = visit(ctx.type(0))
+        val argument = if(argCount == 1) {
+            visit(ctx.type(0))
         } else {
-            argument = TupleType(ctx.type().subList(0, argCount).map { visit(it) }.toTypedArray())
+            TupleType(ctx.type().subList(0, argCount).map { visit(it) }.toTypedArray())
         }
         val returnType = visit(ctx.type(argCount)) // le dernier type de la liste est le type de retour
         return FunctionType(argument, returnType)

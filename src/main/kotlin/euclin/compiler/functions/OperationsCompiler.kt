@@ -106,7 +106,7 @@ abstract class OperationsCompiler(parentContext: Context): ExpressionCompiler(pa
 
         val comparisonMethod = valueType.listMethods().find { it.name == "compareTo" && it.arguments.size == 1 && it.arguments[0].type == WildcardType && it.returnType == Int32Type }
         compileAssert(comparisonMethod != null || valueType in listOf(Int16Type, Int8Type, Int32Type, Int64Type, Real32Type, Real64Type, StringType), functionSignature.ownerClass, left) // TODO: Supporter long/double etc.
-        { "On ne peut comparer que les types ayant une méthode compareTo ou les types Int et Real!" }
+        { "On ne peut comparer que les types ayant une méthode compareTo ou les types Int et Real! (C'était $valueType)" }
 
         val trueLabel = Label()
         val endLabel = Label()
@@ -187,8 +187,8 @@ abstract class OperationsCompiler(parentContext: Context): ExpressionCompiler(pa
 
         val leftType = translator.translate(left).type
         val rightType = translator.translate(right).type
-        if(leftType == StringType && rightType == StringType) {
-            compareStrings(left, right, negate=false)
+        if(leftType is ObjectType && rightType is ObjectType) {
+            compareObjects(leftType, left, right, negate=false)
         } else {
             compare(left, right, Opcodes.IF_ICMPEQ)
         }
@@ -200,14 +200,14 @@ abstract class OperationsCompiler(parentContext: Context): ExpressionCompiler(pa
 
         val leftType = translator.translate(left).type
         val rightType = translator.translate(right).type
-        if(leftType == StringType && rightType == StringType) {
-            compareStrings(left, right, negate=true)
+        if(leftType is ObjectType && rightType is ObjectType) {
+            compareObjects(leftType, left, right, negate=true)
         } else {
             compare(left, right, Opcodes.IF_ICMPNE)
         }
     }
 
-    private fun compareStrings(left: EuclinParser.ExpressionContext, right: EuclinParser.ExpressionContext, negate: Boolean) {
+    private fun compareObjects(objectType: ObjectType, left: EuclinParser.ExpressionContext, right: EuclinParser.ExpressionContext, negate: Boolean) {
         with(writer) {
             visit(left)
             visit(right)
@@ -215,7 +215,7 @@ abstract class OperationsCompiler(parentContext: Context): ExpressionCompiler(pa
             typeStack.pop()
 
             // on utilise la méthode de comparaison de la classe String
-            visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", true)
+            visitMethodInsn(Opcodes.INVOKEINTERFACE, objectType.toASM().internalName, "equals", "(Ljava/lang/Object;)Z", true)
             if(negate)
                 negateBoolean()
         }

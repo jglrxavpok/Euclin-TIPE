@@ -2,6 +2,9 @@ package euclin.compiler.types
 
 import org.jglr.inference.types.TypeDefinition
 
+/**
+ * Type représentant les tableaux de ```elementType```
+ */
 class ArrayType(val elementType: TypeDefinition): TypeDefinition() {
 
     override fun toString(): String {

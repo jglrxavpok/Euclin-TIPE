@@ -10,7 +10,7 @@ class EuclinClassWriter: ClassWriter(ClassWriter.COMPUTE_FRAMES) {
     override fun getCommonSuperClass(type1: String, type2: String): String {
         val typeA = context.getTypeOrCreate(type1)
         val typeB = context.getTypeOrCreate(type2)
-        val result = context.translator.inferer.unify(typeA, typeB)
+        val result = context.translator.inferer.unify(typeA, typeB) // permet d'utiliser des types définis
         return result.toASM().internalName
     }
 

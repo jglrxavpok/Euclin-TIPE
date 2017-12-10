@@ -1,5 +1,6 @@
 grammar Euclin;
 
+// Description de l'automate représentant le langage
 // Règles du parseur
 
 // Règle de base

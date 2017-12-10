@@ -1,5 +1,5 @@
 EuclinCompiler -> reçoit un fichier source et renvoit le bytecode correspondant
-; Expliquer les visitors
+; Expliquer les visitors <- parcours en profondeur des arbres syntaxiques
 ; Montrer arbres syntaxiques
 ; Explications types génériques ?
 ; Expliquer les fonctions lambda de Kotlin (rapidement)

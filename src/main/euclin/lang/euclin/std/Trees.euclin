@@ -9,6 +9,7 @@ struct BinaryTree {
     link size(BinaryTree): Int
     link isEmpty(BinaryTree): Bool
     link isLeaf(BinaryTree): Bool
+    link depthTraverse(BinaryTree, (@) -> Unit): Unit
 }
 
 var EmptyTree = new BinaryTree
@@ -42,4 +43,13 @@ func depth(tree: BinaryTree): Int {
         return 0
     }
     1 + maxi(tree.left.depth(), tree.right.depth())
+}
+
+func depthTraverse(tree: BinaryTree, function: (@) -> Unit): Unit {
+    if(tree.isEmpty()) {
+        return ()
+    }
+    function(tree.root)
+    depthTraverse(tree.left, function)
+    depthTraverse(tree.right, function)
 }

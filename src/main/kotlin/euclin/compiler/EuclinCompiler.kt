@@ -184,6 +184,7 @@ object EuclinCompiler {
         TypeInspector.inspect(UnitObject::class.java, UnitType, context)
         TypeInspector.inspect(String::class.java, StringType, context)
         TypeInspector.inspect(Console::class.java, BasicType("euclin.std.Console"), context)
+        TypeInspector.inspect(IO::class.java, BasicType("euclin.std.IO"), context)
         TypeInspector.inspect(EuclinApplication::class.java, BasicType("euclin.intrisincs.EuclinApplication"), context)
         TypeInspector.inspect(MemoizationCache::class.java, BasicType("euclin.intrisincs.MemoizationCache"), context)
     }
@@ -226,6 +227,16 @@ object EuclinCompiler {
                 TypedMember("text", StringType)
         ), JVMVoid, "euclin.std.Console", static = true)
 
+        val writeCharFunction = FunctionSignature("writeChar", listOf(
+                TypedMember("c", CharType)
+        ), JVMVoid, "euclin.std.Console", static = true)
+
+        val readCharFunction = FunctionSignature("readChar", emptyList(), CharType, "euclin.std.Console", static = true)
+
+        val readFileFunction = FunctionSignature("readFile", listOf(
+                TypedMember("name", StringType)
+        ), StringType, "euclin.std.IO", static = true)
+
         functions["sin"] = sinFunction
         functions["cos"] = cosFunction
         functions["tan"] = tanFunction
@@ -235,6 +246,9 @@ object EuclinCompiler {
         functions["circle"] = circleFunction
         functions["write"] = writeFunction
         functions["writeln"] = writelnFunction
+        functions["writeChar"] = writeCharFunction
+        functions["readChar"] = readCharFunction
+        functions["readFile"] = readFileFunction
     }
 
     private fun compileFunctions(code: EuclinParser.CodeBlockContext, context: Context) {

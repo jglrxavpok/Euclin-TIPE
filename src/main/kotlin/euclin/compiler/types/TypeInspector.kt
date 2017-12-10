@@ -63,6 +63,7 @@ object TypeInspector {
             Integer.TYPE -> Int32Type
             java.lang.Long.TYPE -> Int64Type
             java.lang.Boolean.TYPE -> BooleanType
+            java.lang.Character.TYPE -> CharType
             java.lang.Float.TYPE -> Real32Type
             java.lang.Double.TYPE -> Real64Type
             java.lang.Short.TYPE -> Int16Type
@@ -78,11 +79,18 @@ object TypeInspector {
             String::class.java -> StringType
             else -> {
                 val known = context.knowsType(clazz.canonicalName)
-                val basic = context.typeConverter.convertBasic(clazz.canonicalName)
-                if( ! known) {
+                if(known)
+                    return context.getTypeOrCreate(clazz.canonicalName)
+                if(clazz.isArray) {
+                    val elementType = convert(clazz.componentType, context)
+                    val arrayType = ArrayType(elementType)
+                    context.registerType(clazz.canonicalName, arrayType)
+                    arrayType
+                } else {
+                    val basic = context.typeConverter.convertBasic(clazz.canonicalName)
                     inspect(clazz, basic, context)
+                    basic
                 }
-                basic
             }
         }
     }

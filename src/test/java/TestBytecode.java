@@ -1,3 +1,5 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -5,7 +7,6 @@ import java.util.stream.Stream;
 public class TestBytecode {
 
     private static double somefunc(double _) {
-
         return Math.sin(new BigDecimal(4.5).doubleValue());
     }
 

@@ -1,4 +1,4 @@
-// Generated from F:/Programming/Kotlin/Languages/Euclin-TIPE/src/main/kotlin/antlr/euclin\Euclin.g4 by ANTLR 4.7
+// Generated from D:/Code/Kotlin/Languages/Euclin/src/main/kotlin/antlr/euclin\Euclin.g4 by ANTLR 4.7
 package euclin.compiler.grammar;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -402,6 +402,13 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitWrappedExpr(EuclinParser.WrappedExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code CharExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCharExpr(EuclinParser.CharExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code LessExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.
 	 * @param ctx the parse tree
@@ -429,6 +436,13 @@ public interface EuclinVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDivExpr(EuclinParser.DivExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code NewArrayExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNewArrayExpr(EuclinParser.NewArrayExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code AccessArrayExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.

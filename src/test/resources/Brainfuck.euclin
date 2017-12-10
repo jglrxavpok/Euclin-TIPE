@@ -1,0 +1,64 @@
+import java.lang.String as JString
+
+var memoire = new Int[30000]
+var pointeur = 0
+
+var code = readFile("brainfuck.bf")
+var pileAppels = new Int[256]
+var pointeurRetour = 0
+
+func instruction(caractere: Char, indice: Int): Int {
+    if(caractere == '+') {
+        memoire[pointeur] = memoire[pointeur] +1
+    }
+    if(caractere == '-') {
+        memoire[pointeur] = memoire[pointeur] -1
+    }
+    if(caractere == '>') {
+        pointeur = pointeur +1
+    }
+    if(caractere == '<') {
+        pointeur = pointeur -1
+    }
+
+    if(caractere == '.') {
+        writeChar(memoire[pointeur] <- Char)
+    }
+
+    if(caractere == ',') {
+        memoire[pointeur] = readChar() <- Int
+    }
+
+    if(caractere == '[') {
+        pileAppels[pointeurRetour] = indice
+        pointeurRetour = pointeurRetour+1
+    }
+
+    if(caractere == ']') {
+        var valeur = memoire[pointeur]
+        pointeurRetour = pointeurRetour -1
+        if(valeur == 0) {
+            // on fait rien
+        } else {
+            return pileAppels[pointeurRetour] // on retourne à la position du début de boucle
+        }
+    }
+
+    return indice+1 // par défaut on avance d'un pas
+}
+
+func execute(code: String): Unit {
+    var caracteres = code.toCharArray()
+    var taille = caracteres.length <- Int64
+    var indice = 0
+    while(indice < taille) {
+        var caractere = caracteres[indice]
+        indice = instruction(caractere, indice)
+    }
+    writeln(JString.valueOf(taille <- Int32))
+    writeln(JString.valueOf(indice <- Int32))
+    writeln("fin boucle:")
+    writeln(code)
+}
+
+execute(code)

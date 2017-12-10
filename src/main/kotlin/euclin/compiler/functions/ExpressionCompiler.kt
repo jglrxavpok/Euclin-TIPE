@@ -321,7 +321,7 @@ abstract class ExpressionCompiler(val parentContext: Context): EuclinBaseVisitor
             compileNativeCast(Int64Type, Int32Type, ctx.start?.line ?: -1)
             //typeStack.push(Int32Type)
         } else {
-            compileAssert(arrayType.isIntType(maxBitSize = 32), parentContext.currentClass, ctx) { "L'indice doit être un entier!" }
+            compileAssert(indexType.isIntType(maxBitSize = 32), parentContext.currentClass, ctx) { "L'indice doit être un entier! (était $indexType)" }
         }
         val elementType = (arrayType as ArrayType).elementType
         writer.visitInsn(elementType.correctOpcode(Opcodes.IALOAD))
@@ -366,6 +366,8 @@ abstract class ExpressionCompiler(val parentContext: Context): EuclinBaseVisitor
         fun unsupportedCast() {
             compileError("Cast impossible de $current à $target", lineInFile, parentContext.currentClass)
         }
+        if(current == target) // on a rien à faire ici
+            return
 
         if(current == BooleanType || current == Int16Type || current == Int8Type || current == CharType) {
             compileNativeCast(Int32Type, target, lineInFile) // ces types ne sont que des entiers pour la JVM
@@ -419,5 +421,46 @@ abstract class ExpressionCompiler(val parentContext: Context): EuclinBaseVisitor
                 else -> unsupportedCast()
             }
         }
+    }
+
+    override fun visitCharExpr(ctx: EuclinParser.CharExprContext) {
+        val char = ctx.CharConstant().text[1]
+        writer.visitLdcInsn(char)
+        typeStack.push(CharType)
+    }
+
+    override fun visitNewArrayExpr(ctx: EuclinParser.NewArrayExprContext) {
+        val arrayType = translator.translate(ctx).type as ArrayType
+        // compile 'length'
+        visit(ctx.expression())
+        val indexType = typeStack.pop()
+        if(indexType == Int64Type) {
+            compileWarning("La taille du tableau va être implicitement converti en Int32", parentContext.currentClass, ctx)
+            compileNativeCast(Int64Type, Int32Type, ctx.start?.line ?: -1)
+            //typeStack.push(Int32Type)
+        } else {
+            compileAssert(arrayType.isIntType(maxBitSize = 32), parentContext.currentClass, ctx) { "La taille du tableau doit être un entier!" }
+        }
+        val elementType = arrayType.elementType
+        with(writer) {
+            if(elementType is NativeType) {
+                val arrayTypeASM = when(elementType) {
+                    Int8Type -> Opcodes.T_BYTE
+                    BooleanType -> Opcodes.T_BOOLEAN
+                    Int16Type -> Opcodes.T_SHORT
+                    Int32Type -> Opcodes.T_INT
+                    Int64Type -> Opcodes.T_LONG
+                    Real32Type -> Opcodes.T_FLOAT
+                    Real64Type -> Opcodes.T_DOUBLE
+                    CharType -> Opcodes.T_CHAR
+                    else -> TODO()
+                }
+                visitIntInsn(Opcodes.NEWARRAY, arrayTypeASM)
+            } else {
+                visitTypeInsn(Opcodes.ANEWARRAY, elementType.toASM().internalName)
+            }
+
+        }
+        typeStack.push(arrayType)
     }
 }

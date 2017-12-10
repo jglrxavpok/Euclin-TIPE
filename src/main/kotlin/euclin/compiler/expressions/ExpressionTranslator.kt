@@ -277,6 +277,15 @@ open class ExpressionTranslator(val parentContext: Context) : EuclinBaseVisitor<
         val index = translate(ctx.expression(1))
         compileAssert(array.type is ArrayType, parentContext.currentClass, ctx) { "L'expression doit être un tableau!" }
         compileAssert(index.type.isIntType(), parentContext.currentClass, ctx) { "L'indice doit être un entier!" }
-        return AccessExpression(array, index.toString())
+        return AccessExpression(array, index.toString()) of (array.type as ArrayType).elementType
+    }
+
+    override fun visitNewArrayExpr(ctx: EuclinParser.NewArrayExprContext): Expression {
+        val arrayType = parentContext.typeConverter.visit(ctx.type()) // on converti le noeud 'type' en TypeDefinition
+        return OpaqueExpression(ctx.expression().text) of ArrayType(arrayType) // on renvoie un tableau du bon type
+    }
+
+    override fun visitCharExpr(ctx: EuclinParser.CharExprContext): Expression {
+        return OpaqueExpression(ctx.text) of CharType
     }
 }

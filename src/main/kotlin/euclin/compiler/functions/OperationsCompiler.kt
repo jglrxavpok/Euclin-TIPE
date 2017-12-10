@@ -105,7 +105,7 @@ abstract class OperationsCompiler(parentContext: Context): ExpressionCompiler(pa
         val valueType = translator.translate(left).type
 
         val comparisonMethod = valueType.listMethods().find { it.name == "compareTo" && it.arguments.size == 1 && it.arguments[0].type == WildcardType && it.returnType == Int32Type }
-        compileAssert(comparisonMethod != null || valueType in listOf(Int16Type, Int8Type, Int32Type, Int64Type, Real32Type, Real64Type, StringType), functionSignature.ownerClass, left) // TODO: Supporter long/double etc.
+        compileAssert(comparisonMethod != null || valueType in listOf(Int16Type, Int8Type, Int32Type, Int64Type, Real32Type, Real64Type, StringType, CharType), functionSignature.ownerClass, left) // TODO: Supporter long/double etc.
         { "On ne peut comparer que les types ayant une méthode compareTo ou les types Int et Real! (C'était $valueType)" }
 
         val trueLabel = Label()
@@ -117,19 +117,19 @@ abstract class OperationsCompiler(parentContext: Context): ExpressionCompiler(pa
             typeStack.pop()
 
             // /!\ Astuce: la comparaison va nous donner un nombre que l'on va ensuite comparer à 0
-            if(valueType != Int32Type && valueType != Int16Type && valueType != Int8Type) {
+            if(valueType != Int32Type && valueType != Int16Type && valueType != Int8Type && valueType != CharType) {
                 if(valueType == Real32Type) { // c'est un float
                     visitInsn(Opcodes.FCMPL) // on compare
                     visitIntInsn(Opcodes.BIPUSH, 0)
-                    visitInsn(Opcodes.SWAP)
+                  //  visitInsn(Opcodes.SWAP)
                 } else if(valueType == Real64Type) { // c'est un double
                     visitInsn(Opcodes.DCMPL) // on compare
                     visitIntInsn(Opcodes.BIPUSH, 0)
-                    visitInsn(Opcodes.SWAP)
+                  //  visitInsn(Opcodes.SWAP)
                 } else if(valueType == Int64Type) { // c'est un long
                     visitInsn(Opcodes.LCMP) // on compare
                     visitIntInsn(Opcodes.BIPUSH, 0)
-                    visitInsn(Opcodes.SWAP)
+                  //  visitInsn(Opcodes.SWAP)
                 } else if(valueType == StringType) {
                     visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/lang/String", "compareTo", "(Ljava/lang/Object;)I", true)
                     visitIntInsn(Opcodes.BIPUSH, 0)

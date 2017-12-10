@@ -1,4 +1,4 @@
-// Generated from F:/Programming/Kotlin/Languages/Euclin-TIPE/src/main/kotlin/antlr/euclin\Euclin.g4 by ANTLR 4.7
+// Generated from D:/Code/Kotlin/Languages/Euclin/src/main/kotlin/antlr/euclin\Euclin.g4 by ANTLR 4.7
 package euclin.compiler.grammar;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -712,6 +712,18 @@ public class EuclinBaseListener implements EuclinListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterCharExpr(EuclinParser.CharExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCharExpr(EuclinParser.CharExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterLessExpr(EuclinParser.LessExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -755,6 +767,18 @@ public class EuclinBaseListener implements EuclinListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDivExpr(EuclinParser.DivExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNewArrayExpr(EuclinParser.NewArrayExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNewArrayExpr(EuclinParser.NewArrayExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

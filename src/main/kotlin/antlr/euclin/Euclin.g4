@@ -110,6 +110,7 @@ expression
     | expression LeftSquareBracket expression RightSquareBracket                #AccessArrayExpr
     | LeftSquareBracket (expression (Comma expression)*)? RightSquareBracket    #ArrayExpr
     | expression Colon type                                                     #LoadAndRetypeExpr
+    | New type LeftSquareBracket expression RightSquareBracket            #NewArrayExpr
     | New Identifier (LeftBracket (expression (Comma expression)*)? RightBracket)? #NewObjectExpr
     | LeftCurlyBracket functionInstructions+ RightCurlyBracket                  #LambdaFunctionExpr
     | expression (Period Identifier)+           #AccessExpr
@@ -132,6 +133,7 @@ expression
     | True                                      #BoolTrueExpr
     | False                                     #BoolFalseExpr
     | StringConstant                            #StringExpr
+    | CharConstant                              #CharExpr
     | LeftBracket RightBracket                  #UnitExpr
     | expression RightLightArrow type           #CastExpr
     ;
@@ -211,6 +213,10 @@ SubOperator
 
 StringConstant
     : '"' ~('"')* '"'
+    ;
+
+CharConstant
+    : '\'' ~('\'') '\''
     ;
 // Fragments: visible que par le lexer
 fragment IdentifierStart

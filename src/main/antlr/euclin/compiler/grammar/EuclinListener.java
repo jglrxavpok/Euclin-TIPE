@@ -1,4 +1,4 @@
-// Generated from F:/Programming/Kotlin/Languages/Euclin-TIPE/src/main/kotlin/antlr/euclin\Euclin.g4 by ANTLR 4.7
+// Generated from D:/Code/Kotlin/Languages/Euclin/src/main/kotlin/antlr/euclin\Euclin.g4 by ANTLR 4.7
 package euclin.compiler.grammar;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -674,6 +674,18 @@ public interface EuclinListener extends ParseTreeListener {
 	 */
 	void exitWrappedExpr(EuclinParser.WrappedExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code CharExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterCharExpr(EuclinParser.CharExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code CharExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitCharExpr(EuclinParser.CharExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code LessExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.
 	 * @param ctx the parse tree
@@ -721,6 +733,18 @@ public interface EuclinListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDivExpr(EuclinParser.DivExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code NewArrayExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterNewArrayExpr(EuclinParser.NewArrayExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NewArrayExpr}
+	 * labeled alternative in {@link EuclinParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitNewArrayExpr(EuclinParser.NewArrayExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code AccessArrayExpr}
 	 * labeled alternative in {@link EuclinParser#expression}.

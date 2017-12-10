@@ -10,7 +10,7 @@ import java.io.StringWriter
 
 object TestBase {
     fun compileAndCheck(name: String) {
-        val sourceCode = javaClass.getResourceAsStream("/$name.euclin").bufferedReader().use { it.readText() } // ferme le flux après
+        val sourceCode = Thread.currentThread().contextClassLoader.getResourceAsStream("$name.euclin").bufferedReader().use { it.readText() } // ferme le flux après
         val results = EuclinCompiler.compile(sourceCode, "$name.euclin")
 
         for((filename, data) in results) {

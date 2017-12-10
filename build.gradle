@@ -42,7 +42,7 @@ sourceSets {
     }
     test {
         java {
-            srcDirs = ["src/test/java"]
+            srcDirs = ["src/test/java", "src/test/kotlin"]
         }
         resources {
             srcDirs = ["src/test/resources"]

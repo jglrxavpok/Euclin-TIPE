@@ -3,6 +3,7 @@ var otherArray = ["MyFirstString", "" <- @]
 var emptyIntArray = []: [Int]
 var empty = []
 var myNum = array[0]
+var zeroes = new Int[78]
 
 func main(args: [String]): Unit {
     writeln("Hi!")

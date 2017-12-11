@@ -18,7 +18,10 @@ public class Console {
 
     public static char readChar() {
         try {
-            return (char) System.in.read();
+            int val = System.in.read();
+            if(val == -1)
+                return '\0';
+            return (char)val;
         } catch (IOException e) {
             e.printStackTrace();
             return '\0';

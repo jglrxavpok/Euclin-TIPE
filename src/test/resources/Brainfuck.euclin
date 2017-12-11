@@ -1,13 +1,29 @@
-import java.lang.String as JString
-
 var memoire = new Int[30000]
 var pointeur = 0
 
-var code = readFile("brainfuck.bf")
+var code = readFile("brainfuck/factorials.bf")
 var pileAppels = new Int[256]
 var pointeurRetour = 0
 
-func instruction(caractere: Char, indice: Int): Int {
+func trouveIndiceCrochetFermant(indiceOuvrant: Int, code: String): Int {
+    var somme = 1
+    // suppose que le code est bien parenthésé!
+    indiceOuvrant = indiceOuvrant+1
+    while(somme != 0) {
+        indiceOuvrant = indiceOuvrant+1
+        var c = code.charAt(indiceOuvrant <- Int32)
+        if(c == '[')  {
+            somme = somme+1
+        } else {
+            if(c == ']')  {
+                somme = somme-1
+            }
+        }
+    }
+    return indiceOuvrant
+}
+
+func instruction(caractere: Char, indice: Int, code: String): Int {
     if(caractere == '+') {
         memoire[pointeur] = memoire[pointeur] +1
     }
@@ -30,8 +46,13 @@ func instruction(caractere: Char, indice: Int): Int {
     }
 
     if(caractere == '[') {
-        pileAppels[pointeurRetour] = indice
-        pointeurRetour = pointeurRetour+1
+        var saute = memoire[pointeur] == 0
+        if(saute) {
+            return trouveIndiceCrochetFermant(indice, code)+1
+        } else {
+            pileAppels[pointeurRetour] = indice
+            pointeurRetour = pointeurRetour+1
+        }
     }
 
     if(caractere == ']') {
@@ -53,12 +74,8 @@ func execute(code: String): Unit {
     var indice = 0
     while(indice < taille) {
         var caractere = caracteres[indice]
-        indice = instruction(caractere, indice)
+        indice = instruction(caractere, indice, code)
     }
-    writeln(JString.valueOf(taille <- Int32))
-    writeln(JString.valueOf(indice <- Int32))
-    writeln("fin boucle:")
-    writeln(code)
 }
 
 execute(code)

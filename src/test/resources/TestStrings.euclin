@@ -3,5 +3,5 @@ func main(): Unit {
 }
 
 func someText(): String {
-    return "Hello world!"
+    return "Hello world!4554"
 }

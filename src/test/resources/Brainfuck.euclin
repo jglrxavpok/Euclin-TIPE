@@ -1,7 +1,7 @@
 var memoire = new Int[30000]
 var pointeur = 0
 
-var code = readFile("brainfuck/factorials.bf")
+var code = readFile("brainfuck/sierpinski.bf")
 var pileAppels = new Int[256]
 var pointeurRetour = 0
 

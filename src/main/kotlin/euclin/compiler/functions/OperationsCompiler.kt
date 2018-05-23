@@ -38,7 +38,7 @@ abstract class OperationsCompiler(parentContext: Context): ExpressionCompiler(pa
                 visitMethodInsn(Opcodes.INVOKEVIRTUAL, stringBuilderInternalName, "append", "(Ljava/lang/String;)L$stringBuilderInternalName;", false) // le builder se renvoit lui-même
 
                 // renvoi du résultat
-                visitMethodInsn(Opcodes.INVOKESPECIAL, stringBuilderInternalName, "toString", "()Ljava/lang/String;", false)
+                visitMethodInsn(Opcodes.INVOKEVIRTUAL, stringBuilderInternalName, "toString", "()Ljava/lang/String;", false)
             }
 
             // on retire les termes du stack

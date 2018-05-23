@@ -27,7 +27,6 @@ abstract class OperationsCompiler(parentContext: Context): ExpressionCompiler(pa
                 visitTypeInsn(Opcodes.NEW, stringBuilderInternalName)
 
                 visitInsn(Opcodes.DUP) // on duplique deux fois le builder: pour <init>, pour 'append' et pour 'toString()'
-                visitInsn(Opcodes.DUP)
 
                 // compilation du membre gauche et appel de constructeur
                 visit(left)
